@@ -80,7 +80,7 @@
         .info-item label { font-weight: bold; color: #555; }
         .full-width { grid-column: span 2; }
 
-        /* 页签 (Tabs) 切换控制 (屏幕看时可用，打印时自动展平) */
+        /* 页签 (Tabs) 切换控制 */
         .tabs {
             display: flex;
             gap: 8px;
@@ -172,11 +172,11 @@
 
         <!-- 屏幕查看时的分类 Tabs 控制栏 -->
         <div class="tabs no-print">
-            <button class="tab-btn active" onclick="switchTab('track')">🏃 比赛成绩 (TRACK)</button>
-            <button class="tab-btn" onclick="switchTab('field')">🏋️ 比赛成绩 (FIELD)</button>
-            <button class="tab-btn" onclick="switchTab('cross')">🌲 比赛成绩 (CROSS COUNTRY)</button>
-            <button class="tab-btn" onclick="switchTab('tests')">📈 测试数据</button>
-            <button class="tab-btn" onclick="switchTab('body')">📏 身体数据</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'track')">🏃 比赛成绩 (TRACK)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'field')">🏋️ 比赛成绩 (FIELD)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'cross')">🌲 比赛成绩 (CROSS COUNTRY)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tests')">📈 测试数据</button>
+            <button class="tab-btn" onclick="switchTab(event, 'body')">📏 身体数据</button>
         </div>
 
         <!-- 2. 径赛成绩 TRACK -->
@@ -223,9 +223,7 @@
             <section>
                 <h3>📈 测试数据</h3>
                 <table id="testsTable">
-                    <thead>
-                        <!-- 此处的表头会在加载数据时根据 Sheet 动态生成 -->
-                    </thead>
+                    <thead></thead>
                     <tbody></tbody>
                 </table>
             </section>
@@ -236,9 +234,7 @@
             <section>
                 <h3>📏 身体数据</h3>
                 <table id="bodyTable">
-                    <thead>
-                        <!-- 此处的表头会在加载数据时根据 Sheet 动态生成 -->
-                    </thead>
+                    <thead></thead>
                     <tbody></tbody>
                 </table>
             </section>
@@ -248,14 +244,12 @@
 </div>
 
 <script>
-    // ⚠️ 请在此处替换为您 Google Sheet 的真实 ID
+    // ⚠️ 请在此处确保为您正确的 Google Sheet ID
     const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
 
-    // 格式化获取 CSV 的 API
     const getSheetUrl = (sheetName) => 
         `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
 
-    // 读取 CSV 数据逻辑
     function fetchSheetData(sheetName) {
         return new Promise((resolve) => {
             Papa.parse(getSheetUrl(sheetName), {
@@ -263,17 +257,17 @@
                 header: true,
                 skipEmptyLines: true,
                 complete: (results) => resolve(results.data || []),
-                error: () => resolve([]) // 遇到空表或错误时返回空数组
+                error: () => resolve([])
             });
         });
     }
 
-    // 安全获取字段数据的工具函数（兼容双语表头）
+    // 模糊匹配字段工具，模糊搜索包含某个关键词的列
     function getVal(row, keys) {
         if (!row) return "-";
         for (let key of keys) {
             for (let rowKey in row) {
-                if (rowKey.trim().toLowerCase() === key.toLowerCase()) {
+                if (rowKey.trim().toLowerCase().includes(key.toLowerCase())) {
                     return row[rowKey] || "-";
                 }
             }
@@ -281,7 +275,6 @@
         return "-";
     }
 
-    // 核心查询函数
     async function searchStudent() {
         const inputId = document.getElementById("studentIdInput").value.trim();
         if (!inputId) {
@@ -298,7 +291,6 @@
         contentEl.classList.add("hidden");
 
         try {
-            // 并行读取 6 个 Sheet 的数据
             const [profiles, bodyData, testData, trackRaces, fieldRaces, crossRaces] = await Promise.all([
                 fetchSheetData("个人基本资料"),
                 fetchSheetData("身体数据"),
@@ -310,9 +302,9 @@
 
             loadingEl.classList.add("hidden");
 
-            // 1. 匹配个人资料
+            // 1. 匹配个人基本资料
             const student = profiles.find(item => {
-                const id = getVal(item, ["学号 ID", "学号", "ID"]);
+                const id = getVal(item, ["学号", "id"]);
                 return String(id).trim() === inputId;
             });
 
@@ -322,61 +314,60 @@
                 return;
             }
 
-            // 2. 渲染个人基本资料
-            document.getElementById("infoNameC").innerText = getVal(student, ["姓名 NAME (C)", "姓名", "NAME (C)"]);
-            document.getElementById("infoNameE").innerText = getVal(student, ["姓名 NAME(E)", "NAME(E)", "NAME (E)"]);
-            document.getElementById("infoId").innerText = getVal(student, ["学号 ID", "学号", "ID"]);
-            document.getElementById("infoGender").innerText = getVal(student, ["性别 GENDER", "性别", "GENDER"]);
-            document.getElementById("infoIc").innerText = getVal(student, ["身份证号码 IC No.", "身份证号码", "IC No."]);
-            document.getElementById("infoDob").innerText = getVal(student, ["出生日期 D.O.B.", "出生日期", "D.O.B."]);
+            // 渲染基本资料
+            document.getElementById("infoNameC").innerText = getVal(student, ["name (c)", "姓名"]);
+            document.getElementById("infoNameE").innerText = getVal(student, ["name(e)", "name (e)"]);
+            document.getElementById("infoId").innerText = getVal(student, ["学号", "id"]);
+            document.getElementById("infoGender").innerText = getVal(student, ["gender", "性别"]);
+            document.getElementById("infoIc").innerText = getVal(student, ["ic no", "身份证"]);
+            document.getElementById("infoDob").innerText = getVal(student, ["d.o.b", "出生日期"]);
             
-            const age = getVal(student, ["年龄 AGE", "年龄"]);
-            const trainAge = getVal(student, ["训练年龄 TRAINING AGE", "训练年龄"]);
+            const age = getVal(student, ["age", "年龄"]);
+            const trainAge = getVal(student, ["training age", "训练年龄"]);
             document.getElementById("infoAgeGroup").innerText = `${age}岁 / 训练 ${trainAge}`;
             
-            document.getElementById("infoContact").innerText = getVal(student, ["联络电话 CONTACT", "联络电话"]);
-            document.getElementById("infoEmail").innerText = getVal(student, ["邮箱 EMAIL", "邮箱"]);
+            document.getElementById("infoContact").innerText = getVal(student, ["contact", "联络电话"]);
+            document.getElementById("infoEmail").innerText = getVal(student, ["email", "邮箱"]);
 
-            const pEvent = getVal(student, ["主项 PRIMARY", "主项"]);
-            const pBest = getVal(student, ["个人最好成绩 PRIMARY BEST PERFORMANCE", "个人最好成绩"]);
+            const pEvent = getVal(student, ["primary best", "主项"]);
+            const pBest = getVal(student, ["primary performance", "个人最好成绩"]);
             document.getElementById("infoPrimary").innerText = `${pEvent} (${pBest})`;
 
-            const sEvent = getVal(student, ["副项 SECONDARY", "副项"]);
-            const sBest = getVal(student, ["个人最好成绩 SECONDARY BEST PERFORMANCE", "个人最好成绩"]);
+            const sEvent = getVal(student, ["secondary", "副项"]);
+            const sBest = getVal(student, ["secondary best", "副项成绩"]);
             document.getElementById("infoSecondary").innerText = `${sEvent} (${sBest})`;
 
-            // 照片设置
-            const photoUrl = getVal(student, ["照片 PHOTO", "照片", "PHOTO"]);
-            document.getElementById("avatarImg").src = photoUrl !== "-" ? photoUrl : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
+            const photoUrl = getVal(student, ["photo", "照片"]);
+            document.getElementById("avatarImg").src = (photoUrl !== "-" && photoUrl.startsWith("http")) ? photoUrl : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
 
-            // 3. 渲染 Track 径赛表格
-            renderStandardTable("#trackTable tbody", trackRaces, inputId, [
-                ["比赛年份 YEAR", "年份", "YEAR"],
-                ["比赛名称 TOURNAMENT", "比赛名称"],
-                ["比赛项目 EVENT", "比赛项目"],
-                ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "RESULTS"],
-                ["备注 REMARKS", "备注"]
-            ]);
-
-            // 4. 渲染 Field 田赛表格
+            // 2. 渲染 FIELD 田赛（精准识别 RESULTS (m) 列）
             renderStandardTable("#fieldTable tbody", fieldRaces, inputId, [
-                ["比赛年份 YEAR", "年份", "YEAR"],
-                ["比赛名称 TOURNAMENT", "比赛名称"],
-                ["比赛项目 EVENT", "比赛项目"],
-                ["比赛成绩 RESULTS (meter)", "比赛成绩", "RESULTS"],
-                ["备注 REMARKS", "备注"]
+                ["year", "年份"],
+                ["tournament", "比赛名称"],
+                ["event", "比赛项目"],
+                ["results", "m", "成绩"], // 模糊匹配包含 results 或 m 的列
+                ["remarks", "备注"]
             ]);
 
-            // 5. 渲染 Cross Country 越野赛表格
+            // 3. 渲染 TRACK 径赛
+            renderStandardTable("#trackTable tbody", trackRaces, inputId, [
+                ["year", "年份"],
+                ["tournament", "比赛名称"],
+                ["event", "比赛项目"],
+                ["results", "成绩"],
+                ["remarks", "备注"]
+            ]);
+
+            // 4. 渲染 CROSS COUNTRY 越野赛
             renderStandardTable("#crossTable tbody", crossRaces, inputId, [
-                ["比赛年份 YEAR", "年份", "YEAR"],
-                ["比赛名称 TOURNAMENT", "比赛名称"],
-                ["比赛项目 EVENT", "比赛项目"],
-                ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "RESULTS"],
-                ["备注 REMARKS", "备注"]
+                ["year", "年份"],
+                ["tournament", "比赛名称"],
+                ["event", "比赛项目"],
+                ["results", "成绩"],
+                ["remarks", "备注"]
             ]);
 
-            // 6. 动态渲染测试数据与身体数据 (保留原 Sheet 里的所有自定义列)
+            // 5. 渲染测试数据与身体数据 (强化过滤，只显示当前Sheet独有的列)
             renderDynamicTable("#testsTable", testData, inputId);
             renderDynamicTable("#bodyTable", bodyData, inputId);
 
@@ -390,11 +381,10 @@
         }
     }
 
-    // 通用渲染固定结构表格
     function renderStandardTable(tbodySelector, dataList, inputId, columnsMap) {
         const tbody = document.querySelector(tbodySelector);
         const filteredData = dataList.filter(item => {
-            const id = getVal(item, ["学号 ID", "学号", "ID"]);
+            const id = getVal(item, ["学号", "id"]);
             return String(id).trim() === inputId;
         });
 
@@ -410,25 +400,27 @@
         });
     }
 
-    // 通用渲染动态结构表格（适合身体数据、测试数据）
     function renderDynamicTable(tableSelector, dataList, inputId) {
         const table = document.querySelector(tableSelector);
         const thead = table.querySelector("thead");
         const tbody = table.querySelector("tbody");
 
         const filteredData = dataList.filter(item => {
-            const id = getVal(item, ["学号 ID", "学号", "ID"]);
+            const id = getVal(item, ["学号", "id"]);
             return String(id).trim() === inputId;
         });
 
         if (!filteredData.length || !dataList.length) {
-            thead.innerHTML = "<tr><th>记录</th></tr>";
+            thead.innerHTML = "<tr><th>数据</th></tr>";
             tbody.innerHTML = "<tr><td>暂无相关数据</td></tr>";
             return;
         }
 
-        // 动态提取原Sheet的所有列名 (排除学号ID列)
-        const headers = Object.keys(dataList[0]).filter(h => !["学号 id", "学号", "id"].includes(h.trim().toLowerCase()));
+        // 提取并过滤掉属于个人资料的列，只保留该Sheet独有列
+        const headers = Object.keys(dataList[0]).filter(h => {
+            const low = h.trim().toLowerCase();
+            return !["学号", "id", "姓名", "name", "ic no", "d.o.b", "photo"].some(ignore => low.includes(ignore));
+        });
 
         let thHtml = "<tr>";
         headers.forEach(h => thHtml += `<th>${h}</th>`);
@@ -444,8 +436,7 @@
         tbody.innerHTML = tbodyHtml;
     }
 
-    // 屏幕 Tabs 切换
-    function switchTab(tabName) {
+    function switchTab(event, tabName) {
         document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
         document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
         
