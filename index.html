@@ -367,8 +367,16 @@
                 ["remarks", "备注"]
             ]);
 
-            // 5. 渲染测试数据与身体数据 (强化过滤，只显示当前Sheet独有的列)
-            renderDynamicTable("#testsTable", testData, inputId);
+            // 5. 渲染 测试数据 
+            renderStandardTable("#testsTable", testData, inputId, [
+                ["event", "项目"],
+                ["第一圈"],
+                ["第二圈"],
+                ["第三圈"],
+                ["第四圈"],
+            ]);
+            
+            // 6. 渲染与身体数据 (强化过滤，只显示当前Sheet独有的列)
             renderDynamicTable("#bodyTable", bodyData, inputId);
 
             contentEl.classList.remove("hidden");
