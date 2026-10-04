@@ -296,7 +296,7 @@
             const [profiles, bodyData, testData, trackRaces, fieldRaces, crossRaces] = await Promise.all([
                 fetchSheetData("个人基本资料"),
                 fetchSheetData("身体数据"),
-                fetchSheetData("测试数据"),
+                fetchSheetData("测试成绩"),
                 fetchSheetData("比赛成绩 (TRACK)"),
                 fetchSheetData("比赛成绩 (FIELD)"),
                 fetchSheetData("比赛成绩 (CROSS COUNTRY)")
