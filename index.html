@@ -264,6 +264,8 @@
         });
     }
 
+
+    
     // 模糊匹配字段工具，模糊搜索包含某个关键词的列
     function getVal(row, keys) {
         if (!row) return "-";
@@ -277,6 +279,55 @@
         return "-";
     }
 
+    // ⏱️️ 将输入的数值自动转换/补齐为 hh:mm:ss.ss 格式
+    function formatTime(val) {
+        if (!val || val === "-" || val === "") return "-";
+        
+        let str = String(val).trim();
+        
+        // 情况 A：纯秒数或小数 (例如输入 12.34 或 85.2) -> 转为 hh:mm:ss.ss
+        if (!str.includes(":")) {
+            let totalSeconds = parseFloat(str);
+            if (isNaN(totalSeconds)) return str;
+
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600) / 60);
+            let seconds = (totalSeconds % 60).toFixed(2);
+
+            let hh = String(hours).padStart(2, '0');
+            let mm = String(minutes).padStart(2, '0');
+            let ss = String(parseFloat(seconds).toFixed(2)).padStart(5, '0');
+
+            return `\({hh}:\){mm}:${ss}`;
+        }
+
+        // 情况 B：已经是 mm:ss.ss (例如输入 01:23.45) -> 自动补齐开头的 hh: (00:01:23.45)
+        let parts = str.split(":");
+        if (parts.length === 2) {
+            let mm = parts[0].padStart(2, '0');
+            let ss = parts[1].padStart(5, '0');
+            return `00:\({mm}:\){ss}`;
+        }
+
+        // 情况 C：已经是 hh:mm:ss.ss 格式 -> 格式化对齐补零
+        if (parts.length === 3) {
+            let hh = parts[0].padStart(2, '0');
+            let mm = parts[1].padStart(2, '0');
+            let ss = parts[2].padStart(5, '0');
+            return `\({hh}:\){mm}:${ss}`;
+        }
+
+        return str;
+    }
+
+    // 通用标准表格渲染函数（新增 isTimeFormat 参数控制是否进行时间格式转换）
+    function renderStandardTable(tbodySelector, dataList, inputId, columnsMap, isTimeFormat = false) {
+        const tbody = document.querySelector(tbodySelector);
+        const filteredData = dataList.filter(item => {
+            const id = getVal(item, ["学号", "id"]);
+            return String(id).trim() === inputId;
+        });
+        
     async function searchStudent() {
         const inputId = document.getElementById("studentIdInput").value.trim();
         if (!inputId) {
@@ -454,56 +505,7 @@
         event.currentTarget.classList.add("active");
     }
 
-// ⏱️️ 将输入的数值自动转换/补齐为 hh:mm:ss.ss 格式
-    function formatTime(val) {
-        if (!val || val === "-" || val === "") return "-";
-        
-        let str = String(val).trim();
-        
-        // 情况 A：纯秒数或小数 (例如输入 12.34 或 85.2) -> 转为 hh:mm:ss.ss
-        if (!str.includes(":")) {
-            let totalSeconds = parseFloat(str);
-            if (isNaN(totalSeconds)) return str;
 
-            let hours = Math.floor(totalSeconds / 3600);
-            let minutes = Math.floor((totalSeconds % 3600) / 60);
-            let seconds = (totalSeconds % 60).toFixed(2);
-
-            let hh = String(hours).padStart(2, '0');
-            let mm = String(minutes).padStart(2, '0');
-            let ss = String(parseFloat(seconds).toFixed(2)).padStart(5, '0');
-
-            return `\({hh}:\){mm}:${ss}`;
-        }
-
-        // 情况 B：已经是 mm:ss.ss (例如输入 01:23.45) -> 自动补齐开头的 hh: (00:01:23.45)
-        let parts = str.split(":");
-        if (parts.length === 2) {
-            let mm = parts[0].padStart(2, '0');
-            let ss = parts[1].padStart(5, '0');
-            return `00:\({mm}:\){ss}`;
-        }
-
-        // 情况 C：已经是 hh:mm:ss.ss 格式 -> 格式化对齐补零
-        if (parts.length === 3) {
-            let hh = parts[0].padStart(2, '0');
-            let mm = parts[1].padStart(2, '0');
-            let ss = parts[2].padStart(5, '0');
-            return `\({hh}:\){mm}:${ss}`;
-        }
-
-        return str;
-    }
-
-    // 通用标准表格渲染函数（新增 isTimeFormat 参数控制是否进行时间格式转换）
-    function renderStandardTable(tbodySelector, dataList, inputId, columnsMap, isTimeFormat = false) {
-        const tbody = document.querySelector(tbodySelector);
-        const filteredData = dataList.filter(item => {
-            const id = getVal(item, ["学号", "id"]);
-            return String(id).trim() === inputId;
-        });
-
-        tbody.innerHTML = filteredData.length ? "" : `
     
 </script>
 
