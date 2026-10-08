@@ -183,6 +183,27 @@
         <div id="tab-track" class="tab-content">
             <section>
                 <h3>🏃 比赛成绩 (TRACK)</h3>
+                <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <label>📅 年份: 
+                        <select id="trackYearFilter" onchange="applyTrackFilterAndSort()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部年份</option>
+                        </select>
+                    </label>
+
+                    <label>🏃 项目: 
+                        <select id="trackEventFilter" onchange="applyTrackFilterAndSort()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部项目</option>
+                        </select>
+                    </label>
+
+                    <label>📊 成绩排序: 
+                        <select id="trackSortOrder" onchange="applyTrackFilterAndSort()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="DEFAULT">默认排序 (原表格顺序)</option>
+                            <option value="DESC">成绩从大到小 (慢 -> 快 / 远 -> 近)</option>
+                            <option value="ASC">成绩从小到大 (快 -> 慢 / 近 -> 远)</option>
+                        </select>
+                    </label>
+                </div>
                 <table id="trackTable">
                     <thead>
                         <tr><th>年份</th><th>比赛名称</th><th>比赛项目</th><th>比赛成绩 (hh:mm:ss,ss)</th><th>备注</th></tr>
@@ -279,6 +300,134 @@
         return "-";
     }
 
+    // 💡 将各种时间/成绩字符串统一解析为总秒数/数值，用于准确排序
+    function parsePerformanceToSeconds(val) {
+        if (!val || val === "-" || val === "") return -1;
+        let str = String(val).trim().replace(/：/g, ":");
+
+        // 如果是时间格式 (hh:mm:ss.ss 或 mm:ss.ss)
+        if (str.includes(":")) {
+            let parts = str.split(":");
+            if (parts.length === 2) {
+                let mm = parseFloat(parts[0]) || 0;
+                let ss = parseFloat(parts[1]) || 0;
+                return mm * 60 + ss;
+            } else if (parts.length === 3) {
+                let hh = parseFloat(parts[0]) || 0;
+                let mm = parseFloat(parts[1]) || 0;
+                let ss = parseFloat(parts[2]) || 0;
+                return hh * 3600 + mm * 60 + ss;
+            }
+        }
+
+        // 如果是纯数值 (如径赛秒数 12.34 或田赛距离 5.45)
+        let num = parseFloat(str);
+        return isNaN(num) ? -1 : num;
+    }
+
+    // 全局变量保存当前查询的径赛原始数据
+    let currentTrackRaces = [];
+    let currentInputId = "";
+
+    // 💡 动态初始化下拉菜单选项（年份与比赛项目）
+    function initFilterOptions(dataList) {
+        const yearSelect = document.getElementById("trackYearFilter");
+        const eventSelect = document.getElementById("trackEventFilter");
+
+        const years = new Set();
+        const events = new Set();
+
+        dataList.forEach(item => {
+            const year = getVal(item, ["year", "年份"]);
+            const event = getVal(item, ["event", "比赛项目"]);
+            if (year !== "-") years.add(year);
+            if (event !== "-") events.add(event);
+        });
+
+        // 填充年份下拉框
+        yearSelect.innerHTML = '<option value="ALL">全部年份</option>';
+        Array.from(years).sort().reverse().forEach(y => {
+            yearSelect.innerHTML += `<option value="${y}">${y}年</option>`;
+        });
+
+        // 填充项目下拉框
+        eventSelect.innerHTML = '<option value="ALL">全部项目</option>';
+        Array.from(events).sort().forEach(e => {
+            eventSelect.innerHTML += `<option value="${e}">${e}</option>`;
+        });
+    }
+
+    // 💡 执行筛选与排序核心逻辑
+    function applyTrackFilterAndSort() {
+        if (!currentTrackRaces.length) return;
+
+        const selectedYear = document.getElementById("trackYearFilter").value;
+        const selectedEvent = document.getElementById("trackEventFilter").value;
+        const sortOrder = document.getElementById("trackSortOrder").value;
+
+        // 1. 筛选数据
+        let filtered = currentTrackRaces.filter(item => {
+            const id = getVal(item, ["学号", "id"]);
+            const matchesId = String(id).trim() === currentInputId;
+
+            const year = getVal(item, ["year", "年份"]);
+            const event = getVal(item, ["event", "比赛项目"]);
+
+            const matchesYear = (selectedYear === "ALL" || year === selectedYear);
+            const matchesEvent = (selectedEvent === "ALL" || event === selectedEvent);
+
+            return matchesId && matchesYear && matchesEvent;
+        });
+
+        // 2. 排序数据（按成绩总秒数/数值排序）
+        if (sortOrder === "DESC") {
+            // 从大到小
+            filtered.sort((a, b) => {
+                let valA = parsePerformanceToSeconds(getVal(a, ["results", "成绩"]));
+                let valB = parsePerformanceToSeconds(getVal(b, ["results", "成绩"]));
+                return valB - valA;
+            });
+        } else if (sortOrder === "ASC") {
+            // 从小到大
+            filtered.sort((a, b) => {
+                let valA = parsePerformanceToSeconds(getVal(a, ["results", "成绩"]));
+                let valB = parsePerformanceToSeconds(getVal(b, ["results", "成绩"]));
+                return valA - valB;
+            });
+        }
+
+        // 3. 渲染筛选排序后的表格
+        renderStandardTableDirect("#trackTable tbody", filtered, [
+            ["year", "年份"],
+            ["tournament", "比赛名称"],
+            ["event", "比赛项目"],
+            ["results", "成绩"],
+            ["remarks", "备注"]
+        ], true);
+    }
+
+    // 直接渲染已被筛选/排序过的数组
+    function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
+        const tbody = document.querySelector(tbodySelector);
+        tbody.innerHTML = filteredData.length ? "" : `<tr><td colspan="${columnsMap.length}">暂无符合条件的记录</td></tr>`;
+        
+        filteredData.forEach(item => {
+            let tr = "<tr>";
+            columnsMap.forEach(keys => {
+                let value = getVal(item, keys);
+                const isExactResultColumn = keys.some(k => k.toLowerCase() === "results" || k === "成绩");
+
+                if (isTimeFormat && isExactResultColumn) {
+                    value = formatTime(value);
+                }
+
+                tr += `<td>${value}</td>`;
+            });
+            tr += "</tr>";
+            tbody.innerHTML += tr;
+        });
+    }
+    
     // ⏱️ 增强版时间自动补齐与格式化函数
     function formatTime(val) {
         // 1. 过滤空值、无效值
@@ -411,14 +560,21 @@
                 ["remarks", "备注"]
             ]);
 
-            // 3. 渲染 TRACK 径赛
-            renderStandardTable("#trackTable tbody", trackRaces, inputId, [
-                ["year", "年份"],
-                ["tournament", "比赛名称"],
-                ["event", "比赛项目"],
-                ["results", "成绩"],
-                ["remarks", "备注"]
-            ], true);
+            // 3. 缓存与初始化 TRACK 径赛数据（支持动态筛选与排序）
+            currentTrackRaces = trackRaces;
+            currentInputId = inputId;
+
+            // 过滤出当前查询学生的 TRACK 数据
+            const studentTrackData = trackRaces.filter(item => {
+                const id = getVal(item, ["学号", "id"]);
+                return String(id).trim() === inputId;
+            });
+
+            // 初始化下拉菜单选项（年份与项目）
+            initFilterOptions(studentTrackData);
+
+            // 执行初始筛选与渲染
+            applyTrackFilterAndSort();
 
             // 4. 渲染 CROSS COUNTRY 越野赛
             renderStandardTable("#crossTable tbody", crossRaces, inputId, [
