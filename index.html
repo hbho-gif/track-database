@@ -418,7 +418,7 @@
                 ["event", "比赛项目"],
                 ["results", "成绩"],
                 ["remarks", "备注"]
-            ]);
+            ], true);
 
             // 4. 渲染 CROSS COUNTRY 越野赛
             renderStandardTable("#crossTable tbody", crossRaces, inputId, [
@@ -427,7 +427,7 @@
                 ["event", "比赛项目"],
                 ["results", "成绩"],
                 ["remarks", "备注"]
-            ]);
+            ], true);
 
             // 5. 渲染 测试数据 
             renderStandardTable("#testsTable tbody", testData, inputId, [
@@ -436,7 +436,7 @@
                 ["第二圈"],
                 ["第三圈"],
                 ["第四圈"],
-            ]);
+            ], true);
             
             // 6. 渲染与身体数据 (强化过滤，只显示当前Sheet独有的列)
             renderDynamicTable("#bodyTable", bodyData, inputId);
@@ -451,7 +451,8 @@
         }
     }
 
-    function renderStandardTable(tbodySelector, dataList, inputId, columnsMap) {
+    // 强制自动格式化所有成绩列的渲染函数
+    function renderStandardTable(tbodySelector, dataList, inputId, columnsMap, isTimeFormat = false) {
         const tbody = document.querySelector(tbodySelector);
         const filteredData = dataList.filter(item => {
             const id = getVal(item, ["学号", "id"]);
@@ -463,7 +464,20 @@
         filteredData.forEach(item => {
             let tr = "<tr>";
             columnsMap.forEach(keys => {
-                tr += `<td>${getVal(item, keys)}</td>`;
+                let value = getVal(item, keys);
+                
+                // 检查当前列是否包含 "成绩"、"results" 或 "performance" 等关键字
+                const isResultColumn = keys.some(k => {
+                    const keyLower = k.toLowerCase();
+                    return keyLower.includes("results") || keyLower.includes("成绩") || keyLower.includes("performance") || keyLower.includes("best");
+                });
+
+                // 只要开启了时间转换标志（或自动匹配到成绩列），就强制调用 formatTime 转换
+                if ((isTimeFormat || isResultColumn) && isTimeFormat !== false) {
+                    value = formatTime(value);
+                }
+
+                tr += `<td>${value}</td>`;
             });
             tr += "</tr>";
             tbody.innerHTML += tr;
