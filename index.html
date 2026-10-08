@@ -451,7 +451,6 @@
         }
     }
 
-    // 强制自动格式化所有成绩列的渲染函数
     function renderStandardTable(tbodySelector, dataList, inputId, columnsMap, isTimeFormat = false) {
         const tbody = document.querySelector(tbodySelector);
         const filteredData = dataList.filter(item => {
@@ -466,14 +465,10 @@
             columnsMap.forEach(keys => {
                 let value = getVal(item, keys);
                 
-                // 检查当前列是否包含 "成绩"、"results" 或 "performance" 等关键字
-                const isResultColumn = keys.some(k => {
-                    const keyLower = k.toLowerCase();
-                    return keyLower.includes("results") || keyLower.includes("成绩") || keyLower.includes("performance") || keyLower.includes("best");
-                });
+                // 仅针对名为 "results" 或 "成绩" 的列进行时间转换
+                const isExactResultColumn = keys.some(k => k.toLowerCase() === "results" || k === "成绩");
 
-                // 只要开启了时间转换标志（或自动匹配到成绩列），就强制调用 formatTime 转换
-                if ((isTimeFormat || isResultColumn) && isTimeFormat !== false) {
+                if (isTimeFormat && isExactResultColumn) {
                     value = formatTime(value);
                 }
 
@@ -483,7 +478,7 @@
             tbody.innerHTML += tr;
         });
     }
-
+    
     function renderDynamicTable(tableSelector, dataList, inputId) {
         const table = document.querySelector(tableSelector);
         const thead = table.querySelector("thead");
