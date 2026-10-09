@@ -317,39 +317,12 @@
 </div>
 
 <script>
-   // 1. 确保在 <script> 顶部声明了全局变量
-   let basicStudents = [];
-   let trackRaces = [];
-   let fieldRaces = [];
-   let crossRaces = [];
-   let testData = [];
+   // 1. 基础配置与通用工具函数（放在 script 最上方）
+   const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk"; // 替换为你的真实 ID
 
-    // 2. 在数据拉取/解析回调中进行赋值
-    Promise.all([
-        fetchSheetData("Basic"),             // 基本资料 Tab
-        fetchSheetData("TRACK"),             // 径赛 Tab
-        fetchSheetData("FIELD"),             // 田赛 Tab
-        fetchSheetData("CROSS COUNTRY"),     // 越野赛 Tab
-        fetchSheetData("Test")               // 测试 Tab
-    ]).then(([basic, track, field, cross, test]) => {
-    
-    // 👇 在这里把解析好的数据保存到全局变量中
-    basicStudents = basic;
-    trackRaces = track;
-    fieldRaces = field;
-    crossRaces = cross;
-    testData = test;
-
-    console.log("所有 Google Sheet 数据已成功载入！");
-}).catch(err => {
-    console.error("数据读取失败:", err);
-});
-    
-    // ⚠️ 请在此处确保为您正确的 Google Sheet ID
-    const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
-
-    const getSheetUrl = (sheetName) => 
-        `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+    function getSheetUrl(sheetName) {
+        return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+}
 
     function fetchSheetData(sheetName) {
         return new Promise((resolve) => {
@@ -363,8 +336,33 @@
         });
     }
 
+    // 2. 全局变量声明
+    let basicStudents = [];
+    let trackRaces = [];
+    let fieldRaces = [];
+    let crossRaces = [];
+    let testData = [];
 
+    // 3. 执行数据批量加载（必须放在 getSheetUrl 和 fetchSheetData 的下方）
+    Promise.all([
+        fetchSheetData("Basic"),           // 请确保这里的 Tab 名称与 Google Sheet 底部的完全一致
+        fetchSheetData("TRACK"),
+        fetchSheetData("FIELD"),
+        fetchSheetData("CROSS COUNTRY"),
+        fetchSheetData("Test")
+    ]).then(([basic, track, field, cross, test]) => {
+        basicStudents = basic;
+        trackRaces = track;
+        fieldRaces = field;
+        crossRaces = cross;
+        testData = test;
+
+        console.log("所有数据加载完成！基本资料笔数:", basicStudents.length);
+    }).catch(err => {
+        console.error("数据读取失败:", err);
+    });
     
+       
     // 模糊匹配字段工具，模糊搜索包含某个关键词的列
     function getVal(row, keys) {
         if (!row) return "-";
