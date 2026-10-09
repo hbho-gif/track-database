@@ -752,19 +752,7 @@
             ["第二圈"],
             ["第三圈"],
             ["第四圈"]
-        ], true);
-    
-        // 7. 渲染与身体数据 (强化过滤，只显示当前Sheet独有的列)
-        renderDynamicTable("#bodyTable", bodyData, inputId);
-
-        contentEl.classList.remove("hidden");
-
-        } catch (error) {
-            loadingEl.classList.add("hidden");
-            emptyEl.innerText = "⚠️ 数据读取异常，请检查 Google Sheet ID 或共享权限设置！";
-            emptyEl.classList.remove("hidden");
-            console.error(error);
-        }
+        ], true);  
     }
 
     function renderDynamicTable(tableSelector, dataList, inputId) {
