@@ -317,12 +317,33 @@
 </div>
 
 <script>
-    // 全局数据变量
-    let basicStudents = []; // 存放所有学生的基本资料
-    let trackRaces = [];
-    let fieldRaces = [];
-    let crossRaces = [];
-    let testData = [];
+   // 1. 确保在 <script> 顶部声明了全局变量
+   let basicStudents = [];
+   let trackRaces = [];
+   let fieldRaces = [];
+   let crossRaces = [];
+   let testData = [];
+
+    // 2. 在数据拉取/解析回调中进行赋值
+    Promise.all([
+        fetchSheetData("Basic"),             // 基本资料 Tab
+        fetchSheetData("TRACK"),             // 径赛 Tab
+        fetchSheetData("FIELD"),             // 田赛 Tab
+        fetchSheetData("CROSS COUNTRY"),     // 越野赛 Tab
+        fetchSheetData("Test")               // 测试 Tab
+    ]).then(([basic, track, field, cross, test]) => {
+    
+    // 👇 在这里把解析好的数据保存到全局变量中
+    basicStudents = basic;
+    trackRaces = track;
+    fieldRaces = field;
+    crossRaces = cross;
+    testData = test;
+
+    console.log("所有 Google Sheet 数据已成功载入！");
+}).catch(err => {
+    console.error("数据读取失败:", err);
+});
     
     // ⚠️ 请在此处确保为您正确的 Google Sheet ID
     const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
