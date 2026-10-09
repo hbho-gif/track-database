@@ -217,6 +217,27 @@
         <div id="tab-field" class="tab-content hidden">
             <section>
                 <h3>🏋️ 比赛成绩 (FIELD)</h3>
+                <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <label>📅 年份: 
+                        <select id="fieldYearFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部年份</option>
+                        </select>
+                    </label>
+
+                    <label>🏋️ 项目: 
+                        <select id="fieldEventFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部项目</option>
+                        </select>
+                    </label>
+
+                    <label>📊 成绩排序: 
+                        <select id="fieldSortOrder" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="DEFAULT">默认排序 (原表格顺序)</option>
+                            <option value="DESC">成绩从大到小 (远/高 -> 近/低)</option>
+                            <option value="ASC">成绩从小到大 (近/低 -> 远/高)</option>
+                        </select>
+                    </label>
+                </div>
                 <table id="fieldTable">
                     <thead>
                         <tr><th>年份</th><th>比赛名称</th><th>比赛项目</th><th>比赛成绩 (m)</th><th>备注</th></tr>
@@ -230,6 +251,27 @@
         <div id="tab-cross" class="tab-content hidden">
             <section>
                 <h3>🌲 比赛成绩 (CROSS COUNTRY)</h3>
+                <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <label>📅 年份: 
+                        <select id="crossYearFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部年份</option>
+                        </select>
+                    </label>
+
+                    <label>🌲 项目: 
+                        <select id="crossEventFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部项目</option>
+                        </select>
+                    </label>
+
+                    <label>📊 成绩排序: 
+                        <select id="crossSortOrder" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="DEFAULT">默认排序 (原表格顺序)</option>
+                            <option value="DESC">成绩从大到小 (慢 -> 快)</option>
+                            <option value="ASC">成绩从小到大 (快 -> 慢)</option>
+                        </select>
+                    </label>
+                </div>
                 <table id="crossTable">
                     <thead>
                         <tr><th>年份</th><th>比赛名称</th><th>比赛项目</th><th>比赛成绩 (hh:mm:ss,ss)</th><th>备注</th></tr>
@@ -325,14 +367,67 @@
         return isNaN(num) ? -1 : num;
     }
 
-    // 全局变量保存当前查询的径赛原始数据
-    let currentTrackRaces = [];
-    let currentInputId = "";
+    // 全局数据缓存对象
+    let raceDataStore = {
+        inputId: "",
+        track: [],
+        field: [],
+        cross: []
+    };
 
-    // 💡 动态初始化下拉菜单选项（年份与比赛项目）
-    function initFilterOptions(dataList) {
-        const yearSelect = document.getElementById("trackYearFilter");
-        const eventSelect = document.getElementById("trackEventFilter");
+    // 模块配置映射表
+    const moduleConfig = {
+        track: {
+            tableSelector: "#trackTable tbody",
+            yearFilterId: "trackYearFilter",
+            eventFilterId: "trackEventFilter",
+            sortOrderId: "trackSortOrder",
+            isTimeFormat: true,
+            columnsMap: [
+                ["year", "年份"],
+                ["tournament", "比赛名称"],
+                ["event", "比赛项目"],
+                ["results", "成绩"],
+                ["remarks", "备注"]
+            ]
+        },
+        field: {
+            tableSelector: "#fieldTable tbody",
+            yearFilterId: "fieldYearFilter",
+            eventFilterId: "fieldEventFilter",
+            sortOrderId: "fieldSortOrder",
+            isTimeFormat: false, // 田赛（高度/距离）不需要时间格式补全
+            columnsMap: [
+                ["year", "年份"],
+                ["tournament", "比赛名称"],
+                ["event", "比赛项目"],
+                ["results", "m", "成绩"],
+                ["remarks", "备注"]
+            ]
+        },
+        cross: {
+            tableSelector: "#crossTable tbody",
+            yearFilterId: "crossYearFilter",
+            eventFilterId: "crossEventFilter",
+            sortOrderId: "crossSortOrder",
+            isTimeFormat: true, // 越野赛需要时间格式转换
+            columnsMap: [
+                ["year", "年份"],
+                ["tournament", "比赛名称"],
+                ["event", "比赛项目"],
+                ["results", "成绩"],
+                ["remarks", "备注"]
+            ]
+        }
+    };
+
+    // 💡 动态初始化下拉菜单选项（通用）
+    function initModuleFilterOptions(type, dataList) {
+        const config = moduleConfig[type];
+        const yearSelect = document.getElementById(config.yearFilterId);
+        const eventSelect = document.getElementById(config.eventFilterId);
+
+        if (!yearSelect || !eventSelect) return;
 
         const years = new Set();
         const events = new Set();
@@ -344,31 +439,35 @@
             if (event !== "-") events.add(event);
         });
 
-        // 填充年份下拉框
         yearSelect.innerHTML = '<option value="ALL">全部年份</option>';
         Array.from(years).sort().reverse().forEach(y => {
             yearSelect.innerHTML += `<option value="${y}">${y}年</option>`;
         });
 
-        // 填充项目下拉框
         eventSelect.innerHTML = '<option value="ALL">全部项目</option>';
         Array.from(events).sort().forEach(e => {
             eventSelect.innerHTML += `<option value="${e}">${e}</option>`;
         });
     }
 
-    // 💡 执行筛选与排序核心逻辑
-    function applyTrackFilterAndSort() {
-        if (!currentTrackRaces.length) return;
+    // 💡 执行通用筛选与排序
+    function applyFilterAndSort(type) {
+        const config = moduleConfig[type];
+        const rawData = raceDataStore[type];
+        if (!rawData) return;
 
-        const selectedYear = document.getElementById("trackYearFilter").value;
-        const selectedEvent = document.getElementById("trackEventFilter").value;
-        const sortOrder = document.getElementById("trackSortOrder").value;
+        const yearSelect = document.getElementById(config.yearFilterId);
+        const eventSelect = document.getElementById(config.eventFilterId);
+        const sortSelect = document.getElementById(config.sortOrderId);
 
-        // 1. 筛选数据
-        let filtered = currentTrackRaces.filter(item => {
+        const selectedYear = yearSelect ? yearSelect.value : "ALL";
+        const selectedEvent = eventSelect ? eventSelect.value : "ALL";
+        const sortOrder = sortSelect ? sortSelect.value : "DEFAULT";
+
+        // 1. 筛选
+        let filtered = rawData.filter(item => {
             const id = getVal(item, ["学号", "id"]);
-            const matchesId = String(id).trim() === currentInputId;
+            const matchesId = String(id).trim() === raceDataStore.inputId;
 
             const year = getVal(item, ["year", "年份"]);
             const event = getVal(item, ["event", "比赛项目"]);
@@ -379,53 +478,23 @@
             return matchesId && matchesYear && matchesEvent;
         });
 
-        // 2. 排序数据（按成绩总秒数/数值排序）
+        // 2. 排序
         if (sortOrder === "DESC") {
-            // 从大到小
             filtered.sort((a, b) => {
-                let valA = parsePerformanceToSeconds(getVal(a, ["results", "成绩"]));
-                let valB = parsePerformanceToSeconds(getVal(b, ["results", "成绩"]));
+                let valA = parsePerformanceToSeconds(getVal(a, ["results", "m", "成绩"]));
+                let valB = parsePerformanceToSeconds(getVal(b, ["results", "m", "成绩"]));
                 return valB - valA;
             });
         } else if (sortOrder === "ASC") {
-            // 从小到大
             filtered.sort((a, b) => {
-                let valA = parsePerformanceToSeconds(getVal(a, ["results", "成绩"]));
-                let valB = parsePerformanceToSeconds(getVal(b, ["results", "成绩"]));
+                let valA = parsePerformanceToSeconds(getVal(a, ["results", "m", "成绩"]));
+                let valB = parsePerformanceToSeconds(getVal(b, ["results", "m", "成绩"]));
                 return valA - valB;
             });
         }
 
-        // 3. 渲染筛选排序后的表格
-        renderStandardTableDirect("#trackTable tbody", filtered, [
-            ["year", "年份"],
-            ["tournament", "比赛名称"],
-            ["event", "比赛项目"],
-            ["results", "成绩"],
-            ["remarks", "备注"]
-        ], true);
-    }
-
-    // 直接渲染已被筛选/排序过的数组
-    function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
-        const tbody = document.querySelector(tbodySelector);
-        tbody.innerHTML = filteredData.length ? "" : `<tr><td colspan="${columnsMap.length}">暂无符合条件的记录</td></tr>`;
-        
-        filteredData.forEach(item => {
-            let tr = "<tr>";
-            columnsMap.forEach(keys => {
-                let value = getVal(item, keys);
-                const isExactResultColumn = keys.some(k => k.toLowerCase() === "results" || k === "成绩");
-
-                if (isTimeFormat && isExactResultColumn) {
-                    value = formatTime(value);
-                }
-
-                tr += `<td>${value}</td>`;
-            });
-            tr += "</tr>";
-            tbody.innerHTML += tr;
-        });
+        // 3. 渲染
+        renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
     }
     
     // ⏱️ 增强版时间自动补齐与格式化函数
@@ -551,39 +620,26 @@
             const photoUrl = getVal(student, ["photo", "照片"]);
             document.getElementById("avatarImg").src = (photoUrl !== "-" && photoUrl.startsWith("http")) ? photoUrl : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
 
+            // 保存全局数据
+            raceDataStore.inputId = inputId;
+            raceDataStore.track = trackRaces;
+            raceDataStore.field = fieldRaces;
+            raceDataStore.cross = crossRaces;
+            
             // 2. 渲染 FIELD 田赛（精准识别 RESULTS (m) 列）
-            renderStandardTable("#fieldTable tbody", fieldRaces, inputId, [
-                ["year", "年份"],
-                ["tournament", "比赛名称"],
-                ["event", "比赛项目"],
-                ["results", "meter", "成绩"], // 模糊匹配包含 results 或 m 的列
-                ["remarks", "备注"]
-            ]);
+            const studentField = fieldRaces.filter(i => String(getVal(i, ["学号", "id"])).trim() === inputId);
+            initModuleFilterOptions("field", studentField);
+            applyFilterAndSort("field");
 
-            // 3. 缓存与初始化 TRACK 径赛数据（支持动态筛选与排序）
-            currentTrackRaces = trackRaces;
-            currentInputId = inputId;
-
-            // 过滤出当前查询学生的 TRACK 数据
-            const studentTrackData = trackRaces.filter(item => {
-                const id = getVal(item, ["学号", "id"]);
-                return String(id).trim() === inputId;
-            });
-
-            // 初始化下拉菜单选项（年份与项目）
-            initFilterOptions(studentTrackData);
-
-            // 执行初始筛选与渲染
-            applyTrackFilterAndSort();
+            // 3. 渲染 TRACK 径赛
+            const studentTrack = trackRaces.filter(i => String(getVal(i, ["学号", "id"])).trim() === inputId);
+            initModuleFilterOptions("track", studentTrack);
+            applyFilterAndSort("track");
 
             // 4. 渲染 CROSS COUNTRY 越野赛
-            renderStandardTable("#crossTable tbody", crossRaces, inputId, [
-                ["year", "年份"],
-                ["tournament", "比赛名称"],
-                ["event", "比赛项目"],
-                ["results", "成绩"],
-                ["remarks", "备注"]
-            ], true);
+            const studentCross = crossRaces.filter(i => String(getVal(i, ["学号", "id"])).trim() === inputId);
+            initModuleFilterOptions("cross", studentCross);
+            applyFilterAndSort("cross");
 
             // 5. 渲染 测试数据 
             renderStandardTable("#testsTable tbody", testData, inputId, [
