@@ -421,9 +421,11 @@
         }
     };
 
-    // 💡 动态初始化下拉菜单选项（通用）
+    // 💡 动态初始化下拉菜单选项（修正版：全面兼容田赛/径赛/越野赛的字段读取）
     function initModuleFilterOptions(type, dataList) {
         const config = moduleConfig[type];
+        if (!config) return;
+
         const yearSelect = document.getElementById(config.yearFilterId);
         const eventSelect = document.getElementById(config.eventFilterId);
 
@@ -433,19 +435,35 @@
         const events = new Set();
 
         dataList.forEach(item => {
+            // 1. 读取年份（兼容 year, 年份）
             const year = getVal(item, ["year", "年份"]);
-            const event = getVal(item, ["distance", "距离"]);
-            if (year !== "-") years.add(year);
-            if (event !== "-") events.add(event);
+            if (year && year !== "-") years.add(String(year).trim());
+
+            // 2. 读取项目/距离（根据模块优先使用对应字段，防止错读）
+            let eventVal = "-";
+            if (type === "cross") {
+                eventVal = getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"]);
+            } else if (type === "field") {
+                eventVal = getVal(item, ["event", "比赛项目", "项目", "fieldEvent"]);
+            } else {
+                eventVal = getVal(item, ["event", "比赛项目", "项目"]);
+            }
+
+            if (eventVal && eventVal !== "-") {
+                events.add(String(eventVal).trim());
+            }
         });
 
+        // 填充年份下拉框
         yearSelect.innerHTML = '<option value="ALL">全部年份</option>';
         Array.from(years).sort().reverse().forEach(y => {
             yearSelect.innerHTML += `<option value="${y}">${y}年</option>`;
         });
 
+        // 填充项目/距离下拉框
         const defaultText = (type === "cross") ? "全部距离" : "全部项目";
         eventSelect.innerHTML = `<option value="ALL">${defaultText}</option>`;
+        
         Array.from(events).sort().forEach(e => {
             eventSelect.innerHTML += `<option value="${e}">${e}</option>`;
         });
