@@ -185,19 +185,19 @@
                 <h3>🏃 比赛成绩 (TRACK)</h3>
                 <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <label>📅 年份: 
-                        <select id="trackYearFilter" onchange="applyTrackFilterAndSort()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                        <select id="trackYearFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
                             <option value="ALL">全部年份</option>
                         </select>
                     </label>
 
                     <label>🏃 项目: 
-                        <select id="trackEventFilter" onchange="applyTrackFilterAndSort()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                        <select id="trackEventFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
                             <option value="ALL">全部项目</option>
                         </select>
                     </label>
 
                     <label>📊 成绩排序: 
-                        <select id="trackSortOrder" onchange="applyTrackFilterAndSort()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                        <select id="trackSortOrder" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
                             <option value="DEFAULT">默认排序 (原表格顺序)</option>
                             <option value="DESC">成绩从大到小 (慢 -> 快 / 远 -> 近)</option>
                             <option value="ASC">成绩从小到大 (快 -> 慢 / 近 -> 远)</option>
