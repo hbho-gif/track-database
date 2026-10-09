@@ -730,26 +730,54 @@
         container.style.display = "block";
     }
 
-    // 💡 统一渲染逻辑（由 searchStudent 校验完后直接调用）
+    // 💡 统一渲染逻辑（带有 DOM 安全校验防错）
     function executeStudentRender(inputId) {
         // 查找学生个人信息
-        const student = basicStudents.find(i => String(getVal(i, ["学号", "id"])).trim() === inputId);
-        if (!student) return;
-
-        // 1. 填入个人基本资料
-        document.getElementById("infoNameC").textContent = getVal(student, ["中文姓名", "姓名", "nameC"]);
-        document.getElementById("infoNameE").textContent = getVal(student, ["英文姓名", "nameE"]);
-        document.getElementById("infoId").textContent = inputId;
-        document.getElementById("infoClass").textContent = getVal(student, ["班级", "class"]);
-        document.getElementById("infoGender").textContent = getVal(student, ["性别", "gender"]);
-
-        const photoUrl = getVal(student, ["photo", "照片"]);
-        const avatarElem = document.getElementById("avatarImg");
-        if (avatarElem) {
-            avatarElem.src = (photoUrl !== "-" && photoUrl.startsWith("http")) ? photoUrl : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
+        const basicDataList = basicStudents.length ? basicStudents : (raceDataStore.basic || []);
+        const student = basicDataList.find(i => String(getVal(i, ["学号", "id"])).trim() === inputId);
+        
+        if (!student) {
+            alert("未找到该学号的详细资料！");
+            return;
         }
 
-        // 2. 缓存全局 ID
+        // 辅助赋值安全函数，找不到节点时不报错
+        const setSafeText = (id, value) => {
+            const elem = document.getElementById(id);
+            if (elem) elem.textContent = value;
+        };
+
+        // 1. 安全填入个人基本资料（兼容 infoNameC 与 nameC 等常见命名）
+        const nameC = getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"]);
+        const nameE = getVal(student, ["英文姓名", "nameE", "name_en"]);
+        const sClass = getVal(student, ["班级", "class"]);
+        const gender = getVal(student, ["性别", "gender"]);
+
+        setSafeText("infoNameC", nameC);
+        setSafeText("nameC", nameC);
+
+        setSafeText("infoNameE", nameE);
+        setSafeText("nameE", nameE);
+
+        setSafeText("infoId", inputId);
+        setSafeText("studentId", inputId);
+
+        setSafeText("infoClass", sClass);
+        setSafeText("studentClass", sClass);
+
+        setSafeText("infoGender", gender);
+        setSafeText("studentGender", gender);
+
+        // 照片安全替换
+        const photoUrl = getVal(student, ["photo", "照片", "avatar"]);
+        const avatarElem = document.getElementById("avatarImg") || document.getElementById("studentPhoto");
+        if (avatarElem) {
+            avatarElem.src = (photoUrl !== "-" && photoUrl.startsWith("http")) 
+                ? photoUrl 
+                : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
+        }
+
+        // 2. 缓存全局数据
         raceDataStore.inputId = inputId;
         raceDataStore.track = trackRaces;
         raceDataStore.field = fieldRaces;
@@ -778,7 +806,7 @@
             ["第二圈"],
             ["第三圈"],
             ["第四圈"]
-        ], true);  
+        ], true);
     }
 
     function renderDynamicTable(tableSelector, dataList, inputId) {
