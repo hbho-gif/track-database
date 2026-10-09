@@ -496,6 +496,32 @@
         // 3. 渲染
         renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
     }
+
+    // 💡 直接渲染已经被筛选/排序过的数组
+    function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
+        const tbody = document.querySelector(tbodySelector);
+        if (!tbody) return;
+
+        tbody.innerHTML = filteredData.length ? "" : `<tr><td colspan="${columnsMap.length}">暂无符合条件的记录</td></tr>`;
+        
+        filteredData.forEach(item => {
+            let tr = "<tr>";
+            columnsMap.forEach(keys => {
+                let value = getVal(item, keys);
+                
+                // 精准匹配成绩列进行时间格式化
+                const isExactResultColumn = keys.some(k => k.toLowerCase() === "results" || k === "成绩");
+
+                if (isTimeFormat && isExactResultColumn) {
+                    value = formatTime(value);
+                }
+
+                tr += `<td>${value}</td>`;
+            });
+            tr += "</tr>";
+            tbody.innerHTML += tr;
+        });
+    }
     
     // ⏱️ 增强版时间自动补齐与格式化函数
     function formatTime(val) {
