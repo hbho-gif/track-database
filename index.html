@@ -258,9 +258,9 @@
                         </select>
                     </label>
 
-                    <label>🌲 项目: 
-                        <select id="crossEventFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部项目</option>
+                    <label>🌲 距离: 
+                        <select id="crossDistanceFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ALL">全部距离</option>
                         </select>
                     </label>
 
@@ -408,13 +408,13 @@
         cross: {
             tableSelector: "#crossTable tbody",
             yearFilterId: "crossYearFilter",
-            eventFilterId: "crossEventFilter",
+            eventFilterId: "crossDistanceFilter",
             sortOrderId: "crossSortOrder",
             isTimeFormat: true, // 越野赛需要时间格式转换
             columnsMap: [
                 ["year", "年份"],
                 ["tournament", "比赛名称"],
-                ["event", "比赛项目"],
+                ["distance", "距离"],
                 ["results", "成绩"],
                 ["remarks", "备注"]
             ]
@@ -509,7 +509,7 @@
         renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
     }
 
-    // 💡 直接渲染已经被筛选/排序过的数组
+    // 💡 统一渲染表格函数（支持比赛成绩与多圈测试成绩格式化）
     function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
         const tbody = document.querySelector(tbodySelector);
         if (!tbody) return;
@@ -521,10 +521,14 @@
             columnsMap.forEach(keys => {
                 let value = getVal(item, keys);
                 
-                // 精准匹配成绩列进行时间格式化
-                const isExactResultColumn = keys.some(k => k.toLowerCase() === "results" || k === "成绩");
+                // 检查是否为成绩/秒数/分段圈数列（匹配 "results"、"成绩"、"圈" 等关键字）
+                const isResultColumn = keys.some(k => {
+                    const kLower = k.toLowerCase();
+                    return kLower === "results" || kLower === "成绩" || kLower.includes("圈") || kLower.includes("time");
+                });
 
-                if (isTimeFormat && isExactResultColumn) {
+                // 开启时间转换时，自动处理匹配到的列
+                if (isTimeFormat && isResultColumn) {
                     value = formatTime(value);
                 }
 
@@ -679,13 +683,15 @@
             initModuleFilterOptions("cross", studentCross);
             applyFilterAndSort("cross");
 
-            // 5. 渲染 测试数据 
-            renderStandardTable("#testsTable tbody", testData, inputId, [
+           // 5. 渲染测试数据（分段圈数成绩自动转换时间格式）
+            const studentTestData = testData.filter(i => String(getVal(i, ["学号", "id"])).trim() === inputId);
+            
+            renderStandardTableDirect("#testsTable tbody", studentTestData, [
                 ["event", "项目"],
                 ["第一圈"],
                 ["第二圈"],
                 ["第三圈"],
-                ["第四圈"],
+                ["第四圈"]
             ], true);
             
             // 6. 渲染与身体数据 (强化过滤，只显示当前Sheet独有的列)
