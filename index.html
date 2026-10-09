@@ -258,7 +258,7 @@
                         </select>
                     </label>
 
-                    <label>🌲 距离: 
+                    <label>📏 距离: 
                         <select id="crossDistanceFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
                             <option value="ALL">全部距离</option>
                         </select>
@@ -274,7 +274,7 @@
                 </div>
                 <table id="crossTable">
                     <thead>
-                        <tr><th>年份</th><th>比赛名称</th><th>比赛项目</th><th>比赛成绩 (hh:mm:ss,ss)</th><th>备注</th></tr>
+                        <tr><th>年份</th><th>比赛名称</th><th>距离</th><th>比赛成绩 (hh:mm:ss,ss)</th><th>备注</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -434,7 +434,7 @@
 
         dataList.forEach(item => {
             const year = getVal(item, ["year", "年份"]);
-            const event = getVal(item, ["event", "比赛项目"]);
+            const event = getVal(item, ["distance", "距离"]);
             if (year !== "-") years.add(year);
             if (event !== "-") events.add(event);
         });
@@ -444,7 +444,8 @@
             yearSelect.innerHTML += `<option value="${y}">${y}年</option>`;
         });
 
-        eventSelect.innerHTML = '<option value="ALL">全部项目</option>';
+        const defaultText = (type === "cross") ? "全部距离" : "全部项目";
+        eventSelect.innerHTML = `<option value="ALL">${defaultText}</option>`;
         Array.from(events).sort().forEach(e => {
             eventSelect.innerHTML += `<option value="${e}">${e}</option>`;
         });
