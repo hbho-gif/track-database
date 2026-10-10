@@ -474,7 +474,7 @@
         }
     };
 
-    // 💡 动态初始化下拉菜单选项（修正版：全面兼容田赛/径赛/越野赛的字段读取）
+    // 💡 动态初始化下拉菜单选项（全面兼容田赛/径赛/越野赛）
     function initModuleFilterOptions(type, dataList) {
         const config = moduleConfig[type];
         if (!config) return;
@@ -488,11 +488,11 @@
         const events = new Set();
 
         dataList.forEach(item => {
-            // 1. 读取年份（兼容 year, 年份）
+            // 1. 读取年份
             const year = getVal(item, ["year", "年份"]);
             if (year && year !== "-") years.add(String(year).trim());
 
-            // 2. 读取项目/距离（根据模块优先使用对应字段，防止错读）
+            // 2. 读取项目/距离（根据模块类型兼容字段）
             let eventVal = "-";
             if (type === "cross") {
                 eventVal = getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"]);
@@ -522,7 +522,7 @@
         });
     }
 
-    // 💡 执行通用筛选与排序（增强版容错匹配）
+    // 💡 执行通用筛选与排序（修正越野赛距离筛选）
     function applyFilterAndSort(type) {
         const config = moduleConfig[type];
         if (!config) return;
@@ -534,10 +534,10 @@
         const eventSelect = document.getElementById(config.eventFilterId);
         const sortSelect = document.getElementById(config.sortOrderId);
 
-        // 防错处理：若无下拉菜单直接渲染
+        // 防错处理：若无下拉菜单直接渲染默认列表
         if (!yearSelect || !eventSelect || !sortSelect) {
             const defaultFiltered = rawData.filter(item => {
-                const id = getVal(item, ["学号", "id"]);
+                const id = getVal(item, ["学号", "学号 ID", "id"]);
                 return String(id).trim() === String(raceDataStore.inputId).trim();
             });
             renderStandardTableDirect(config.tableSelector, defaultFiltered, config.columnsMap, config.isTimeFormat);
@@ -548,13 +548,20 @@
         const selectedEvent = String(eventSelect.value).trim();
         const sortOrder = sortSelect.value;
 
-        // 1. 筛选逻辑（强化类型转换与去除空白）
+        // 1. 筛选逻辑（修复：兼容越野赛 distance 字段）
         let filtered = rawData.filter(item => {
-            const id = String(getVal(item, ["学号", "id"])).trim();
+            const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
             const matchesId = (id === String(raceDataStore.inputId).trim());
 
             const year = String(getVal(item, ["year", "年份"])).trim();
-            const event = String(getVal(item, ["event", "比赛项目"])).trim();
+
+            // 🛠️ 关键修正：越野赛优先读取 distance/距离 字段
+            let event = "-";
+            if (type === "cross") {
+                event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"])).trim();
+            } else {
+                event = String(getVal(item, ["event", "比赛项目", "项目"])).trim();
+            }
 
             const matchesYear = (selectedYear === "ALL" || year === selectedYear);
             const matchesEvent = (selectedEvent === "ALL" || event === selectedEvent);
@@ -581,7 +588,7 @@
         renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
     }
 
-    // 💡 统一渲染表格函数（支持比赛成绩与多圈测试成绩格式化）
+    // 💡 统一渲染表格函数
     function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
         const tbody = document.querySelector(tbodySelector);
         if (!tbody) return;
@@ -593,13 +600,12 @@
             columnsMap.forEach(keys => {
                 let value = getVal(item, keys);
                 
-                // 检查是否为成绩/秒数/分段圈数列（匹配 "results"、"成绩"、"圈" 等关键字）
+                // 检查是否为成绩/秒数/分段圈数列
                 const isResultColumn = keys.some(k => {
                     const kLower = k.toLowerCase();
                     return kLower === "results" || kLower === "成绩" || kLower.includes("圈") || kLower.includes("time");
                 });
 
-                // 开启时间转换时，自动处理匹配到的列
                 if (isTimeFormat && isResultColumn) {
                     value = formatTime(value);
                 }
@@ -610,48 +616,36 @@
             tbody.innerHTML += tr;
         });
     }
-    
-    // ⏱️ 增强版时间自动补齐与格式化函数
+
+    // ⏱️ 时间自动补齐与格式化函数
     function formatTime(val) {
-        // 1. 过滤空值、无效值
         if (val === undefined || val === null) return "-";
         
         let str = String(val).trim();
-        // 清理 Google Sheet 可能带入的不可见控制字符或中文冒号
         str = str.replace(/：/g, ":").replace(/[\u200B-\u200D\uFEFF]/g, "");
         
         if (str === "" || str === "-") return "-";
 
-        // 2. 如果包含冒号 (mm:ss.ss 或 hh:mm:ss.ss)
         if (str.includes(":")) {
             let parts = str.split(":");
-            
-            // 格式: mm:ss.ss (例如 01:23.45 或 1:23.45)
             if (parts.length === 2) {
                 let mm = parts[0].trim().padStart(2, '0');
                 let ssPart = parts[1].trim();
-                
-                // 处理秒数部分，确保补齐两位小数
                 let secNum = parseFloat(ssPart);
                 let ss = isNaN(secNum) ? ssPart : secNum.toFixed(2).padStart(5, '0');
-                
                 return `00:${mm}:${ss}`;
             }
 
-            // 格式: hh:mm:ss.ss (例如 01:02:03.45)
             if (parts.length === 3) {
                 let hh = parts[0].trim().padStart(2, '0');
                 let mm = parts[1].trim().padStart(2, '0');
                 let ssPart = parts[2].trim();
-                
                 let secNum = parseFloat(ssPart);
                 let ss = isNaN(secNum) ? ssPart : secNum.toFixed(2).padStart(5, '0');
-                
                 return `${hh}:${mm}:${ss}`;
             }
         }
 
-        // 3. 如果是纯数字/纯秒数 (例如 12.34 或 85.2)
         let totalSeconds = parseFloat(str);
         if (!isNaN(totalSeconds)) {
             let hours = Math.floor(totalSeconds / 3600);
@@ -665,22 +659,19 @@
             return `${hh}:${mm}:${ss}`;
         }
 
-        // 4. 如果是文字或其他格式，原样输出，不强制显示 "-"
         return str;
     }
-    
+
     // 1. 智能模糊匹配算法
     function isMatchStudent(student, query) {
         if (!query || !student) return false;
         
-        // 统一转小写、去空格
         const q = String(query).trim().toLowerCase().replace(/\s+/g, "");
 
         const id = String(getVal(student, ["学号", "学号 ID", "id"]) || "").toLowerCase().replace(/\s+/g, "");
         const nameC = String(getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"]) || "").toLowerCase().replace(/\s+/g, "");
         const nameE = String(getVal(student, ["英文姓名", "nameE", "name_en"]) || "").toLowerCase().replace(/\s+/g, "");
 
-        // 只要学号、中文名、英文名包含输入的关键字即算匹配
         return (id.includes(q) || nameC.includes(q) || nameE.includes(q));
     }
 
@@ -722,7 +713,6 @@
             item.onmouseover = () => item.style.backgroundColor = "#eef6ff";
             item.onmouseout = () => item.style.backgroundColor = "white";
 
-            // 关键：点击选项时，把纯学号填入输入框并立即渲染
             item.onclick = function() {
                 const cleanId = String(id).trim();
                 document.getElementById("searchInput").value = cleanId;
@@ -753,18 +743,22 @@
         }
     }
 
-    // 💡 核心渲染函数
+    // 💡 核心渲染函数（包含页面切换逻辑）
     function executeStudentRender(inputId) {
         if (!inputId) return;
         const cleanId = String(inputId).trim();
 
-        // 统一字段读取：兼容 ["学号", "学号 ID", "id"]
         const student = basicStudents.find(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
 
         if (!student) {
             alert("未找到学号为 " + cleanId + " 的学生资料，请检查！");
             return;
         }
+
+        // 🛠️ 显隐界面控制：隐藏空状态提示，显示档案主体
+        document.getElementById("emptyMessage")?.classList.add("hidden");
+        document.getElementById("loading")?.classList.add("hidden");
+        document.getElementById("profileContent")?.classList.remove("hidden");
 
         // 安全填入个人资料
         const nameC = getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"]);
@@ -831,7 +825,6 @@
 
     // 💡 点击“查询”按钮或按 Enter 主入口
     function searchStudent(explicitId = null) {
-        // 关闭下拉弹框
         const container = document.getElementById("searchResultsList");
         if (container) container.style.display = "none";
 
@@ -854,7 +847,6 @@
         if (matchedStudents.length === 0) {
             alert("未找到符合条件的运动员信息，请核对后再试！");
         } else if (matchedStudents.length === 1) {
-            // 确保 targetId 转换为字符串和去空格
             const targetId = String(getVal(matchedStudents[0], ["学号", "学号 ID", "id"])).trim();
             executeStudentRender(targetId);
         } else {
@@ -862,48 +854,14 @@
         }
     }
 
-    function renderDynamicTable(tableSelector, dataList, inputId) {
-        const table = document.querySelector(tableSelector);
-        const thead = table.querySelector("thead");
-        const tbody = table.querySelector("tbody");
-
-        const filteredData = dataList.filter(item => {
-            const id = getVal(item, ["学号", "id"]);
-            return String(id).trim() === inputId;
-        });
-
-        if (!filteredData.length || !dataList.length) {
-            thead.innerHTML = "<tr><th>数据</th></tr>";
-            tbody.innerHTML = "<tr><td>暂无相关数据</td></tr>";
-            return;
-        }
-
-        // 提取并过滤掉属于个人资料的列，只保留该Sheet独有列
-        const headers = Object.keys(dataList[0]).filter(h => {
-            const low = h.trim().toLowerCase();
-            return !["学号", "id", "姓名", "name", "ic no", "d.o.b", "photo"].some(ignore => low.includes(ignore));
-        });
-
-        let thHtml = "<tr>";
-        headers.forEach(h => thHtml += `<th>${h}</th>`);
-        thHtml += "</tr>";
-        thead.innerHTML = thHtml;
-
-        let tbodyHtml = "";
-        filteredData.forEach(row => {
-            tbodyHtml += "<tr>";
-            headers.forEach(h => tbodyHtml += `<td>${row[h] || "-"}</td>`);
-            tbodyHtml += "</tr>";
-        });
-        tbody.innerHTML = tbodyHtml;
-    }
-
+    // 💡 Tab 选项卡切换函数
     function switchTab(event, tabName) {
         document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
         document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
         
-        document.getElementById(`tab-${tabName}`).classList.remove("hidden");
-        event.currentTarget.classList.add("active");
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        if (targetTab) targetTab.classList.remove("hidden");
+        if (event && event.currentTarget) event.currentTarget.classList.add("active");
     }
 
 
