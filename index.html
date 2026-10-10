@@ -125,12 +125,96 @@
 
         /* A4 打印适配样式 */
         @media print {
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
-            .no-print { display: none !important; }
-            .tab-content { display: block !important; margin-bottom: 25px; }
-            h3 { border-left-color: #000; color: #000; }
-            th { background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
+        /* 1. 自动隐藏所有非打印组件 */
+        .no-print, 
+        .search-box, 
+        .filter-group, 
+        .filter-box, 
+        .tab-buttons, 
+        button, 
+        #searchResultsList, 
+        #emptyMessage, 
+        #loading {
+            display: none !important;
+        }
+
+        /* 2. 基础重置 */
+        body {
+            background: white !important;
+            color: #000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            font-size: 12pt !important;
+        }
+
+        .container {
+            box-shadow: none !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* 3. 队员卡片打印排版（防断页） */
+        .profile-card {
+            border: 1px solid #000 !important;
+            box-shadow: none !important;
+            padding: 15px !important;
+            margin-bottom: 20px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            page-break-inside: avoid; /* 避免卡片在纸张边缘被跨页切断 */
+        }
+
+        .info-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important; /* 分为两列对齐 */
+            gap: 8px 15px !important;
+            font-size: 10.5pt !important;
+        }
+
+        .info-grid div {
+            border-bottom: 1px dotted #ccc !important;
+        }
+
+        /* 4. 显示所有 Tab 选项卡（确保径赛、田赛、越野赛和测试表格全部打出） */
+        .tab-content {
+            display: block !important;
+            margin-bottom: 25px !important;
+            page-break-inside: avoid;
+        }
+
+        h3 {
+            border-left: 4px solid #000 !important;
+            padding-left: 8px !important;
+            color: #000 !important;
+            margin-top: 15px !important;
+        }
+
+        /* 5. 强化表格清晰度与防截断 */
+        .table-wrapper {
+            overflow: visible !important; /* 确保右侧列不被截断 */
+            border: none !important;
+        }
+
+        table {
+            width: 100% !important;
+            min-width: 100% !important;
+            border-collapse: collapse !important;
+            font-size: 10pt !important;
+        }
+
+        th, td {
+            border: 1px solid #000 !important; /* 清晰黑色边框 */
+            padding: 6px 8px !important;
+            text-align: center !important;
+            white-space: normal !important;
+        }
+
+        th {
+            background-color: #eeeeee !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
         }
 
         
@@ -164,9 +248,16 @@
 <!-- 💡 提示词更新：支持学号及姓名查询 -->
 <div id="emptyMessage" class="message">💡 请在上方输入框输入学号、中文姓名或英文姓名进行查询。</div>
 
-<!-- 档案主体 -->
-<div id="profileContent" class="hidden">
-        
+    <!-- 档案主体 -->
+    <div id="profileContent" class="hidden">
+
+    <!-- 🖨️ 打印与导出 PDF 按钮（带 no-print 标记，打印时会自动隐藏） -->
+    <div class="no-print" style="text-align: right; margin-bottom: 15px;">
+        <button type="button" onclick="window.print()" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+            🖨️ 打印 / 另存为 PDF
+        </button>
+    </div>
+    
     <!-- 个人基本资料卡片容器 -->
 <div class="profile-card" style="display: flex; gap: 24px; flex-wrap: wrap; background: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 24px;">
     
