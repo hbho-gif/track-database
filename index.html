@@ -164,31 +164,32 @@
 <!-- 档案主体 -->
 <div id="profileContent" class="hidden">
         
-    <!-- 个人基本资料卡片 -->
-    <div class="profile-card" style="display: flex; gap: 20px; flex-wrap: wrap; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-    <!-- 左侧照片 -->
-    <div class="photo-box">
-        <img id="avatarImg" src="https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo" alt="队员照片" style="width: 150px; height: 190px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+    <!-- 个人基本资料卡片容器 -->
+<div class="profile-card" style="display: flex; gap: 24px; flex-wrap: wrap; background: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 24px;">
+    
+    <!-- 左侧照片区域 -->
+    <div class="photo-box" style="flex-shrink: 0; text-align: center;">
+        <img id="avatarImg" src="https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo" alt="队员照片" style="width: 150px; height: 190px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
     </div>
 
-    <!-- 右侧详细资料网格（已移除班级） -->
-    <div class="info-grid" style="flex: 1; min-width: 280px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; font-size: 14px;">
-        <div><strong>中文姓名：</strong><span id="infoNameC">-</span></div>
-        <div><strong>英文姓名：</strong><span id="infoNameE">-</span></div>
-        <div><strong>学号 ID：</strong><span id="infoId">-</span></div>
-        <div><strong>性别：</strong><span id="infoGender">-</span></div>
-        <div><strong>身份证号码：</strong><span id="infoIc">-</span></div>
-        <div><strong>出生日期：</strong><span id="infoDob">-</span></div>
-        <div><strong>年龄：</strong><span id="infoAge">-</span></div>
-        <div><strong>训练年龄：</strong><span id="infoTrainingAge">-</span></div>
-        <div><strong>联络电话：</strong><span id="infoContact">-</span></div>
-        <div><strong>邮箱：</strong><span id="infoEmail">-</span></div>
-        <div><strong>主项：</strong><span id="infoPrimaryEvent">-</span></div>
-        <div><strong>主项 PB：</strong><span id="infoPrimaryBest">-</span></div>
-        <div><strong>副项：</strong><span id="infoSecondaryEvent">-</span></div>
-        <div><strong>副项 PB：</strong><span id="infoSecondaryBest">-</span></div>
+    <!-- 右侧详细资料网格（关键参数调整） -->
+    <div class="info-grid" style="flex: 1; min-width: 300px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px 20px; font-size: 14px; line-height: 1.6; color: #334155;">
+        <div><strong style="color: #1e293b;">中文姓名 NAME(C)：</strong><span id="infoNameC">-</span></div>
+        <div><strong style="color: #1e293b;">英文姓名 NAME(E)：</strong><span id="infoNameE">-</span></div>
+        <div><strong style="color: #1e293b;">学号 ID：</strong><span id="infoId">-</span></div>
+        <div><strong style="color: #1e293b;">性别 GENDER：</strong><span id="infoGender">-</span></div>
+        <div><strong style="color: #1e293b;">身份证号码 IC：</strong><span id="infoIc">-</span></div>
+        <div><strong style="color: #1e293b;">出生日期 DOB：</strong><span id="infoDob">-</span></div>
+        <div><strong style="color: #1e293b;">年龄 AGE：</strong><span id="infoAge">-</span></div>
+        <div><strong style="color: #1e293b;">训练年龄 TRAINING AGE：</strong><span id="infoTrainingAge">-</span></div>
+        <div><strong style="color: #1e293b;">联络电话 CONTACT NO.：</strong><span id="infoContact">-</span></div>
+        <div><strong style="color: #1e293b;">邮箱 EMAIL：</strong><span id="infoEmail">-</span></div>
+        <div><strong style="color: #1e293b;">主项 PRIMARY：</strong><span id="infoPrimaryEvent">-</span></div>
+        <div><strong style="color: #1e293b;">主项 PRIMARY PB：</strong><span id="infoPrimaryBest">-</span></div>
+        <div><strong style="color: #1e293b;">副项 SECONDARY：</strong><span id="infoSecondaryEvent">-</span></div>
+        <div><strong style="color: #1e293b;">副项 SECONDARY PB：</strong><span id="infoSecondaryBest">-</span></div>
     </div>
-    </div>
+</div>
 
         <!-- 屏幕查看时的分类 Tabs 控制栏 -->
         <div class="tabs no-print">
