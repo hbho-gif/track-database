@@ -660,7 +660,7 @@
         // 统一转小写、去空格
         const q = String(query).trim().toLowerCase().replace(/\s+/g, "");
 
-        const id = String(getVal(student, ["学号", "id"]) || "").toLowerCase().replace(/\s+/g, "");
+        const id = String(getVal(student, ["学号", "学号 ID", "id"]) || "").toLowerCase().replace(/\s+/g, "");
         const nameC = String(getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"]) || "").toLowerCase().replace(/\s+/g, "");
         const nameE = String(getVal(student, ["英文姓名", "nameE", "name_en"]) || "").toLowerCase().replace(/\s+/g, "");
 
@@ -688,47 +688,14 @@
         }
     }
 
-    // 3. 点击“查询”按钮或按下 Enter 键触发
-    function searchStudent(explicitId = null) {
-        // 关闭下拉框
-        const container = document.getElementById("searchResultsList");
-        if (container) container.style.display = "none";
-
-        // 如果是通过点击列表直接传入的学号
-        if (explicitId) {
-            executeStudentRender(String(explicitId).trim());
-            return;
-        }
-
-        const inputVal = document.getElementById("searchInput").value.trim();
-        if (!inputVal) {
-            alert("请输入学号或姓名！");
-            return;
-        }
-
-        // 查找所有符合条件的学生
-        const matchedStudents = basicStudents.filter(s => isMatchStudent(s, inputVal));
-
-        if (matchedStudents.length === 0) {
-            alert("未找到符合条件的运动员信息，请核对后再试！");
-        } else if (matchedStudents.length === 1) {
-            // 找到唯一学生，直接加载
-            const targetId = String(getVal(matchedStudents[0], ["学号", "id"])).trim();
-            executeStudentRender(targetId);
-        } else {
-            // 找到多个学生，展示下拉框供选择
-            showMatchedStudentsList(matchedStudents);
-        }
-    }
-
-    // 4. 展示下拉匹配列表
+    // 3. 展示下拉匹配列表
     function showMatchedStudentsList(students) {
         const container = document.getElementById("searchResultsList");
         if (!container) return;
 
         container.innerHTML = "";
         students.forEach(s => {
-            const id = getVal(s, ["学号", "id"]);
+            const id = getVal(s, ["学号", "学号 ID", "id"]);
             const nameC = getVal(s, ["中文姓名", "姓名", "nameC"]);
             const nameE = getVal(s, ["英文姓名", "nameE"]);
 
@@ -739,10 +706,11 @@
             item.onmouseover = () => item.style.backgroundColor = "#eef6ff";
             item.onmouseout = () => item.style.backgroundColor = "white";
 
-            // 关键：点击选项时，直接把【纯学号】填入输入框，并调用渲染
+            // 关键：点击选项时，把纯学号填入输入框并立即渲染
             item.onclick = function() {
-                document.getElementById("searchInput").value = id; // 只放纯学号，防止下次按查询比对失败
-                executeStudentRender(String(id).trim());
+                const cleanId = String(id).trim();
+                document.getElementById("searchInput").value = cleanId;
+                executeStudentRender(cleanId);
                 container.style.display = "none";
             };
 
@@ -761,7 +729,7 @@
         }
     });
 
-    // 💡 1. 安全修改 DOM 文本的辅助工具（找不到 ID 自动跳过，绝对不报错卡死）
+    // 💡 辅助工具：安全修改 DOM 文本
     function safeSetText(elementId, textValue) {
         const elem = document.getElementById(elementId);
         if (elem) {
@@ -769,20 +737,20 @@
         }
     }
 
-    // 💡 2. 核心渲染函数（防卡死增强版）
+    // 💡 核心渲染函数
     function executeStudentRender(inputId) {
         if (!inputId) return;
         const cleanId = String(inputId).trim();
 
-        // 寻找对应学生基本资料
-        const student = basicStudents.find(i => String(getVal(i, ["学号 ID", "id"])).trim() === cleanId);
+        // 统一字段读取：兼容 ["学号", "学号 ID", "id"]
+        const student = basicStudents.find(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
 
         if (!student) {
             alert("未找到学号为 " + cleanId + " 的学生资料，请检查！");
             return;
         }
 
-        // 2.1 安全填入个人资料（自动兼容多种 common ID 命名）
+        // 安全填入个人资料
         const nameC = getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"]);
         const nameE = getVal(student, ["英文姓名", "nameE", "name_en"]);
         const sClass = getVal(student, ["班级", "class"]);
@@ -790,16 +758,12 @@
 
         safeSetText("infoNameC", nameC);
         safeSetText("nameC", nameC);
-
         safeSetText("infoNameE", nameE);
         safeSetText("nameE", nameE);
-
         safeSetText("infoId", cleanId);
         safeSetText("studentId", cleanId);
-
         safeSetText("infoClass", sClass);
         safeSetText("studentClass", sClass);
-
         safeSetText("infoGender", gender);
         safeSetText("studentGender", gender);
 
@@ -812,33 +776,33 @@
                 : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
         }
 
-        // 2.2 全局数据缓存
+        // 全局数据缓存
         raceDataStore.inputId = cleanId;
         raceDataStore.track = trackRaces || [];
         raceDataStore.field = fieldRaces || [];
         raceDataStore.cross = crossRaces || [];
 
-        // 2.3 安全渲染各比赛模块
+        // 各模块安全渲染
         try {
-            const studentTrack = (trackRaces || []).filter(i => String(getVal(i, ["学号", "id"])).trim() === cleanId);
+            const studentTrack = (trackRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
             initModuleFilterOptions("track", studentTrack);
             applyFilterAndSort("track");
         } catch(e) { console.warn("Track render error:", e); }
 
         try {
-            const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "id"])).trim() === cleanId);
+            const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
             initModuleFilterOptions("field", studentField);
             applyFilterAndSort("field");
         } catch(e) { console.warn("Field render error:", e); }
 
         try {
-            const studentCross = (crossRaces || []).filter(i => String(getVal(i, ["学号", "id"])).trim() === cleanId);
+            const studentCross = (crossRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
             initModuleFilterOptions("cross", studentCross);
             applyFilterAndSort("cross");
         } catch(e) { console.warn("Cross render error:", e); }
 
         try {
-            const studentTest = (testData || []).filter(i => String(getVal(i, ["学号", "id"])).trim() === cleanId);
+            const studentTest = (testData || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
             renderStandardTableDirect("#testsTable tbody", studentTest, [
                 ["event", "项目"],
                 ["第一圈"],
@@ -849,23 +813,19 @@
         } catch(e) { console.warn("Test render error:", e); }
     }
 
-    // 💡 3. 点击“查询”按钮主入口
+    // 💡 点击“查询”按钮或按 Enter 主入口
     function searchStudent(explicitId = null) {
         // 关闭下拉弹框
         const container = document.getElementById("searchResultsList");
         if (container) container.style.display = "none";
 
-        // 如果直接指定了 ID
         if (explicitId) {
-            executeStudentRender(explicitId);
+            executeStudentRender(String(explicitId).trim());
             return;
         }
 
         const inputElem = document.getElementById("searchInput");
-        if (!inputElem) {
-            alert("找不到搜索输入框！");
-            return;
-        }
+        if (!inputElem) return;
 
         const inputVal = inputElem.value.trim();
         if (!inputVal) {
@@ -873,13 +833,13 @@
             return;
         }
 
-        // 进行匹配
         const matchedStudents = basicStudents.filter(s => isMatchStudent(s, inputVal));
 
         if (matchedStudents.length === 0) {
             alert("未找到符合条件的运动员信息，请核对后再试！");
         } else if (matchedStudents.length === 1) {
-            const targetId = getVal(matchedStudents[0], ["学号", "id"]);
+            // 确保 targetId 转换为字符串和去空格
+            const targetId = String(getVal(matchedStudents[0], ["学号", "学号 ID", "id"])).trim();
             executeStudentRender(targetId);
         } else {
             showMatchedStudentsList(matchedStudents);
