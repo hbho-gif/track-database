@@ -689,9 +689,9 @@
         
         const q = String(query).trim().toLowerCase().replace(/\s+/g, "");
 
-        const id = String(getVal(student, ["学号", "id"])).toLowerCase().replace(/\s+/g, "");
-        const nameC = String(getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"])).toLowerCase().replace(/\s+/g, "");
-        const nameE = String(getVal(student, ["英文姓名", "nameE", "name_en"])).toLowerCase().replace(/\s+/g, "");
+        const id = String(getVal(student, ["学号", "ID", "学号 ID"])).toLowerCase().replace(/\s+/g, "");
+        const nameC = String(getVal(student, ["中文姓名", "姓名 NAME (C)", "NAME (C)"])).toLowerCase().replace(/\s+/g, "");
+        const nameE = String(getVal(student, ["英文姓名", "姓名 NAME (E)", "NAME (E)"])).toLowerCase().replace(/\s+/g, "");
 
         return (id.includes(q) || nameC.includes(q) || nameE.includes(q));
     }
