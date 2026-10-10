@@ -775,7 +775,7 @@
         const cleanId = String(inputId).trim();
 
         // 寻找对应学生基本资料
-        const student = basicStudents.find(i => String(getVal(i, ["学号", "id"])).trim() === cleanId);
+        const student = basicStudents.find(i => String(getVal(i, ["学号 ID", "id"])).trim() === cleanId);
 
         if (!student) {
             alert("未找到学号为 " + cleanId + " 的学生资料，请检查！");
