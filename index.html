@@ -484,7 +484,7 @@
         }
     };
 
-    // 💡 动态初始化下拉菜单选项（全面兼容田赛/径赛/越野赛）
+    // 💡 动态初始化下拉菜单选项（增强越野赛兼容性）
     function initModuleFilterOptions(type, dataList) {
         const config = moduleConfig[type];
         if (!config) return;
@@ -502,10 +502,10 @@
             const year = getVal(item, ["year", "年份"]);
             if (year && year !== "-") years.add(String(year).trim());
 
-            // 2. 读取项目/距离（根据模块类型兼容字段）
+            // 2. 读取项目/距离
             let eventVal = "-";
             if (type === "cross") {
-                eventVal = getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"]);
+                eventVal = getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目", "项目"]);
             } else if (type === "field") {
                 eventVal = getVal(item, ["event", "比赛项目", "项目", "fieldEvent"]);
             } else {
@@ -532,7 +532,7 @@
         });
     }
 
-    // 💡 执行通用筛选与排序（修正越野赛距离筛选）
+    // 💡 执行通用筛选与排序（修正越野赛距离匹配）
     function applyFilterAndSort(type) {
         const config = moduleConfig[type];
         if (!config) return;
@@ -544,7 +544,7 @@
         const eventSelect = document.getElementById(config.eventFilterId);
         const sortSelect = document.getElementById(config.sortOrderId);
 
-        // 防错处理：若无下拉菜单直接渲染默认列表
+        // 如果没有找到下拉菜单元素，直接渲染该选手的全部记录
         if (!yearSelect || !eventSelect || !sortSelect) {
             const defaultFiltered = rawData.filter(item => {
                 const id = getVal(item, ["学号", "学号 ID", "id"]);
@@ -558,17 +558,17 @@
         const selectedEvent = String(eventSelect.value).trim();
         const sortOrder = sortSelect.value;
 
-        // 1. 筛选逻辑（修复：兼容越野赛 distance 字段）
+        // 1. 筛选逻辑
         let filtered = rawData.filter(item => {
             const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
             const matchesId = (id === String(raceDataStore.inputId).trim());
 
             const year = String(getVal(item, ["year", "年份"])).trim();
 
-            // 🛠️ 关键修正：越野赛优先读取 distance/距离 字段
+            // 越野赛兼容多种列名
             let event = "-";
             if (type === "cross") {
-                event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"])).trim();
+                event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目", "项目"])).trim();
             } else {
                 event = String(getVal(item, ["event", "比赛项目", "项目"])).trim();
             }
@@ -594,7 +594,7 @@
             });
         }
 
-        // 3. 渲染
+        // 3. 渲染结果到表格
         renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
     }
 
