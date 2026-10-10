@@ -164,23 +164,31 @@
 <!-- 档案主体 -->
 <div id="profileContent" class="hidden">
         
-        <!-- 1. 个人基本资料 -->
-        <div class="profile-card">
-            <img id="avatarImg" class="avatar" src="" alt="运动员照片" onerror="this.src='https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo'">
-            <div class="info-grid">
-                <div class="info-item"><label>姓名 (中文)：</label><span id="infoNameC">-</span></div>
-                <div class="info-item"><label>姓名 (英文)：</label><span id="infoNameE">-</span></div>
-                <div class="info-item"><label>学号 ID：</label><span id="infoId">-</span></div>
-                <div class="info-item"><label>性别：</label><span id="infoGender">-</span></div>
-                <div class="info-item"><label>身份证 IC：</label><span id="infoIc">-</span></div>
-                <div class="info-item"><label>出生日期：</label><span id="infoDob">-</span></div>
-                <div class="info-item"><label>年龄 / 训练年龄：</label><span id="infoAgeGroup">-</span></div>
-                <div class="info-item"><label>联络电话：</label><span id="infoContact">-</span></div>
-                <div class="info-item full-width"><label>主项及最佳成绩：</label><span id="infoPrimary">-</span></div>
-                <div class="info-item full-width"><label>副项及最佳成绩：</label><span id="infoSecondary">-</span></div>
-                <div class="info-item full-width"><label>邮箱：</label><span id="infoEmail">-</span></div>
-            </div>
-        </div>
+    <!-- 个人基本资料卡片 -->
+    <div class="profile-card" style="display: flex; gap: 20px; flex-wrap: wrap; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <!-- 左侧照片 -->
+    <div class="photo-box">
+        <img id="avatarImg" src="https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo" alt="队员照片" style="width: 150px; height: 190px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+    </div>
+
+    <!-- 右侧详细资料网格（已移除班级） -->
+    <div class="info-grid" style="flex: 1; min-width: 280px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; font-size: 14px;">
+        <div><strong>中文姓名：</strong><span id="infoNameC">-</span></div>
+        <div><strong>英文姓名：</strong><span id="infoNameE">-</span></div>
+        <div><strong>学号 ID：</strong><span id="infoId">-</span></div>
+        <div><strong>性别：</strong><span id="infoGender">-</span></div>
+        <div><strong>身份证号码：</strong><span id="infoIc">-</span></div>
+        <div><strong>出生日期：</strong><span id="infoDob">-</span></div>
+        <div><strong>年龄：</strong><span id="infoAge">-</span></div>
+        <div><strong>训练年龄：</strong><span id="infoTrainingAge">-</span></div>
+        <div><strong>联络电话：</strong><span id="infoContact">-</span></div>
+        <div><strong>邮箱：</strong><span id="infoEmail">-</span></div>
+        <div><strong>主项：</strong><span id="infoPrimaryEvent">-</span></div>
+        <div><strong>主项 PB：</strong><span id="infoPrimaryBest">-</span></div>
+        <div><strong>副项：</strong><span id="infoSecondaryEvent">-</span></div>
+        <div><strong>副项 PB：</strong><span id="infoSecondaryBest">-</span></div>
+    </div>
+    </div>
 
         <!-- 屏幕查看时的分类 Tabs 控制栏 -->
         <div class="tabs no-print">
@@ -802,22 +810,42 @@
         document.getElementById("loading")?.classList.add("hidden");
         document.getElementById("profileContent")?.classList.remove("hidden");
 
-        // 扩充多词兼容
+        // 1. 安全填入个人基本资料（已移除班级）
         const nameC = getVal(student, ["中文姓名", "姓名", "中文名", "nameC", "name_cn", "name"]);
         const nameE = getVal(student, ["英文姓名", "英文名", "nameE", "name_en"]);
-        const sClass = getVal(student, ["班级", "Class", "班"]);
         const gender = getVal(student, ["性别", "Gender"]);
 
+        const icNo = getVal(student, ["身份证号码", "IC No.", "IC No", "IC"]);
+        const dob = getVal(student, ["出生日期", "D.O.B.", "D.O.B", "DOB"]);
+        const age = getVal(student, ["年龄", "AGE", "Age"]);
+        const trainingAge = getVal(student, ["训练年龄", "TRAINING AGE", "Training Age"]);
+        const primaryEvent = getVal(student, ["主项", "PRIMARY"]);
+        const primaryBest = getVal(student, ["主项个人最好成绩", "PRIMARY BEST PERFORMANCE", "主项PB", "PRIMARY BEST"]);
+        const secondaryEvent = getVal(student, ["副项", "SECONDARY"]);
+        const secondaryBest = getVal(student, ["副项个人最好成绩", "SECONDARY BEST PERFORMANCE", "副项PB", "SECONDARY BEST"]);
+        const contact = getVal(student, ["联络电话", "CONTACT", "Contact", "电话"]);
+        const email = getVal(student, ["邮箱", "EMAIL", "Email", "电邮"]);
+
+        // 2. 赋值渲染到 HTML DOM
         safeSetText("infoNameC", nameC);
         safeSetText("nameC", nameC);
         safeSetText("infoNameE", nameE);
         safeSetText("nameE", nameE);
         safeSetText("infoId", cleanId);
         safeSetText("studentId", cleanId);
-        safeSetText("infoClass", sClass);
-        safeSetText("studentClass", sClass);
         safeSetText("infoGender", gender);
         safeSetText("studentGender", gender);
+
+        safeSetText("infoIc", icNo);
+        safeSetText("infoDob", dob);
+        safeSetText("infoAge", age);
+        safeSetText("infoTrainingAge", trainingAge);
+        safeSetText("infoPrimaryEvent", primaryEvent);
+        safeSetText("infoPrimaryBest", primaryBest);
+        safeSetText("infoSecondaryEvent", secondaryEvent);
+        safeSetText("infoSecondaryBest", secondaryBest);
+        safeSetText("infoContact", contact);
+        safeSetText("infoEmail", email);
 
         // 照片设置
         const photoUrl = getVal(student, ["photo", "照片", "相片", "avatar", "Image"]);
