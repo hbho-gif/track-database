@@ -350,12 +350,12 @@
     // 3. 执行数据批量加载
     Promise.all([
         fetchSheetData("个人基本资料"),           // 请确保这里的 Tab 名称与 Google Sheet 底部的完全一致
-        fetchSheetData("TRACK"),
-        fetchSheetData("FIELD"),
-        fetchSheetData("CROSS COUNTRY"),
-        fetchSheetData("Test")
-    ]).then(([个人基本资料, track, field, cross, test]) => {
-        basicStudents = 个人基本资料;
+        fetchSheetData("比赛成绩 (Track)"),
+        fetchSheetData("比赛成绩 (Field)"),
+        fetchSheetData("比赛成绩 (Cross Country)"),
+        fetchSheetData("测试成绩")
+    ]).then(([basic, track, field, cross, test]) => {
+        basicStudents = basic;
         trackRaces = track;
         fieldRaces = field;
         crossRaces = cross;
