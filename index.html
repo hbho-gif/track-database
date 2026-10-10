@@ -140,17 +140,21 @@
     <h2 class="no-print" style="text-align: center; margin-top: 0; color: #1a73e8;">🏃‍♂️ 循人中学田径队数据库</h2>
 
     <!-- 查询与操作区 -->
-   <!-- 搜索区域 -->
+    <!-- 搜索区域 -->
     <div class="search-box no-print" style="position: relative; max-width: 400px; margin: 20px auto;">
         <div style="display: flex; gap: 8px;">
+            <!-- 使用 oninput 实现实时打字自动弹窗 -->
             <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
+               oninput="handleSearchInput()" 
+               onfocus="handleSearchInput()"
                onkeyup="if(event.key==='Enter') searchStudent()"
+               autocomplete="off"
                style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
-            <button onclick="searchStudent()" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;">🔍 查询</button>
+            <button type="button" onclick="searchStudent()" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;">🔍 查询</button>
         </div>
-       
-        <!-- 用于显示多重模糊匹配结果的下拉选择列表 -->
-        <div id="searchResultsList" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+    
+    <!-- 实时下拉匹配列表容器 -->
+    <div id="searchResultsList" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
     </div>
 
     <div id="loading" class="message hidden">⏳ 正在从云端调取档案，请稍候...</div>
@@ -649,28 +653,54 @@
         return str;
     }
     
-    // 💡 智能匹配算法（不区分大小写、忽略空格、支持子字符串模糊包含）
+    // 全局防抖定时器，防止打字太快频繁触发
+    let searchDebounceTimer = null;
+
+    // 💡 实时打字时自动调用的函数
+    function handleSearchInput() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            const inputVal = document.getElementById("searchInput").value.trim();
+            const container = document.getElementById("searchResultsList");
+            if (!container) return;
+
+            // 框内为空时清空并隐藏下拉菜单
+            if (!inputVal) {
+                container.style.display = "none";
+                container.innerHTML = "";
+                return;
+            }
+
+            const basicDataList = basicStudents.length ? basicStudents : (raceDataStore.basic || []);
+            const matchedStudents = basicDataList.filter(s => isMatchStudent(s, inputVal));
+
+            if (matchedStudents.length > 0) {
+                showMatchedStudentsList(matchedStudents);
+            } else {
+                container.innerHTML = `<div style="padding: 10px; color: #999; text-align: center;">未找到匹配队员</div>`;
+                container.style.display = "block";
+            }
+        }, 200); // 延迟 200ms 触发，体验更顺畅
+    }
+
+    // 💡 智能匹配算法
     function isMatchStudent(student, query) {
         if (!query) return false;
         
         const q = String(query).trim().toLowerCase().replace(/\s+/g, "");
 
-        // 提取学号、中文姓名、英文姓名
         const id = String(getVal(student, ["学号", "id"])).toLowerCase().replace(/\s+/g, "");
         const nameC = String(getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"])).toLowerCase().replace(/\s+/g, "");
         const nameE = String(getVal(student, ["英文姓名", "nameE", "name_en"])).toLowerCase().replace(/\s+/g, "");
 
-        // 只要学号、中文名或英文名包含关键字，即判定匹配成功
         return (id.includes(q) || nameC.includes(q) || nameE.includes(q));
     }
 
-    // 💡 核心查询入口（支持单人定位与多人匹配弹窗）
+    // 💡 点击“查询”按钮或按下 Enter 键时触发
     function searchStudent(explicitId = null) {
-        // 关闭以前的模糊搜索结果下拉框
-        const resultsContainer = document.getElementById("searchResultsList");
-        if (resultsContainer) resultsContainer.style.display = "none";
+        const container = document.getElementById("searchResultsList");
+        if (container) container.style.display = "none";
 
-        // 如果是通过点击结果列表传入的精确 ID
         if (explicitId) {
             executeStudentRender(String(explicitId).trim());
             return;
@@ -678,26 +708,24 @@
 
         const inputVal = document.getElementById("searchInput").value.trim();
         if (!inputVal) {
-            alert("请输入学号或姓名进行查询！");
+            alert("请输入学号或姓名！");
             return;
         }
 
-        // 在基本资料库中寻找所有符合条件的学生
-        const matchedStudents = basicStudents.filter(s => isMatchStudent(s, inputVal));
+        const basicDataList = basicStudents.length ? basicStudents : (raceDataStore.basic || []);
+        const matchedStudents = basicDataList.filter(s => isMatchStudent(s, inputVal));
 
         if (matchedStudents.length === 0) {
-            alert("未找到符合条件的运动员信息，请核对后重试！");
+            alert("未找到符合条件的运动员信息，请核对后再试！");
         } else if (matchedStudents.length === 1) {
-            // 唯一匹配：直接渲染该运动员数据
             const targetId = String(getVal(matchedStudents[0], ["学号", "id"])).trim();
             executeStudentRender(targetId);
         } else {
-            // 多个匹配：展示匹配列表让用户自行点击选择
             showMatchedStudentsList(matchedStudents);
         }
     }
 
-    // 💡 弹出多人匹配的选择列表
+    // 💡 渲染实时匹配结果下拉框
     function showMatchedStudentsList(students) {
         const container = document.getElementById("searchResultsList");
         if (!container) return;
@@ -709,16 +737,17 @@
             const nameE = getVal(s, ["英文姓名", "nameE"]);
 
             const item = document.createElement("div");
-            item.style.cssText = "padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; text-align: left;";
-            item.innerHTML = `<strong>${nameC}</strong> (${nameE}) - <span style="color: #666;">学号: ${id}</span>`;
+            item.style.cssText = "padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; text-align: left;";
+            item.innerHTML = `<strong>${nameC}</strong> <span style="color: #666; font-size: 13px;">(${nameE})</span> - <span style="color: #007bff; font-weight: bold;">${id}</span>`;
             
-            // 鼠标悬停高亮效果
-            item.onmouseover = () => item.style.backgroundColor = "#f0f7ff";
+            // 悬停交互高亮
+            item.onmouseover = () => item.style.backgroundColor = "#eef6ff";
             item.onmouseout = () => item.style.backgroundColor = "white";
 
-            // 点击具体某位学生直接加载
-            item.onclick = () => {
-                document.getElementById("searchInput").value = id;
+            // 点击任意一位队员，自动填入输入框并立即加载其详细数据
+            item.onclick = (e) => {
+                e.stopPropagation(); // 阻止冒泡
+                document.getElementById("searchInput").value = `${nameC} (${id})`;
                 executeStudentRender(String(id).trim());
                 container.style.display = "none";
             };
@@ -728,6 +757,15 @@
 
         container.style.display = "block";
     }
+
+    // 💡 全局监听：点击页面空白区域时自动收起下拉框
+    document.addEventListener("click", function(e) {
+        const searchBox = document.querySelector(".search-box");
+        const container = document.getElementById("searchResultsList");
+        if (searchBox && container && !searchBox.contains(e.target)) {
+            container.style.display = "none";
+        }
+    });
 
     // 💡 统一渲染逻辑（带有 DOM 安全校验防错）
     function executeStudentRender(inputId) {
