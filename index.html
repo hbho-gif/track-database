@@ -505,7 +505,7 @@
             // 2. 读取项目/距离
             let eventVal = "-";
             if (type === "cross") {
-                eventVal = getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目", "项目"]);
+                eventVal = getVal(item, ["distance", "distance/km", "距离", "距离 DISTANCE", "event", "比赛项目", "项目"]);
             } else if (type === "field") {
                 eventVal = getVal(item, ["event", "比赛项目", "项目", "fieldEvent"]);
             } else {
