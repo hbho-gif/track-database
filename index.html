@@ -140,28 +140,29 @@
     <h2 class="no-print" style="text-align: center; margin-top: 0; color: #1a73e8;">🏃‍♂️ 循人中学田径队数据库</h2>
 
     <!-- 查询与操作区 -->
-    <!-- 搜索区域 -->
-    <div class="search-box no-print" style="position: relative; max-width: 400px; margin: 20px auto;">
-        <div style="display: flex; gap: 8px;">
-            <!-- 使用 oninput 实现实时打字自动弹窗 -->
-            <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
+<!-- 搜索区域 -->
+<div class="search-box no-print" style="position: relative; max-width: 400px; margin: 20px auto; z-index: 1001;">
+    <div style="display: flex; gap: 8px;">
+        <!-- 使用 oninput 实现实时打字自动弹窗 -->
+        <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
                oninput="handleSearchInput()" 
                onfocus="handleSearchInput()"
-               onkeyup="if(event.key==='Enter') searchStudent()"
+               onkeyup="if(event.key==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
                autocomplete="off"
                style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
-            <button type="button" onclick="searchStudent()" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;">🔍 查询档案</button>
-        </div>
-    
-    <!-- 实时下拉匹配列表容器 -->
-    <div id="searchResultsList" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
+        <button type="button" onclick="searchStudent()" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;">🔍 查询档案</button>
     </div>
 
-    <div id="loading" class="message hidden">⏳ 正在从云端调取档案，请稍候...</div>
-    <div id="emptyMessage" class="message">💡 请在上方输入框输入学号 ID 并点击“查询档案”。</div>
+    <!-- 实时下拉匹配列表容器 -->
+    <div id="searchResultsList" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; z-index: 1002; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
+</div>
 
-    <!-- 档案主体 -->
-    <div id="profileContent" class="hidden">
+<div id="loading" class="message hidden">⏳ 正在从云端调取档案，请稍候...</div>
+<!-- 💡 提示词更新：支持学号及姓名查询 -->
+<div id="emptyMessage" class="message">💡 请在上方输入框输入学号、中文姓名或英文姓名进行查询。</div>
+
+<!-- 档案主体 -->
+<div id="profileContent" class="hidden">
         
         <!-- 1. 个人基本资料 -->
         <div class="profile-card">
