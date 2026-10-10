@@ -743,28 +743,70 @@
         }
     }
 
-    // 💡 核心渲染函数（包含页面切换逻辑）
+    // 💡 超强容错 getVal：支持去空格匹配 + 智能判断
+    function getVal(row, keys) {
+        if (!row) return "-";
+
+        // 第一轮：精准与去空格匹配
+        for (let key of keys) {
+            const targetKey = key.toLowerCase().replace(/\s+/g, "");
+            for (let rowKey in row) {
+                const cleanRowKey = rowKey.trim().toLowerCase().replace(/\s+/g, "");
+                if (cleanRowKey === targetKey) {
+                    const val = row[rowKey];
+                    if (val !== undefined && val !== null && String(val).trim() !== "") {
+                        return String(val).trim();
+                    }
+                }
+            }
+        }
+
+        // 第二轮：包含关键词模糊匹配
+        for (let key of keys) {
+            const targetKey = key.toLowerCase().replace(/\s+/g, "");
+            for (let rowKey in row) {
+                const cleanRowKey = rowKey.trim().toLowerCase().replace(/\s+/g, "");
+                if (cleanRowKey.includes(targetKey)) {
+                    const val = row[rowKey];
+                    if (val !== undefined && val !== null && String(val).trim() !== "") {
+                        return String(val).trim();
+                    }
+                }
+            }
+        }
+
+        return "-";
+    }
+
+    // 💡 核心渲染函数（补充极广的表头关键词）
     function executeStudentRender(inputId) {
         if (!inputId) return;
         const cleanId = String(inputId).trim();
 
-        const student = basicStudents.find(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+        // 兼容所有常见的学号列名
+        const idKeys = ["学号", "学号 ID", "学号ID", "id", "student id", "studentid", "编号"];
+
+        // 寻找匹配的学生
+        const student = basicStudents.find(i => {
+            const val = getVal(i, idKeys);
+            return val !== "-" && String(val).trim() === cleanId;
+        });
 
         if (!student) {
-            alert("未找到学号为 " + cleanId + " 的学生资料，请检查！");
+            alert("未找到学号为 " + cleanId + " 的学生资料，请检查数据表！");
             return;
         }
 
-        // 🛠️ 显隐界面控制：隐藏空状态提示，显示档案主体
+        // 显隐界面控制
         document.getElementById("emptyMessage")?.classList.add("hidden");
         document.getElementById("loading")?.classList.add("hidden");
         document.getElementById("profileContent")?.classList.remove("hidden");
 
-        // 安全填入个人资料
-        const nameC = getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"]);
-        const nameE = getVal(student, ["英文姓名", "nameE", "name_en"]);
-        const sClass = getVal(student, ["班级", "class"]);
-        const gender = getVal(student, ["性别", "gender"]);
+        // 扩充多词兼容
+        const nameC = getVal(student, ["中文姓名", "姓名", "中文名", "nameC", "name_cn", "name"]);
+        const nameE = getVal(student, ["英文姓名", "英文名", "nameE", "name_en"]);
+        const sClass = getVal(student, ["班级", "Class", "班"]);
+        const gender = getVal(student, ["性别", "Gender"]);
 
         safeSetText("infoNameC", nameC);
         safeSetText("nameC", nameC);
@@ -778,7 +820,7 @@
         safeSetText("studentGender", gender);
 
         // 照片设置
-        const photoUrl = getVal(student, ["photo", "照片", "avatar"]);
+        const photoUrl = getVal(student, ["photo", "照片", "相片", "avatar", "Image"]);
         const avatarElem = document.getElementById("avatarImg") || document.getElementById("studentPhoto");
         if (avatarElem) {
             avatarElem.src = (photoUrl && photoUrl !== "-" && String(photoUrl).startsWith("http")) 
@@ -792,27 +834,27 @@
         raceDataStore.field = fieldRaces || [];
         raceDataStore.cross = crossRaces || [];
 
-        // 各模块安全渲染
+        // 渲染各比赛模块
         try {
-            const studentTrack = (trackRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+            const studentTrack = (trackRaces || []).filter(i => getVal(i, idKeys) === cleanId);
             initModuleFilterOptions("track", studentTrack);
             applyFilterAndSort("track");
         } catch(e) { console.warn("Track render error:", e); }
 
         try {
-            const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+            const studentField = (fieldRaces || []).filter(i => getVal(i, idKeys) === cleanId);
             initModuleFilterOptions("field", studentField);
             applyFilterAndSort("field");
         } catch(e) { console.warn("Field render error:", e); }
 
         try {
-            const studentCross = (crossRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+            const studentCross = (crossRaces || []).filter(i => getVal(i, idKeys) === cleanId);
             initModuleFilterOptions("cross", studentCross);
             applyFilterAndSort("cross");
         } catch(e) { console.warn("Cross render error:", e); }
 
         try {
-            const studentTest = (testData || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+            const studentTest = (testData || []).filter(i => getVal(i, idKeys) === cleanId);
             renderStandardTableDirect("#testsTable tbody", studentTest, [
                 ["event", "项目"],
                 ["第一圈"],
