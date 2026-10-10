@@ -321,12 +321,12 @@
 </div>
 
 <script>
-   // 1. 基础配置与通用工具函数（放在 script 最上方）
-   const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk"; // 替换为你的真实 ID
+// 1. 基础配置与通用工具函数（放在 script 最上方）
+    const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
 
     function getSheetUrl(sheetName) {
         return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-}
+    }
 
     function fetchSheetData(sheetName) {
         return new Promise((resolve) => {
@@ -347,7 +347,7 @@
     let crossRaces = [];
     let testData = [];
 
-    // 3. 执行数据批量加载（必须放在 getSheetUrl 和 fetchSheetData 的下方）
+    // 3. 执行数据批量加载
     Promise.all([
         fetchSheetData("Basic"),           // 请确保这里的 Tab 名称与 Google Sheet 底部的完全一致
         fetchSheetData("TRACK"),
@@ -365,18 +365,33 @@
     }).catch(err => {
         console.error("数据读取失败:", err);
     });
-    
-       
-    // 模糊匹配字段工具，模糊搜索包含某个关键词的列
+
+    // 💡 优化后的 getVal：先优先全等精准匹配，找不到再退而求其次进行 includes 匹配，防误判
     function getVal(row, keys) {
         if (!row) return "-";
+        
+        // 第一轮：精确匹配列名（忽略大小写和空格）
         for (let key of keys) {
+            const targetKey = key.toLowerCase();
             for (let rowKey in row) {
-                if (rowKey.trim().toLowerCase().includes(key.toLowerCase())) {
-                    return row[rowKey] || "-";
+                if (rowKey.trim().toLowerCase() === targetKey) {
+                    const val = row[rowKey];
+                    return (val !== undefined && val !== null && String(val).trim() !== "") ? val : "-";
                 }
             }
         }
+
+        // 第二轮：模糊匹配（包含关键词）
+        for (let key of keys) {
+            const targetKey = key.toLowerCase();
+            for (let rowKey in row) {
+                if (rowKey.trim().toLowerCase().includes(targetKey)) {
+                    const val = row[rowKey];
+                    return (val !== undefined && val !== null && String(val).trim() !== "") ? val : "-";
+                }
+            }
+        }
+
         return "-";
     }
 
@@ -446,13 +461,13 @@
         cross: {
             tableSelector: "#crossTable tbody",
             yearFilterId: "crossYearFilter",
-            eventFilterId: "crossDistanceFilter",
+            eventFilterId: "crossEventFilter", // 🛠️ 修正为 crossEventFilter，与 HTML 下拉框保持一致
             sortOrderId: "crossSortOrder",
             isTimeFormat: true, // 越野赛需要时间格式转换
             columnsMap: [
                 ["year", "年份"],
                 ["tournament", "比赛名称"],
-                ["distance", "距离"],
+                ["distance", "distance/km", "距离", "event", "比赛项目"], // 🛠️ 扩充兼容列名
                 ["results", "成绩"],
                 ["remarks", "备注"]
             ]
