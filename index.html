@@ -568,7 +568,7 @@
             // 越野赛兼容多种列名
             let event = "-";
             if (type === "cross") {
-                event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目", "项目"])).trim();
+                event = String(getVal(item, ["DISTANCE", "distance/km", "距离", "距离 DISTANCE","event", "比赛项目", "项目"])).trim();
             } else {
                 event = String(getVal(item, ["event", "比赛项目", "项目"])).trim();
             }
