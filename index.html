@@ -683,20 +683,30 @@
         }, 200); // 延迟 200ms 触发，体验更顺畅
     }
 
-    // 💡 智能匹配算法
+    // 💡 智能匹配算法（增强版：自动提取括号内的学号）
     function isMatchStudent(student, query) {
         if (!query) return false;
-        
-        const q = String(query).trim().toLowerCase().replace(/\s+/g, "");
 
-        const id = String(getVal(student, ["学号", "ID", "学号 ID"])).toLowerCase().replace(/\s+/g, "");
-        const nameC = String(getVal(student, ["中文姓名", "姓名 NAME (C)", "NAME (C)"])).toLowerCase().replace(/\s+/g, "");
-        const nameE = String(getVal(student, ["英文姓名", "姓名 NAME (E)", "NAME (E)"])).toLowerCase().replace(/\s+/g, "");
+        let rawQuery = String(query).trim();
 
+        // 1. 如果输入框里是 "张小明 (21001)" 格式，自动提取出括号里的 "21001"
+        const bracketMatch = rawQuery.match(/\(([^)]+)\)/);
+        if (bracketMatch && bracketMatch[1]) {
+            rawQuery = bracketMatch[1].trim(); // 提取括号内的学号
+        }
+
+        const q = rawQuery.toLowerCase().replace(/\s+/g, "");
+
+        // 2. 提取学生的数据
+        const id = String(getVal(student, ["学号", "id"])).toLowerCase().replace(/\s+/g, "");
+        const nameC = String(getVal(student, ["中文姓名", "姓名", "nameC", "name_cn"])).toLowerCase().replace(/\s+/g, "");
+        const nameE = String(getVal(student, ["英文姓名", "nameE", "name_en"])).toLowerCase().replace(/\s+/g, "");
+
+        // 3. 子字符串模糊匹配
         return (id.includes(q) || nameC.includes(q) || nameE.includes(q));
     }
 
-    // 💡 点击“查询”按钮或按下 Enter 键时触发
+    // 💡 点击“查询”按钮或按 Enter 触发
     function searchStudent(explicitId = null) {
         const container = document.getElementById("searchResultsList");
         if (container) container.style.display = "none";
@@ -706,9 +716,16 @@
             return;
         }
 
-        const inputVal = document.getElementById("searchInput").value.trim();
+        let inputVal = document.getElementById("searchInput").value.trim();
         if (!inputVal) {
             alert("请输入学号或姓名！");
+            return;
+        }
+
+        // 如果用户直接按了“查询”且输入框是 "张小明 (21001)"，提取学号直接渲染
+        const bracketMatch = inputVal.match(/\(([^)]+)\)/);
+        if (bracketMatch && bracketMatch[1]) {
+            executeStudentRender(bracketMatch[1].trim());
             return;
         }
 
