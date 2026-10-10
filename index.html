@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>循人中学田径队数据库</title>
     <!-- 引入 PapaParse 用于解析 Google Sheet CSV 数据 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -132,7 +132,125 @@
             h3 { border-left-color: #000; color: #000; }
             th { background-color: #eeeeee !important; -webkit-print-color-adjust: exact; }
         }
-    </style>
+
+        /* ==========================================
+   📱 移动端自适应响应式样式 (Responsive CSS)
+   ========================================== */
+
+/* 1. 基础全局防溢出 */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    padding: 10px;
+    margin: 0;
+    overflow-x: hidden; /* 防止手机端出现横向滚动条 */
+}
+
+/* 2. 搜索框区域适配 */
+.search-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 10px auto !important;
+}
+
+.search-box > div {
+    flex-direction: row; /* 保持输入框与按钮同行 */
+}
+
+#searchInput {
+    font-size: 16px !important; /* 💡 关键：iOS 上 16px 以上才不会自动放大页面 */
+}
+
+/* 3. 队员照片与个人资料卡片适配 */
+.profile-card {
+    padding: 16px !important;
+    gap: 16px !important;
+    flex-direction: column; /* 手机端改为上下单列布局 */
+    align-items: center;
+}
+
+.photo-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.photo-box img {
+    width: 130px !important; /* 手机端适当缩放照片尺寸 */
+    height: 165px !important;
+}
+
+.info-grid {
+    width: 100%;
+    grid-template-columns: 1fr !important; /* 💡 手机端强行改为单列展示，防止双语标题挤压 */
+    gap: 10px !important;
+    font-size: 14px !important;
+}
+
+.info-grid div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #edf2f7; /* 增加虚线分割线，提升手机阅读舒适度 */
+    padding-bottom: 6px;
+}
+
+/* 4. 筛选下拉框控制区适配 */
+.filter-group, .filter-box {
+    display: flex;
+    flex-direction: column; /* 手机端筛选下拉框叠放 */
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.filter-group select, .filter-box select {
+    width: 100% !important;
+    padding: 10px !important;
+    font-size: 15px !important;
+}
+
+/* 5. 表格移动端横向自适应滚动（防撑爆屏幕） */
+.table-container, table {
+    width: 100%;
+}
+
+/* 💡 给所有表格的父级 div 加上该类名，手机上表格内容较多时可平滑左右滑动 */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* 顺畅滑动的 iOS 优化 */
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+table {
+    min-width: 500px; /* 保证表格列头不被过于挤压，超出的部分左右滑动查看 */
+    font-size: 13px !important;
+}
+
+th, td {
+    padding: 8px 10px !important;
+    white-space: nowrap; /* 文字不换行，保持列整齐 */
+}
+
+/* 6. Tab 选项卡按钮手机端适配 */
+.tab-buttons {
+    display: flex;
+    overflow-x: auto; /* 按钮过多时支持横向滑动 */
+    white-space: nowrap;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+}
+        </style>
 </head>
 <body>
 
