@@ -272,11 +272,9 @@
         <div><strong style="color: #1e293b;">英文姓名 NAME(E)：</strong><span id="infoNameE">-</span></div>
         <div><strong style="color: #1e293b;">学号 ID：</strong><span id="infoId">-</span></div>
         <div><strong style="color: #1e293b;">性别 GENDER：</strong><span id="infoGender">-</span></div>
-        <div><strong style="color: #1e293b;">身份证号码 IC：</strong><span id="infoIc">-</span></div>
         <div><strong style="color: #1e293b;">出生日期 DOB：</strong><span id="infoDob">-</span></div>
         <div><strong style="color: #1e293b;">年龄 AGE：</strong><span id="infoAge">-</span></div>
         <div><strong style="color: #1e293b;">训练年龄 TRAINING AGE：</strong><span id="infoTrainingAge">-</span></div>
-        <div><strong style="color: #1e293b;">联络电话 CONTACT NO.：</strong><span id="infoContact">-</span></div>
         <div><strong style="color: #1e293b;">邮箱 EMAIL：</strong><span id="infoEmail">-</span></div>
         <div><strong style="color: #1e293b;">主项 PRIMARY：</strong><span id="infoPrimaryEvent">-</span></div>
         <div><strong style="color: #1e293b;">主项 PRIMARY PB：</strong><span id="infoPrimaryBest">-</span></div>
@@ -286,12 +284,18 @@
 </div>
 
         <!-- 屏幕查看时的分类 Tabs 控制栏 -->
-        <div class="tabs no-print">
-            <button class="tab-btn active" onclick="switchTab(event, 'track')">🏃 比赛成绩 (TRACK)</button>
-            <button class="tab-btn" onclick="switchTab(event, 'field')">🏋️ 比赛成绩 (FIELD)</button>
-            <button class="tab-btn" onclick="switchTab(event, 'cross')">🌲 比赛成绩 (CROSS COUNTRY)</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tests')">📈 测试数据</button>
-            <button class="tab-btn" onclick="switchTab(event, 'body')">📏 身体数据</button>
+        <div class="tab-buttons no-print">
+            <!-- 1. 身体数据（最左边，默认激活） -->
+            <button class="tab-btn active" onclick="switchTab('bodyTab')">身体数据 Body Stats</button>
+    
+            <!-- 2. 径赛成绩 -->
+            <button class="tab-btn" onclick="switchTab('trackTab')">径赛 Track</button>
+    
+            <!-- 3. 田赛成绩 -->
+            <button class="tab-btn" onclick="switchTab('fieldTab')">田赛 Field</button>
+    
+            <!-- 4. 越野赛 -->
+            <button class="tab-btn" onclick="switchTab('crossTab')">越野赛 Cross Country</button>
         </div>
 
         <!-- 2. 径赛成绩 TRACK -->
@@ -765,6 +769,19 @@
         return str;
     }
 
+    // 💡 改进后的单元格格式化逻辑：自动识别田赛并保留两位小数
+    function formatFieldValue(val, isField = false) {
+        if (val === undefined || val === null || val === "" || val === "-") return "-";
+    
+        // 如果是数字且属于田赛项目（如远跳、铅球、高跳等单位为米 m 的成绩）
+        const num = parseFloat(val);
+            if (!isNaN(num) && isField) {
+        return num.toFixed(2) + " m"; // 强制格式化为 2 位小数，如 5.30 m
+        }
+    return val;
+    }
+
+    
     // 1. 智能模糊匹配算法
     function isMatchStudent(student, query) {
         if (!query || !student) return false;
@@ -934,8 +951,6 @@
         safeSetText("studentId", cleanId);
         safeSetText("infoGender", gender);
         safeSetText("studentGender", gender);
-
-        safeSetText("infoIc", icNo);
         safeSetText("infoDob", dob);
         safeSetText("infoAge", age);
         safeSetText("infoTrainingAge", trainingAge);
@@ -943,7 +958,6 @@
         safeSetText("infoPrimaryBest", primaryBest);
         safeSetText("infoSecondaryEvent", secondaryEvent);
         safeSetText("infoSecondaryBest", secondaryBest);
-        safeSetText("infoContact", contact);
         safeSetText("infoEmail", email);
 
         // 照片设置
@@ -968,9 +982,23 @@
             applyFilterAndSort("track");
         } catch(e) { console.warn("Track render error:", e); }
 
+        // 确保在渲染田赛表格 (Field) 时，成绩列使用两位小数处理
         try {
-            const studentField = (fieldRaces || []).filter(i => getVal(i, idKeys) === cleanId);
-            initModuleFilterOptions("field", studentField);
+            const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+    
+            // 对田赛成绩逐行强制格式化为 2 位小数
+            const formattedFieldData = studentField.map(item => {
+                let copyItem = { ...item };
+                let rawRes = getVal(copyItem, ["results", "m", "成绩", "Result"]);
+                if (rawRes !== "-" && !isNaN(parseFloat(rawRes))) {
+                    copyItem["resultsFormatted"] = parseFloat(rawRes).toFixed(2);
+                } else {
+                    copyItem["resultsFormatted"] = rawRes;
+                }
+            return copyItem;
+            });
+
+            initModuleFilterOptions("field", formattedFieldData);
             applyFilterAndSort("field");
         } catch(e) { console.warn("Field render error:", e); }
 
