@@ -991,34 +991,43 @@
             applyFilterAndSort("track");
         } catch(e) { console.warn("Track render error:", e); }
 
-        // 渲染田赛表格 (Field)，强制成绩格式化为 2 位小数
+        // -----------------------------------------------------------
+        // 💡 田赛成绩处理 (Field) - 强力格式化与防空白错位
+        // -----------------------------------------------------------
         try {
             const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
 
-            // 1. 遍历并规范化成绩格式（如 5.3 -> 5.30）
+            // 遍历并规范化田赛成绩（保留 2 位小数 + 空白防错）
             const formattedFieldData = studentField.map(item => {
                 let copyItem = { ...item };
                 
-                // 自动寻找田赛成绩列头
-                const resultKey = ["results", "m", "成绩", "Result", "成绩results (m)"].find(k => copyItem[k] !== undefined);
-                let rawRes = getVal(copyItem, ["results", "m", "成绩", "Result", "成绩results (m)"]);
+                const fieldResultKeys = ["results", "m", "成绩", "Result", "成绩results (m)"];
 
-                if (rawRes !== "-" && !isNaN(parseFloat(rawRes))) {
+                // 1. 读取成绩原始值
+                let rawRes = getVal(copyItem, fieldResultKeys);
+
+                // 2. 只有当 rawRes 是合法数字时才强制转 2 位小数
+                if (rawRes !== "-" && rawRes !== "" && !isNaN(parseFloat(rawRes))) {
                     const formattedValue = parseFloat(rawRes).toFixed(2);
-                    // 覆盖原始属性，确保渲染和读取都能直接用到 2 位小数
+                    
+                    // 覆盖找到的字段
+                    const resultKey = fieldResultKeys.find(k => copyItem[k] !== undefined);
                     if (resultKey) {
                         copyItem[resultKey] = formattedValue;
                     }
-                    copyItem["results"] = formattedValue; // 补全标准 key
+                    copyItem["results"] = formattedValue;
+                } else {
+                    // 3. 如果是空白或非法字符，强制设定为 "-"
+                    copyItem["results"] = "-";
                 }
 
                 return copyItem;
             });
 
-            // 2. 💡 关键：同步更新全局缓存，保证后续筛选/排序时依然保留 2 位小数
+            // 更新全局数据缓存，确保筛选/排序时依然生效
             raceDataStore.field = formattedFieldData;
 
-            // 3. 初始化筛选选项并渲染
+            // 初始化下拉菜单并渲染表格
             initModuleFilterOptions("field", formattedFieldData);
             applyFilterAndSort("field");
 
