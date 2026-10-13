@@ -983,24 +983,37 @@
             applyFilterAndSort("track");
         } catch(e) { console.warn("Track render error:", e); }
 
-        // 确保在渲染田赛表格 (Field) 时，成绩列使用两位小数处理
+        // 渲染田赛表格 (Field)，强制成绩格式化为 2 位小数
         try {
             const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
-    
-            // 对田赛成绩逐行强制格式化为 2 位小数
+
+            // 1. 遍历并规范化成绩格式（如 5.3 -> 5.30）
             const formattedFieldData = studentField.map(item => {
                 let copyItem = { ...item };
-                let rawRes = getVal(copyItem, ["results", "m", "成绩", "Result"]);
+                
+                // 自动寻找田赛成绩列头
+                const resultKey = ["results", "m", "成绩", "Result", "成绩results (m)"].find(k => copyItem[k] !== undefined);
+                let rawRes = getVal(copyItem, ["results", "m", "成绩", "Result", "成绩results (m)"]);
+
                 if (rawRes !== "-" && !isNaN(parseFloat(rawRes))) {
-                    copyItem["resultsFormatted"] = parseFloat(rawRes).toFixed(2);
-                } else {
-                    copyItem["resultsFormatted"] = rawRes;
+                    const formattedValue = parseFloat(rawRes).toFixed(2);
+                    // 覆盖原始属性，确保渲染和读取都能直接用到 2 位小数
+                    if (resultKey) {
+                        copyItem[resultKey] = formattedValue;
+                    }
+                    copyItem["results"] = formattedValue; // 补全标准 key
                 }
-            return copyItem;
+
+                return copyItem;
             });
 
+            // 2. 💡 关键：同步更新全局缓存，保证后续筛选/排序时依然保留 2 位小数
+            raceDataStore.field = formattedFieldData;
+
+            // 3. 初始化筛选选项并渲染
             initModuleFilterOptions("field", formattedFieldData);
             applyFilterAndSort("field");
+
         } catch(e) { console.warn("Field render error:", e); }
 
         try {
