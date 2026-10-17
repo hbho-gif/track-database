@@ -349,7 +349,7 @@
                 <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
                        oninput="handleSearchInput()" 
                        onfocus="handleSearchInput()"
-                       onkeyup="if(event.key==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
+                       onkeyup="if(event.==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
                        autocomplete="off"
                        style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
                
@@ -1339,14 +1339,14 @@
             let subEventsHtml = "";
             let subCount = 0;
 
-            for (let key in itemHeader) {
+            for (let keyss in itemHeader) {
                 // 只要不是固定主属性列，就全盘扫描
-                if (!isMainColumn(key)) {
-                    const subName = itemHeader[key]; // 第 2 行的值（例如 "100m"）
-                    const subVal = itemValue[key];   // 第 3 行的值（例如 "11.20s"）
+                if (!isMainColumn(keyss)) {
+                    const subName = itemHeader[keyss]; // 第 2 行的值（例如 "100m"）
+                    const subVal = itemValue[keyss];   // 第 3 行的值（例如 "11.20s"）
 
                     // 调试用日志：如果依然不出标签，可以在浏览器的 Console 查看具体抓到了什么
-                    // console.log(`列名: ${key} | 小项名: ${subName} | 成绩: ${subVal}`);
+                    // console.log(`列名: ${keyss} | 小项名: ${subName} | 成绩: ${subVal}`);
 
                     if (subName && subVal && 
                         String(subName).trim() !== "" && 
