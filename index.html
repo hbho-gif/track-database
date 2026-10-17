@@ -1278,13 +1278,13 @@
     }
 
     // ==========================================
-    // 🌟 全能项 (MULTI) 专属渲染逻辑（适配双行架构：项目行 + 成绩行）
+    // 🌟 精准修复版：全能项 (MULTI) 双行渲染逻辑
     // ==========================================
     function renderMultiEventsTable(studentId) {
         const container = document.getElementById("multiTableContainer");
         if (!container) return;
 
-        // 1. 抓取该学号的所有行（正常情况下应该会有偶数行：2行、4行...）
+        // 1. 抓取该学号的所有行
         const studentMulti = (multiRaces || []).filter(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === studentId);
 
         if (!studentMulti || studentMulti.length === 0) {
@@ -1292,15 +1292,16 @@
             return;
         }
 
-        // 定义基本信息列名（这些列两行都会有，其余列为 动态小项/成绩 列）
-        const primaryKeys = [
-            "学号 ID", "学号", "id", 
-            "比赛名称 TOURNAMENT", "比赛名称", "tournament", 
-            "比赛年份 YEAR", "年份", "year", 
-            "比赛项目 EVENT", "项目", "event", 
-            "比赛成绩 RESULTS (points)", "比赛成绩", "results", "points", 
-            "备注 REMARKS", "备注", "remarks"
-        ];
+        // 严格定义的【主属性列】精准匹配关键词列表（只排除这几列，其他一律当作小项列处理）
+        const isMainColumn = (keyName) => {
+            const k = keyName.trim().toLowerCase();
+            return k.includes("学号") || k.includes("id") ||
+                   k.includes("比赛名称") || k.includes("tournament") ||
+                   k.includes("比赛年份") || k.includes("年份") || k.includes("year") ||
+                   k.includes("比赛项目") || k.includes("event") ||
+                   k.includes("比赛成绩") || k.includes("points") || k.includes("results") ||
+                   k.includes("备注") || k.includes("remarks");
+        };
 
         let html = `
             <table class="multi-table" style="width:100%; border-collapse:collapse;">
@@ -1317,45 +1318,43 @@
                 <tbody>
         `;
 
-        // 💡 2. 以 2 行为一组进行循环配对（i 为项目名行，i+1 为成绩数值行）
+        // 💡 2. 两行一组进行配对解析（i 为小项名称行，i+1 为手动成绩行）
         for (let i = 0; i < studentMulti.length; i += 2) {
-            const itemHeader = studentMulti[i];       // 第一行：项目小项名称
-            const itemValue = studentMulti[i + 1] || {}; // 第二行：手动输入的成绩数值
+            const itemHeader = studentMulti[i];       // 第 2 行：小项名称行
+            const itemValue = studentMulti[i + 1] || {}; // 第 3 行：成绩数值行
 
-            // 获取基本信息（从第一行或第二行读取皆可）
-            const year = getVal(itemHeader, ["比赛年份 YEAR", "年份", "year"]);
+            const year = getVal(itemHeader, ["比赛年份 YEAR", "比赛年份", "年份", "year"]);
             const tournament = getVal(itemHeader, ["比赛名称 TOURNAMENT", "比赛名称", "tournament"]);
-            const eventName = getVal(itemHeader, ["比赛项目 EVENT", "项目", "event"]);
-            
-            // 总积分和备注优先取第二行（如果第二行没填则取第一行）
-            const points = getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩", "results", "points"]) !== "-" 
-                           ? getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩", "results", "points"])
-                           : getVal(itemHeader, ["比赛成绩 RESULTS (points)", "比赛成绩", "results", "points"]);
+            const eventName = getVal(itemHeader, ["比赛项目 EVENT", "比赛项目", "项目", "event"]);
+        
+            const points = getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"]) !== "-" 
+                           ? getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"])
+                           : getVal(itemHeader, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"]);
                        
             const remarks = getVal(itemValue, ["备注 REMARKS", "备注", "remarks"]) !== "-" 
                             ? getVal(itemValue, ["备注 REMARKS", "备注", "remarks"])
                             : getVal(itemHeader, ["备注 REMARKS", "备注", "remarks"]);
 
-            // 💡 3. 配对提取小项名称与成绩
+            // 💡 3. 动态提取小项名称与成绩
             let subEventsHtml = "";
             let subCount = 0;
 
             for (let key in itemHeader) {
-                const cleanKey = key.trim();
-                // 排除掉基本信息列
-                const isPrimaryKey = primaryKeys.some(pk => pk.toLowerCase().replace(/\s+/g, "") === cleanKey.toLowerCase().replace(/\s+/g, ""));
+                // 只要不是固定主属性列，就全盘扫描
+                if (!isMainColumn(key)) {
+                    const subName = itemHeader[key]; // 第 2 行的值（例如 "100m"）
+                    const subVal = itemValue[key];   // 第 3 行的值（例如 "11.20s"）
 
-                if (!isPrimaryKey) {
-                    const subName = itemHeader[key]; // 小项名称（如 "100m"）
-                    const subVal = itemValue[key];   // 成绩数值（如 "11.20s"）
+                    // 调试用日志：如果依然不出标签，可以在浏览器的 Console 查看具体抓到了什么
+                    // console.log(`列名: ${key} | 小项名: ${subName} | 成绩: ${subVal}`);
 
-                    // 只要小项名称和成绩都不为空且不为 "-"
-                    if (subName && subVal &&
-                        String(subName).trim() !== "" &&
-                        String(subName).trim() !== "-" &&
-                        !String(subName).includes("#") && // 💡 防公式报错（如 #N/A）
-                        String(subVal).trim() !== "" &&
+                    if (subName && subVal && 
+                        String(subName).trim() !== "" && 
+                        String(subName).trim() !== "-" && 
+                        !String(subName).includes("#") &&
+                        String(subVal).trim() !== "" && 
                         String(subVal).trim() !== "-") {
+                    
                         subCount++;
                         subEventsHtml += `
                             <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center;">
