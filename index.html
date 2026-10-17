@@ -1350,7 +1350,12 @@
                     const subVal = itemValue[key];   // 成绩数值（如 "11.20s"）
 
                     // 只要小项名称和成绩都不为空且不为 "-"
-                    if (subName && subVal && String(subName).trim() !== "" && String(subName).trim() !== "-" && String(subVal).trim() !== "" && String(subVal).trim() !== "-") {
+                    if (subName && subVal &&
+                        String(subName).trim() !== "" &&
+                        String(subName).trim() !== "-" &&
+                        !String(subName).includes("#") && // 💡 防公式报错（如 #N/A）
+                        String(subVal).trim() !== "" &&
+                        String(subVal).trim() !== "-") {
                         subCount++;
                         subEventsHtml += `
                             <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center;">
