@@ -624,13 +624,13 @@
         });
 
         // 填充年份下拉框
-        yearSelect.innerHTML = '<option value="ALL">全部年份</option>';
+        yearSelect.innerHTML = '<option value="ALL">全部年份 ALL YEAR</option>';
         Array.from(years).sort().reverse().forEach(y => {
             yearSelect.innerHTML += `<option value="${y}">${y}年</option>`;
         });
 
         // 填充项目/距离下拉框
-        const defaultText = (type === "cross") ? "全部距离" : "全部项目";
+        const defaultText = (type === "cross") ? "全部距离 ALL DISTANCE" : "全部项目 ALL EVENT";
         eventSelect.innerHTML = `<option value="ALL">${defaultText}</option>`;
         
         Array.from(events).sort().forEach(e => {
