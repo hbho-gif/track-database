@@ -628,36 +628,12 @@
 
     function fetchSheetData(sheetName) {
         return new Promise((resolve) => {
-            Papa.parse(getSheetUrl("比赛成绩 (MULTI)"), {
+            Papa.parse(getSheetUrl(sheetName), {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
-                complete: (results) => {
-                    let data = results.data || [];
-
-                    // 🌟 如果是全能项，加上针对合并单元格（Merge）的学号继承预处理
-                    if (sheetName === "比赛成绩 (MULTI)" || sheetName.includes("MULTI")) {
-                        let lastHeader = {};
-                        data = data.map((row, index) => {
-                            // 偶数行（第 2 行）为项目名称行
-                            if (index % 2 === 0) {
-                                lastHeader = row;
-                                return row;
-                            } else {
-                                // 奇数行（第 3 行）为成绩行：如果学号在 CSV 中因合并变为空，自动继承上一行的学号
-                                let studentId = getVal(row, ["学号 ID", "学号", "id"]);
-                                if (!studentId || studentId === "-" || studentId.trim() === "") {
-                                    row["学号 ID"] = getVal(lastHeader, ["学号 ID", "学号", "id"]);
-                                }
-                                return row;
-                            }
-                        });
-                    }
-
-                    // 原原本本用你原有的 resolve 返回清洗后的数据
-                    resolve(data);
-                },
-                error: () => resolve([])
+                complete: (results) => resolve(results.data || []),
+                error: () => resolve([])}
             });
         });
     }
