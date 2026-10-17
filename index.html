@@ -628,6 +628,7 @@
 
     function fetchSheetData(sheetName) {
         return new Promise((resolve) => {
+            const isMulti = sheetName.includes("MULTI") || sheetName.includes("全能");
             Papa.parse(getSheetUrl(sheetName), {
                 download: true,
                 header: !isMulti, // 全能项不用 header，避免合并单元格重名
@@ -1358,7 +1359,7 @@
                                 <strong style="color:#0f172a;">${String(subVal).trim()}</strong>
                             </div>
                         `;
-                    }
+                        }
                 }
             }
 
