@@ -646,7 +646,7 @@
                         let lastHeader = [];
                         data = data.map((row, index) => {
                             // 偶数行（第 2 行）为小项名称行
-                            if (index % 2 === 0) {
+                            if (index % 2 == 0) {
                                 lastHeader = row;
                                 return row;
                             } else {
