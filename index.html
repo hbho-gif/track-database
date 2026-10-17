@@ -1331,8 +1331,8 @@
             const eventName = isArray ? itemHeader[3] : getVal(itemHeader, ["比赛项目 EVENT", "项目"]);
         
             // P 列 (索引 15) 为总积分，Q 列 (索引 16) 为备注
-            const points = isArray ? (itemValue[15] || itemHeader[15] || "-") : getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩"]);
-            const remarks = isArray ? (itemValue[16] || itemHeader[16] || "") : getVal(itemValue, ["备注 REMARKS", "备注"]);
+            const points = isArray ? (itemValue[15] || itemHeader[15] || "-") : getVal(itemHeader, ["比赛成绩 RESULTS (points)", "比赛成绩"]);
+            const remarks = isArray ? (itemValue[16] || itemHeader[16] || "") : getVal(itemHeader, ["备注 REMARKS", "备注"]);
 
             // 💡 3. 精准扫描 E 列到 O 列（索引 4 到 14，共 11 列小项容量）
             let subEventsHtml = "";
@@ -1340,7 +1340,7 @@
 
             if (isArray) {
                 // 循环索引 4 到 14 (对应 E列到O列)
-                for (let col = 4; col <= 14; col++) {
+                for (let col = 5; col <= 14; col++) {
                     const subName = itemHeader[col]; // 第 2 行的小项名称 (例如 "100m")
                     const subVal = itemValue[col];   // 第 3 行的成绩数值 (例如 "11.20s")
 
