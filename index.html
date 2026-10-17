@@ -216,166 +216,242 @@
             print-color-adjust: exact;
         }
         }
-
         
+        /* ==========================================
+        🧭 全局主导航栏 CSS (主 Tab 切换)
+        ========================================== */
+        .main-nav {
+            background-color: #1e293b;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 10px;
+            overflow-x: auto; /* 📱 手机端按钮超长时支持平滑滑动 */
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .main-nav .nav-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .main-nav .nav-btn:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .main-nav .nav-btn.active {
+            color: #ffffff;
+            background-color: #007bff; /* 激活高亮颜色 */
+        }
+
+        /* 占位卡片样式 */
+        .placeholder-card {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .placeholder-card h2 {
+            color: #334155;
+            margin-bottom: 10px;
+        }
         </style>
+        
 </head>
 <body>
 
-<div class="container">
-    <h2 class="no-print" style="text-align: center; margin-top: 0; color: #1a73e8;">🏃‍♂️ 循人中学田径队数据库</h2>
+    <!-- 全局主导航栏（单页面仪表盘） -->
+    <nav class="main-nav no-print">
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="switchMainTab('profile')">🎯 个人数据查询 PERSONAL DATA</button>
+            <button class="nav-btn" onclick="switchMainTab('team')">📊 培训队总汇 EVENT SUMMARY</button>
+            <button class="nav-btn" onclick="switchMainTab('sportsDay')">🏆 运动会履历 DATA IN SCHOOL SPORTS DAY</button>
+            <button class="nav-btn" onclick="switchMainTab('fitness')">📈 体测与成长 FITNESS ASSESSMENT</button>
+        </div>
+    </nav>
 
-    <!-- 查询与操作区 -->
-<!-- 搜索区域 -->
-<div class="search-box no-print" style="position: relative; max-width: 400px; margin: 20px auto; z-index: 1001;">
-    <div style="display: flex; gap: 8px;">
-        <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
-               oninput="handleSearchInput()" 
-               onfocus="handleSearchInput()"
-               onkeyup="if(event.key==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
-               autocomplete="off"
-               style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
+    <!-- HTML 结构：主内容区 -->
+    <main class="main-content">
+        <!-- 🎯 个人数据查询 (把原本的所有页面内容放在这里) -->
+        <section id="mainTab-profile" class="main-tab-content active">
+    
+        <div class="container">
+            <h2 class="no-print" style="text-align: center; margin-top: 0; color: #1a73e8;">🏃‍♂️ 循人中学田径培训队个人数据查询</h2>
+
+        <!-- 查询与操作区 -->
+        <!-- 搜索区域 -->
+        <div class="search-box no-print" style="position: relative; max-width: 400px; margin: 20px auto; z-index: 1001;">
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
+                       oninput="handleSearchInput()" 
+                       onfocus="handleSearchInput()"
+                       onkeyup="if(event.key==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
+                       autocomplete="off"
+                       style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
                
-        <!-- 点击此按钮才是唯一触发查询渲染的入口 -->
-        <button type="button" onclick="searchStudent()" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;">🔍 查询档案</button>
-    </div>
+                <!-- 点击此按钮才是唯一触发查询渲染的入口 -->
+                <button type="button" onclick="searchStudent()" style="padding: 10px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;">🔍 查询档案</button>
+            </div>
 
-    <!-- 下拉弹框 -->
-    <div id="searchResultsList" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; z-index: 1002; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
-</div>
+        <!-- 下拉弹框 -->
+            <div id="searchResultsList" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; z-index: 1002; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
+            </div>
 
-<div id="loading" class="message hidden">⏳ 正在从云端调取档案，请稍候...</div>
-<!-- 💡 提示词更新：支持学号及姓名查询 -->
-<div id="emptyMessage" class="message">💡 请在上方输入框输入学号、中文姓名或英文姓名进行查询。</div>
+            <div id="loading" class="message hidden">⏳ 正在从云端调取档案，请稍候...</div>
 
-    <!-- 档案主体 -->
-    <div id="profileContent" class="hidden">
+            <!-- 💡 提示词更新：支持学号及姓名查询 -->
+            <div id="emptyMessage" class="message">💡 请在上方输入框输入学号、中文姓名或英文姓名进行查询。</div>
 
-    <!-- 🖨️ 打印与导出 PDF 按钮（带 no-print 标记，打印时会自动隐藏） -->
-    <div class="no-print" style="text-align: right; margin-bottom: 15px;">
-        <button type="button" onclick="window.print()" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-            🖨️ 打印 / 另存为 PDF
-        </button>
-    </div>
-    
-    <!-- 个人基本资料卡片容器 -->
-<div class="profile-card" style="display: flex; gap: 24px; flex-wrap: wrap; background: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 24px;">
-    
-    <!-- 左侧照片区域 -->
-    <div class="photo-box" style="flex-shrink: 0; text-align: center;">
-        <img id="avatarImg" src="https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo" alt="队员照片" style="width: 150px; height: 190px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-    </div>
+            <!-- 档案主体 -->
+            <div id="profileContent" class="hidden">
 
-    <!-- 右侧详细资料网格（关键参数调整） -->
-    <div class="info-grid" style="flex: 1; min-width: 300px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px 20px; font-size: 14px; line-height: 1.6; color: #334155;">
-        <div><strong style="color: #1e293b;">中文姓名 NAME(C)：</strong><span id="infoNameC">-</span></div>
-        <div><strong style="color: #1e293b;">英文姓名 NAME(E)：</strong><span id="infoNameE">-</span></div>
-        <div><strong style="color: #1e293b;">学号 ID：</strong><span id="infoId">-</span></div>
-        <div><strong style="color: #1e293b;">性别 GENDER：</strong><span id="infoGender">-</span></div>
-        <div><strong style="color: #1e293b;">出生日期 DOB：</strong><span id="infoDob">-</span></div>
-        <div><strong style="color: #1e293b;">年龄 AGE：</strong><span id="infoAge">-</span></div>
-        <div><strong style="color: #1e293b;">训练年龄 TRAINING AGE：</strong><span id="infoTrainingAge">-</span></div>
-        <div><strong style="color: #1e293b;">邮箱 EMAIL：</strong><span id="infoEmail">-</span></div>
-        <div><strong style="color: #1e293b;">主项 PRIMARY：</strong><span id="infoPrimaryEvent">-</span></div>
-        <div><strong style="color: #1e293b;">主项 PRIMARY PB：</strong><span id="infoPrimaryBest">-</span></div>
-        <div><strong style="color: #1e293b;">副项 SECONDARY：</strong><span id="infoSecondaryEvent">-</span></div>
-        <div><strong style="color: #1e293b;">副项 SECONDARY PB：</strong><span id="infoSecondaryBest">-</span></div>
-    </div>
-</div>
-
-        <!-- 屏幕查看时的分类 Tabs 控制栏 -->
-        <div class="tab-buttons no-print">
-            <!-- 1. 身体数据（最左边，默认激活） -->
-            <button class="tab-btn active" onclick="switchTab(event,'body')">📏 身体数据 (BODY MEASUREMENT)</button>
-    
-            <!-- 2. 径赛成绩 -->
-            <button class="tab-btn" onclick="switchTab(event,'track')">🏃 比赛成绩 (TRACK)</button>
-    
-            <!-- 3. 田赛成绩 -->
-            <button class="tab-btn" onclick="switchTab(event,'field')">🏋️ 比赛成绩 (FIELD)</button>
-    
-            <!-- 4. 越野赛 -->
-            <button class="tab-btn" onclick="switchTab(event,'cross')">🌲 比赛成绩 (CROSS COUNTRY)</button>
-        </div>
-
-        <!-- 1. 身体数据 -->
-        <div id="tab-body" class="tab-content">
-            <section>
-                <h3>📏 身体数据  (BODY MEASUREMENT)</h3>
-                <table id="bodyTable">
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-        </div>
-
-        <!-- 2. 径赛成绩 TRACK -->
-        <div id="tab-track" class="tab-content hidden">
-            <section>
-                <h3>🏃 比赛成绩 (TRACK)</h3>
-                <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <label>📅 年份: 
-                        <select id="trackYearFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部年份 ALL TEAR</option>
-                        </select>
-                    </label>
-
-                    <label>🏃 项目: 
-                        <select id="trackEventFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部项目 ALL EVENT</option>
-                        </select>
-                    </label>
-
-                    <label>📊 成绩排序: 
-                        <select id="trackSortOrder" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="DEFAULT">默认排序 (原表格顺序)</option>
-                            <option value="DESC">成绩从大到小 (慢 -> 快 / 远 -> 近)</option>
-                            <option value="ASC">成绩从小到大 (快 -> 慢 / 近 -> 远)</option>
-                        </select>
-                    </label>
+                <!-- 🖨️ 打印与导出 PDF 按钮（带 no-print 标记，打印时会自动隐藏） -->
+                <div class="no-print" style="text-align: right; margin-bottom: 15px;">
+                    <button type="button" onclick="window.print()" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                        🖨️ 打印 / 另存为 PDF
+                    </button>
                 </div>
-                <table id="trackTable">
-                    <thead>
-                        <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>比赛项目 EVENT</th><th>比赛成绩 PERFORMANCE (hh:mm:ss,ss)</th><th>备注 REMARKS</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-        </div>
+    
+                <!-- 个人基本资料卡片容器 -->
+                <div class="profile-card" style="display: flex; gap: 24px; flex-wrap: wrap; background: #ffffff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 24px;">
+    
+                    <!-- 左侧照片区域 -->
+                    <div class="photo-box" style="flex-shrink: 0; text-align: center;">
+                        <img id="avatarImg" src="https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo" alt="队员照片" style="width: 150px; height: 190px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    </div>
 
-        <!-- 3. 田赛成绩 FIELD -->
-        <div id="tab-field" class="tab-content hidden">
-            <section>
-                <h3>🏋️ 比赛成绩 (FIELD)</h3>
-                <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <label>📅 年份: 
-                        <select id="fieldYearFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部年份 ALL YEAR</option>
-                        </select>
-                    </label>
-
-                    <label>🏋️ 项目: 
-                        <select id="fieldEventFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部项目 ALL EVENT</option>
-                        </select>
-                    </label>
-
-                    <label>📊 成绩排序: 
-                        <select id="fieldSortOrder" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="DEFAULT">默认排序 (原表格顺序)</option>
-                            <option value="DESC">成绩从大到小 (远/高 -> 近/低)</option>
-                            <option value="ASC">成绩从小到大 (近/低 -> 远/高)</option>
-                        </select>
-                    </label>
+                    <!-- 右侧详细资料网格（关键参数调整） -->
+                    <div class="info-grid" style="flex: 1; min-width: 300px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px 20px; font-size: 14px; line-height: 1.6; color: #334155;">
+                        <div><strong style="color: #1e293b;">中文姓名 NAME(C)：</strong><span id="infoNameC">-</span></div>
+                        <div><strong style="color: #1e293b;">英文姓名 NAME(E)：</strong><span id="infoNameE">-</span></div>
+                        <div><strong style="color: #1e293b;">学号 ID：</strong><span id="infoId">-</span></div>
+                        <div><strong style="color: #1e293b;">性别 GENDER：</strong><span id="infoGender">-</span></div>
+                        <div><strong style="color: #1e293b;">出生日期 DOB：</strong><span id="infoDob">-</span></div>
+                        <div><strong style="color: #1e293b;">年龄 AGE：</strong><span id="infoAge">-</span></div>
+                        <div><strong style="color: #1e293b;">训练年龄 TRAINING AGE：</strong><span id="infoTrainingAge">-</span></div>
+                        <div><strong style="color: #1e293b;">邮箱 EMAIL：</strong><span id="infoEmail">-</span></div>
+                        <div><strong style="color: #1e293b;">主项 PRIMARY：</strong><span id="infoPrimaryEvent">-</span></div>
+                        <div><strong style="color: #1e293b;">主项 PRIMARY PB：</strong><span id="infoPrimaryBest">-</span></div>
+                        <div><strong style="color: #1e293b;">副项 SECONDARY：</strong><span id="infoSecondaryEvent">-</span></div>
+                        <div><strong style="color: #1e293b;">副项 SECONDARY PB：</strong><span id="infoSecondaryBest">-</span></div>
+                    </div>
                 </div>
-                <table id="fieldTable">
-                    <thead>
-                        <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>比赛项目 EVENT</th><th>比赛成绩 PERFORMANCE(m)</th><th>备注 REMARKS</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-        </div>
+
+                <!-- 屏幕查看时的分类 Tabs 控制栏 -->
+                <div class="tab-buttons no-print">
+                    <!-- 1. 身体数据（最左边，默认激活） -->
+                    <button class="tab-btn active" onclick="switchTab(event,'body')">📏 身体数据 (BODY MEASUREMENT)</button>
+    
+                    <!-- 2. 径赛成绩 -->
+                    <button class="tab-btn" onclick="switchTab(event,'track')">🏃 比赛成绩 (TRACK)</button>
+    
+                    <!-- 3. 田赛成绩 -->
+                    <button class="tab-btn" onclick="switchTab(event,'field')">🏋️ 比赛成绩 (FIELD)</button>
+    
+                    <!-- 4. 越野赛 -->
+                    <button class="tab-btn" onclick="switchTab(event,'cross')">🌲 比赛成绩 (CROSS COUNTRY)</button>
+                </div>
+
+                <!-- 1. 身体数据 -->
+                <div id="tab-body" class="tab-content">
+                    <section>
+                        <h3>📏 身体数据  (BODY MEASUREMENT)</h3>
+                        <table id="bodyTable">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </section>
+                </div>
+
+                <!-- 2. 径赛成绩 TRACK -->
+                <div id="tab-track" class="tab-content hidden">
+                    <section>
+                        <h3>🏃 比赛成绩 (TRACK)</h3>
+                        <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <label>📅 年份: 
+                                <select id="trackYearFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="ALL">全部年份 ALL TEAR</option>
+                                </select>
+                            </label>
+
+                            <label>🏃 项目: 
+                                <select id="trackEventFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="ALL">全部项目 ALL EVENT</option>
+                                </select>
+                            </label>
+
+                            <label>📊 成绩排序: 
+                                <select id="trackSortOrder" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="DEFAULT">默认排序 (原表格顺序)</option>
+                                    <option value="DESC">成绩从大到小 (慢 -> 快 / 远 -> 近)</option>
+                                    <option value="ASC">成绩从小到大 (快 -> 慢 / 近 -> 远)</option>
+                                </select>
+                            </label>
+                        </div>
+                        <table id="trackTable">
+                            <thead>
+                                <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>比赛项目 EVENT</th><th>比赛成绩 PERFORMANCE (hh:mm:ss,ss)</th><th>备注 REMARKS</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </section>
+                </div>
+
+                <!-- 3. 田赛成绩 FIELD -->
+                <div id="tab-field" class="tab-content hidden">
+                    <section>
+                        <h3>🏋️ 比赛成绩 (FIELD)</h3>
+                        <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <label>📅 年份: 
+                                <select id="fieldYearFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="ALL">全部年份 ALL YEAR</option>
+                                </select>
+                            </label>
+
+                            <label>🏋️ 项目: 
+                                <select id="fieldEventFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="ALL">全部项目 ALL EVENT</option>
+                                </select>
+                            </label>
+
+                            <label>📊 成绩排序: 
+                                <select id="fieldSortOrder" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="DEFAULT">默认排序 (原表格顺序)</option>
+                                    <option value="DESC">成绩从大到小 (远/高 -> 近/低)</option>
+                                    <option value="ASC">成绩从小到大 (近/低 -> 远/高)</option>
+                                </select>
+                            </label>
+                        </div>
+                        <table id="fieldTable">
+                            <thead>
+                                <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>比赛项目 EVENT</th><th>比赛成绩 PERFORMANCE(m)</th><th>备注 REMARKS</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </section>
+                </div>
 
         <!-- 4. 越野赛成绩 CROSS COUNTRY -->
         <div id="tab-cross" class="tab-content hidden">
@@ -425,11 +501,56 @@
         </div>
 
         
-    </div>
-</div>
+            </div>
+            </div>
+            </section>
 
-<script>
-// 1. 基础配置与通用工具函数（放在 script 最上方）
+        <!-- 📊 培训队总汇 (暂留空) -->
+                <section id="mainTab-team" class="main-tab-content" style="display: none;">
+                    <div class="placeholder-card">
+                        <h2>📊 培训队数据总汇</h2>
+                        <p>该模块建设中...</p>
+                    </div>
+                </section>
+
+        <!-- 🏆 运动会履历 (暂留空) -->
+        <section id="mainTab-sportsDay" class="main-tab-content" style="display: none;">
+            <div class="placeholder-card">
+                <h2>🏆 校内运动会履历</h2>
+                <p>该模块建设中...</p>
+            </div>
+        </section>
+
+        <!-- 📈 体测与成长 (暂留空) -->
+        <section id="mainTab-fitness" class="main-tab-content" style="display: none;">
+            <div class="placeholder-card">
+                <h2>📈 个人数据测试与成长</h2>
+                <p>该模块建设中...</p>
+            </div>
+        </section>
+    </main>
+        
+    <script>
+
+    // 💡 把主 Tab 切换逻辑放在这里：
+        function switchMainTab(tabId) {
+            const contents = document.querySelectorAll('.main-tab-content');
+            contents.forEach(content => content.style.display = 'none');
+
+            const buttons = document.querySelectorAll('.main-nav .nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            const targetContent = document.getElementById(`mainTab-${tabId}`);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+            }
+
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+        }        
+            
+    // 1. 基础配置与通用工具函数（放在 script 最上方）
     const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
 
     function getSheetUrl(sheetName) {
