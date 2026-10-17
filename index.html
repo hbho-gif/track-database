@@ -631,30 +631,36 @@
             Papa.parse(getSheetUrl("比赛成绩 (MULTI)"), {
                 download: true,
                 header: true,
-                complete: function(results) {
-                    let rawData = results.data;
-                    
-                    // 💡 自动填充 CSV 中因合并单元格 (Merge) 产生的第 3 行空白主属性
-                    let lastHeader = {};
-                    multiRaces = rawData.map((row, index) => {
-                        // 偶数行（第 2 行，索引 0, 2, 4...）为项目名称行，记录主属性
-                        if (index % 2 === 0) {
-                            lastHeader = row;
-                            return row;
-                        } else {
-                            // 奇数行（第 3 行，索引 1, 3, 5...）为成绩行，自动继承上一行被合并的学号、比赛名称等
-                            return {
-                                ...row,
-                                "学号 ID": getVal(row, ["学号 ID", "学号"]) !== "-" ? getVal(row, ["学号 ID", "学号"]) : getVal(lastHeader, ["学号 ID", "学号"]),
-                                "比赛名称 TOURNAMENT": getVal(row, ["比赛名称 TOURNAMENT", "比赛名称"]) !== "-" ? getVal(row, ["比赛名称 TOURNAMENT", "比赛名称"]) : getVal(lastHeader, ["比赛名称 TOURNAMENT", "比赛名称"]),
-                                "比赛年份 YEAR": getVal(row, ["比赛年份 YEAR", "年份"]) !== "-" ? getVal(row, ["比赛年份 YEAR", "年份"]) : getVal(lastHeader, ["比赛年份 YEAR", "年份"]),
-                                "比赛项目 EVENT": getVal(row, ["比赛项目 EVENT", "项目"]) !== "-" ? getVal(row, ["比赛项目 EVENT", "项目"]) : getVal(lastHeader, ["比赛项目 EVENT", "项目"]),
-                            };
-                        }
-                    });
-                }
+                skipEmptyLines: true,
+                complete: (results) => {
+                    let data = results.data || [];
+
+                    // 🌟 如果是全能项，加上针对合并单元格（Merge）的学号继承预处理
+                    if (sheetName === "比赛成绩 (MULTI)" || sheetName.includes("MULTI")) {
+                        let lastHeader = {};
+                        data = data.map((row, index) => {
+                            // 偶数行（第 2 行）为项目名称行
+                            if (index % 2 === 0) {
+                                lastHeader = row;
+                                return row;
+                            } else {
+                                // 奇数行（第 3 行）为成绩行：如果学号在 CSV 中因合并变为空，自动继承上一行的学号
+                                let studentId = getVal(row, ["学号 ID", "学号", "id"]);
+                                if (!studentId || studentId === "-" || studentId.trim() === "") {
+                                    row["学号 ID"] = getVal(lastHeader, ["学号 ID", "学号", "id"]);
+                                }
+                                return row;
+                            }
+                        });
+                    }
+
+                    // 原原本本用你原有的 resolve 返回清洗后的数据
+                    resolve(data);
+                },
+                error: () => resolve([])
             });
-        }
+        });
+    }
 
     // 2. 全局变量声明
     let basicStudents = [];
