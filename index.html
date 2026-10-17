@@ -630,31 +630,37 @@
         return new Promise((resolve) => {
             Papa.parse(getSheetUrl(sheetName), {
                 download: true,
-                header: true,
+                header: !isMulti, // 全能项不用 header，避免合并单元格重名
                 skipEmptyLines: true,
                 complete: (results) => {
                     let data = results.data || [];
 
-                    // 🌟 如果是全能项，加上针对合并单元格（Merge）的学号继承预处理
-                    if (sheetName === "比赛成绩 (MULTI)" || sheetName.includes("MULTI")) {
-                        let lastHeader = {};
+                    if (isMulti) {
+                        // 去掉 Sheet 里的第 1 行大表头 (E1:O1 各项成绩合并行)
+                        // 如果你的 CSV 第 1 行是表头，删掉它；从数据行开始解析
+                        if (data.length > 0 && String(data[0][0]).includes("学号")) {
+                            data.shift(); // 移除 header 行
+                        }
+    
+                        let lastHeader = [];
                         data = data.map((row, index) => {
-                            // 偶数行（第 2 行）为项目名称行
+                            // 偶数行（第 2 行）为小项名称行
                             if (index % 2 === 0) {
                                 lastHeader = row;
                                 return row;
                             } else {
-                                // 奇数行（第 3 行）为成绩行：如果学号在 CSV 中因合并变为空，自动继承上一行的学号
-                                let studentId = getVal(row, ["学号 ID", "学号", "id"]);
-                                if (!studentId || studentId === "-" || studentId.trim() === "") {
-                                    row["学号 ID"] = getVal(lastHeader, ["学号 ID", "学号", "id"]);
+                                // 奇数行（第 3 行）为成绩行：如果 A列(学号) 为空，自动继承上一行的 A列
+                                if (!row[0] || String(row[0]).trim() === "" || String(row[0]).trim() === "-") {
+                                    row[0] = lastHeader[0]; // 继承学号 ID
+                                    row[1] = lastHeader[1]; // 继承比赛名称
+                                    row[2] = lastHeader[2]; // 继承年份
+                                    row[3] = lastHeader[3]; // 继承项目名称
                                 }
                                 return row;
                             }
                         });
                     }
 
-                    // 原原本本用你原有的 resolve 返回清洗后的数据
                     resolve(data);
                 },
                 error: () => resolve([])
@@ -1278,30 +1284,23 @@
     }
 
     // ==========================================
-    // 🌟 精准修复版：全能项 (MULTI) 双行渲染逻辑
+    // 🌟 物理列索引适配版：全能项 (MULTI) 渲染逻辑
     // ==========================================
     function renderMultiEventsTable(studentId) {
         const container = document.getElementById("multiTableContainer");
         if (!container) return;
 
-        // 1. 抓取该学号的所有行
-        const studentMulti = (multiRaces || []).filter(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === studentId);
+        // 1. 匹配 A 列 (索引 0) 为当前学号的所有行
+        const studentMulti = (multiRaces || []).filter(row => {
+            // 兼容数组格式 row[0] 与对象格式 row["学号 ID"]
+            const idVal = Array.isArray(row) ? row[0] : getVal(row, ["学号 ID", "学号", "id"]);
+            return String(idVal).trim() === String(studentId).trim();
+        });
 
         if (!studentMulti || studentMulti.length === 0) {
             container.innerHTML = '<p class="no-data" style="text-align:center; padding: 20px; color: #94a3b8;">暂无全能项目比赛记录</p>';
             return;
         }
-
-        // 严格定义的【主属性列】精准匹配关键词列表（只排除这几列，其他一律当作小项列处理）
-        const isMainColumn = (keyName) => {
-            const k = keyName.trim().toLowerCase();
-            return k.includes("学号") || k.includes("id") ||
-                   k.includes("比赛名称") || k.includes("tournament") ||
-                   k.includes("比赛年份") || k.includes("年份") || k.includes("year") ||
-                   k.includes("比赛项目") || k.includes("event") ||
-                   k.includes("比赛成绩") || k.includes("points") || k.includes("results") ||
-                   k.includes("备注") || k.includes("remarks");
-        };
 
         let html = `
             <table class="multi-table" style="width:100%; border-collapse:collapse;">
@@ -1318,39 +1317,36 @@
                 <tbody>
         `;
 
-        // 💡 2. 两行一组进行配对解析（i 为小项名称行，i+1 为手动成绩行）
+        // 💡 2. 两行一组配对（i 为第 2 行小项名，i+1 为第 3 行成绩）
         for (let i = 0; i < studentMulti.length; i += 2) {
-            const itemHeader = studentMulti[i];       // 第 2 行：小项名称行
-            const itemValue = studentMulti[i + 1] || {}; // 第 3 行：成绩数值行
+            const itemHeader = studentMulti[i];       // 第 2 行 (数组)
+            const itemValue = studentMulti[i + 1] || []; // 第 3 行 (数组)
 
-            const year = getVal(itemHeader, ["比赛年份 YEAR", "比赛年份", "年份", "year"]);
-            const tournament = getVal(itemHeader, ["比赛名称 TOURNAMENT", "比赛名称", "tournament"]);
-            const eventName = getVal(itemHeader, ["比赛项目 EVENT", "比赛项目", "项目", "event"]);
+            // 判断是用数组索引读取，还是对象读取
+            const isArray = Array.isArray(itemHeader);
+
+            const year = isArray ? itemHeader[2] : getVal(itemHeader, ["比赛年份 YEAR", "年份"]);
+            const tournament = isArray ? itemHeader[1] : getVal(itemHeader, ["比赛名称 TOURNAMENT", "比赛名称"]);
+            const eventName = isArray ? itemHeader[3] : getVal(itemHeader, ["比赛项目 EVENT", "项目"]);
         
-            const points = getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"]) !== "-" 
-                           ? getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"])
-                           : getVal(itemHeader, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"]);
-                       
-            const remarks = getVal(itemValue, ["备注 REMARKS", "备注", "remarks"]) !== "-" 
-                            ? getVal(itemValue, ["备注 REMARKS", "备注", "remarks"])
-                            : getVal(itemHeader, ["备注 REMARKS", "备注", "remarks"]);
+            // P 列 (索引 15) 为总积分，Q 列 (索引 16) 为备注
+            const points = isArray ? (itemValue[15] || itemHeader[15] || "-") : getVal(itemValue, ["比赛成绩 RESULTS (points)", "比赛成绩"]);
+            const remarks = isArray ? (itemValue[16] || itemHeader[16] || "") : getVal(itemValue, ["备注 REMARKS", "备注"]);
 
-            // 💡 3. 动态提取小项名称与成绩
+            // 💡 3. 精准扫描 E 列到 O 列（索引 4 到 14，共 11 列小项容量）
             let subEventsHtml = "";
             let subCount = 0;
 
-            for (let keyss in itemHeader) {
-                // 只要不是固定主属性列，就全盘扫描
-                if (!isMainColumn(keyss)) {
-                    const subName = itemHeader[keyss]; // 第 2 行的值（例如 "100m"）
-                    const subVal = itemValue[keyss];   // 第 3 行的值（例如 "11.20s"）
-
-                    // 调试用日志：如果依然不出标签，可以在浏览器的 Console 查看具体抓到了什么
-                    // console.log(`列名: ${keyss} | 小项名: ${subName} | 成绩: ${subVal}`);
+            if (isArray) {
+                // 循环索引 4 到 14 (对应 E列到O列)
+                for (let col = 4; col <= 14; col++) {
+                    const subName = itemHeader[col]; // 第 2 行的小项名称 (例如 "100m")
+                    const subVal = itemValue[col];   // 第 3 行的成绩数值 (例如 "11.20s")
 
                     if (subName && subVal && 
                         String(subName).trim() !== "" && 
                         String(subName).trim() !== "-" && 
+                        !String(subName).includes("比赛小项") &&
                         !String(subName).includes("#") &&
                         String(subVal).trim() !== "" && 
                         String(subVal).trim() !== "-") {
