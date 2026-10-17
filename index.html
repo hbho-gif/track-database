@@ -286,7 +286,7 @@
         <!-- 屏幕查看时的分类 Tabs 控制栏 -->
         <div class="tab-buttons no-print">
             <!-- 1. 身体数据（最左边，默认激活） -->
-            <button class="tab-btn active" onclick="switchTab(event,'body')">📏 身体数据</button>
+            <button class="tab-btn active" onclick="switchTab(event,'body')">📏 身体数据 (BODY MEASUREMENT)</button>
     
             <!-- 2. 径赛成绩 -->
             <button class="tab-btn" onclick="switchTab(event,'track')">🏃 比赛成绩 (TRACK)</button>
@@ -301,7 +301,7 @@
         <!-- 1. 身体数据 -->
         <div id="tab-body" class="tab-content">
             <section>
-                <h3>📏 身体数据</h3>
+                <h3>📏 身体数据  (BODY MEASUREMENT)</h3>
                 <table id="bodyTable">
                     <thead></thead>
                     <tbody></tbody>
@@ -316,13 +316,13 @@
                 <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <label>📅 年份: 
                         <select id="trackYearFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部年份</option>
+                            <option value="ALL">全部年份 ALL TEAR</option>
                         </select>
                     </label>
 
                     <label>🏃 项目: 
                         <select id="trackEventFilter" onchange="applyFilterAndSort('track')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部项目</option>
+                            <option value="ALL">全部项目 ALL EVENT</option>
                         </select>
                     </label>
 
@@ -336,7 +336,7 @@
                 </div>
                 <table id="trackTable">
                     <thead>
-                        <tr><th>年份</th><th>比赛名称</th><th>比赛项目</th><th>比赛成绩 (hh:mm:ss,ss)</th><th>备注</th></tr>
+                        <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>比赛项目 EVENT</th><th>比赛成绩 PERFORMANCE (hh:mm:ss,ss)</th><th>备注 REMARKS</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -350,13 +350,13 @@
                 <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <label>📅 年份: 
                         <select id="fieldYearFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部年份</option>
+                            <option value="ALL">全部年份 ALL YEAR</option>
                         </select>
                     </label>
 
                     <label>🏋️ 项目: 
                         <select id="fieldEventFilter" onchange="applyFilterAndSort('field')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部项目</option>
+                            <option value="ALL">全部项目 ALL EVENT</option>
                         </select>
                     </label>
 
@@ -370,7 +370,7 @@
                 </div>
                 <table id="fieldTable">
                     <thead>
-                        <tr><th>年份</th><th>比赛名称</th><th>比赛项目</th><th>比赛成绩 (m)</th><th>备注</th></tr>
+                        <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>比赛项目 EVENT</th><th>比赛成绩 PERFORMANCE(m)</th><th>备注 REMARKS</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -384,13 +384,13 @@
                 <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <label>📅 年份: 
                         <select id="crossYearFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部年份</option>
+                            <option value="ALL">全部年份 ALL YEAR</option>
                         </select>
                     </label>
 
                     <label>📏 距离: 
                         <select id="crossEventFilter" onchange="applyFilterAndSort('cross')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                            <option value="ALL">全部距离</option>
+                            <option value="ALL">全部距离 ALL DISTANCE</option>
                         </select>
                     </label>
 
@@ -404,7 +404,7 @@
                 </div>
                 <table id="crossTable">
                     <thead>
-                        <tr><th>年份</th><th>比赛名称</th><th>距离</th><th>比赛成绩 (hh:mm:ss,ss)</th><th>备注</th></tr>
+                        <tr><th>年份 YEAR</th><th>比赛名称 TOURNAMENT</th><th>距离 DISTANCE</th><th>比赛成绩 PERFORMANCE(hh:mm:ss,ss)</th><th>备注 REMARKS</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
