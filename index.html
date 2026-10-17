@@ -646,7 +646,7 @@
                         let lastHeader = [];
                         data = data.map((row, index) => {
                             // 偶数行（第 2 行）为小项名称行
-                            if (index % 2 == 0) {
+                            if (index % 2 === 0) {
                                 lastHeader = row;
                                 return row;
                             } else {
@@ -1340,7 +1340,7 @@
 
             if (isArray) {
                 // 循环索引 4 到 14 (对应 E列到O列)
-                for (let col = 5; col <= 14; col++) {
+                for (let col = 4; col <= 14; col++) {
                     const subName = itemHeader[col]; // 第 2 行的小项名称 (例如 "100m")
                     const subVal = itemValue[col];   // 第 3 行的成绩数值 (例如 "11.20s")
 
