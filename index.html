@@ -1732,6 +1732,10 @@
         const selectedEvent = document.getElementById("teamEventSelect").value;
         const includeSportsDay = document.getElementById("includeSportsDayToggle").checked;
     
+        // 🌟 复用原本的 formatTime 处理径赛时间，田赛用 formatFieldDistance 保留两位小数
+        const rawPerf = getVal(item, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
+        const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
+        
         // 更新 Toggle 状态文字
         const toggleLabel = document.getElementById("sportsDayToggleLabel");
         if(toggleLabel) toggleLabel.innerText = includeSportsDay ? "是 Included" : "否 Excluded";
@@ -2190,7 +2194,17 @@
     
         container.innerHTML = bestRecordHtml + activeStudentHtml;
     }
+
+        // 📏 田赛距离统一格式化函数 (保留两位小数)
+        function formatFieldDistance(val) {
+            if (!val || val === "-" || String(val).trim() === "") return "-";
+            const str = String(val).trim();
+            if (/[a-zA-Z]/.test(str) && !str.includes("m")) return str; // 排除 DNF/DNS 等特殊标记
     
+            const num = parseFloat(str);
+            return isNaN(num) ? str : num.toFixed(2);
+        }
+        
 </script>
 
 </body>
