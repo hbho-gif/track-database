@@ -460,6 +460,9 @@
             <button class="nav-btn" onclick="switchMainTab('fitness')">
                 📈 体测与成长<br><small>FITNESS ASSESSMENT</small>
             </button>
+            <button class="main-tab-btn" onclick="switchMainTab('links')">
+                🔗 外部链接<small>EXTERNAL LINKS</small>
+            </button>
         </div>
     </nav>
 
@@ -727,6 +730,50 @@
                 <p>该模块建设中...</p>
             </div>
         </section>
+    
+        <!-- 🌟 外部链接主 Tab 内容 -->
+        <section id="mainTab-links" class="main-tab-content" style="display: none;">
+            <div class="section-header" style="margin-bottom: 20px;">
+                <h2>🔗 外部资源与参考链接 External Links & Resources （此为建设中页面，请不要胡乱点击以下链接）</h2>
+                <p style="color: #64748b; font-size: 14px;">点击以下链接可跳转至相关文档、云盘资料或官方通告页面。</p>
+            </div>
+
+            <!-- 链接卡片网格布局 -->
+            <div class="links-grid">
+        
+                <!-- 卡片示例 1：训练日记/云盘 -->
+                <a href="https://drive.google.com/YOUR_LINK_HERE" target="_blank" class="link-card">
+                    <div class="link-icon">📁</div>
+                    <div class="link-info">
+                        <h4>田径队资料云盘 Google Drive</h4>
+                        <p>包含历年比赛照片、高画质视频及规章文件下载。</p>
+                        <span class="link-url">drive.google.com ↗</span>
+                    </div>
+                </a>
+
+                <!-- 卡片示例 2：官方赛事网站 -->
+                <a href="https://example.com/tournaments" target="_blank" class="link-card">
+                    <div class="link-icon">🏆</div>
+                    <div class="link-info">
+                        <h4>全国独中田径锦标赛官网</h4>
+                        <p>实时查看全国独中田径锦标赛赛程与最新规程。</p>
+                        <span class="link-url">example.com ↗</span>
+                    </div>
+                </a>
+
+                <!-- 卡片示例 3：表单填报/其他 -->
+                <a href="https://forms.google.com/YOUR_FORM" target="_blank" class="link-card">
+                    <div class="link-icon">📝</div>
+                    <div class="link-info">
+                        <h4>队员请假与外出报备表单</h4>
+                        <p>请假或参加校外赛事前的线上申报入口。</p>
+                        <span class="link-url">forms.google.com ↗</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+    
     </main>
         
     <script>
