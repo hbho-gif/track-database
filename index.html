@@ -1783,8 +1783,8 @@
         
             // 排序
             grpData.sort((a, b) => {
-                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
-                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
+                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]), isTrack);
+                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]), isTrack);
                 return isTrack ? valA - valB : valB - valA;
             });
 
@@ -1792,7 +1792,7 @@
             if (best) {
                 const sid = getVal(best, ["学号 ID", "学号", "id"]);
                 const sName = getStudentName(sid); // 查学生姓名
-                const perf = getVal(best, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]);
+                const perf = getVal(best, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]);
                 const yr = getVal(best, ["比赛年份 YEAR", "年份", "year"]);
                 const rmk = getVal(best, ["备注 REMARKS", "备注"]);
 
@@ -1842,13 +1842,13 @@
             const uniqueStudentMap = new Map();
             activeData.forEach(item => {
                 const sid = getVal(item, ["学号 ID", "学号", "id"]);
-                const currentPerf = parsePerformance(getVal(item, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
+                const currentPerf = parsePerformance(getVal(item, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]), isTrack);
 
                 if (!uniqueStudentMap.has(sid)) {
                     uniqueStudentMap.set(sid, item);
                 } else {
                     const prevItem = uniqueStudentMap.get(sid);
-                    const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
+                    const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]), isTrack);
                 
                     // 径赛取小，田赛取大
                     if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
@@ -1860,8 +1860,8 @@
             // D. 排序并取前 10 名
             const top10 = Array.from(uniqueStudentMap.values());
             top10.sort((a, b) => {
-                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
-                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
+                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]), isTrack);
+                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]), isTrack);
                 return isTrack ? valA - valB : valB - valA;
             });
 
@@ -1922,33 +1922,267 @@
         container.innerHTML = bestRecordHtml + activeStudentHtml;
     }
 
-    // 辅助：获取学生姓名（从身体数据表或主数据库映射）
+    // ==========================================
+    // 🛠️ 防错与兼容增强版：年龄计算与姓名匹配
+    // ==========================================
+
+    // 1. 获取学生姓名（多变量名兼容）
     function getStudentName(studentId) {
-        if (typeof studentDatabase !== "undefined" && studentDatabase[studentId]) {
-            return studentDatabase[studentId].name;
+        if (!studentId) return "-";
+        const sid = String(studentId).trim();
+
+        // 尝试在多个可能的数据集中查找队员姓名
+        const allData = [
+            ...(typeof bodyData !== "undefined" ? bodyData : []),
+            ...(typeof bodyMeasurements !== "undefined" ? bodyMeasurements : []),
+            ...(typeof trackRaces !== "undefined" ? trackRaces : [])
+        ];
+
+        const match = allData.find(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === sid);
+        if (match) {
+            const name = getVal(match, ["姓名 NAME", "姓名", "name"]);
+            if (name && name !== "-") return name;
         }
-        // 从 bodyData 中寻找匹配
-        if (typeof bodyData !== "undefined") {
-            const match = bodyData.find(i => getVal(i, ["学号 ID", "学号"]) === studentId);
-            if (match) return getVal(match, ["中文姓名 NAME (C)", "姓名"]);
-        }
-        return studentId; // 找不到时显示学号
+        return sid; // 找不到时默认显示学号
     }
 
-    // 辅助：获取学生出生年份
+    // 2. 获取学生出生年份（增强日期格式解析 + 防错回退）
     function getStudentBirthYear(studentId) {
-        if (typeof bodyData !== "undefined") {
-            const match = bodyData.find(i => getVal(i, ["学号 ID", "学号"]) === studentId);
-            if (match) {
-                const dob = getVal(match, ["出生日期 D.O.B.", "出生日期", "dob"]);
-                if (dob) {
-                    // 假设日期格式包含年份，如 "2010-05-12" 或 "2010/05/12" 或 "2010"
-                    const yearMatch = String(dob).match(/\d{4}/);
-                    if (yearMatch) return yearMatch[0];
-                }
+        if (!studentId) return null;
+        const sid = String(studentId).trim();
+
+        // 尝试兼容各种变量名的身体数据表
+        const sourceData = typeof bodyData !== "undefined" ? bodyData : 
+                           (typeof bodyMeasurements !== "undefined" ? bodyMeasurements : []);
+
+        const match = sourceData.find(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === sid);
+        if (match) {
+            const dob = getVal(match, ["出生日期 D.O.B.", "出生日期", "dob", "出生年份"]);
+            if (dob && dob !== "-") {
+                // 匹配连续 4 位数字（例如 2010-05-12, 2010/05/12, 2010年）
+                const yearMatch = String(dob).match(/\d{4}/);
+                if (yearMatch) return parseInt(yearMatch[0]);
             }
         }
         return null;
+    }
+
+    // 3. 增强版主渲染函数（包含数据未加载提示）
+    function renderTeamRankings() {
+        const container = document.getElementById("teamRankingContainer");
+        if (!container) return;
+
+        const category = document.getElementById("teamCategorySelect") ? document.getElementById("teamCategorySelect").value : "TRACK";
+        const selectedEvent = document.getElementById("teamEventSelect") ? document.getElementById("teamEventSelect").value : "100 m";
+        const includeSportsDay = document.getElementById("includeSportsDayToggle") ? document.getElementById("includeSportsDayToggle").checked : false;
+    
+        const toggleLabel = document.getElementById("sportsDayToggleLabel");
+        if (toggleLabel) toggleLabel.innerText = includeSportsDay ? "是 Included" : "否 Excluded";
+
+        const isTrack = category === "TRACK";
+        const currentYear = new Date().getFullYear(); // 2026
+
+        // 数据源安全获取
+        let rawData = [];
+        if (isTrack) {
+            rawData = typeof trackRaces !== "undefined" ? [...trackRaces] : [];
+            if (includeSportsDay && typeof schoolSportsDayTrack !== "undefined") {
+                rawData = rawData.concat(schoolSportsDayTrack.map(item => ({ ...item, isSportsDay: true })));
+            }
+        } else {
+            rawData = typeof fieldRaces !== "undefined" ? [...fieldRaces] : [];
+            if (includeSportsDay && typeof schoolSportsDayField !== "undefined") {
+                rawData = rawData.concat(schoolSportsDayField.map(item => ({ ...item, isSportsDay: true })));
+            }
+        }
+
+        // 💡 诊断提示：如果数据还在加载中，给出明确提示
+        if (rawData.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
+                    <p style="font-size:16px; font-weight:bold; margin-bottom:8px;">⏳ 正在加载比赛数据或未找到记录...</p>
+                    <p style="font-size:12px; color:#94a3b8;">请确保数据表已成功拉取，或尝试切换其他项目。</p>
+                </div>
+            `;
+            return;
+    }
+
+        // 精准过滤项目与 4 大组别
+        const filteredData = rawData.filter(item => {
+            const itemEvent = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目"]);
+            const itemGroup = getVal(item, ["组别 GROUP", "组别", "group"]);
+        
+            // 忽略空格与大小写差异进行强力匹配
+            const matchEvent = String(itemEvent).trim().toLowerCase() === String(selectedEvent).trim().toLowerCase();
+            const matchGroup = GROUPS.some(g => String(itemGroup).trim().toLowerCase().includes(g.split('/')[0].toLowerCase()));
+        
+            return matchEvent && matchGroup;
+        });
+
+        // --- 1. 构建 2022年至今最佳纪录 HTML ---
+        let bestRecordHtml = `
+            <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:16px; margin-bottom:24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <h3 style="margin-top:0; color:#1e293b; font-size:16px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
+                    ⭐ 2022年至今最佳纪录 (Overall Best Records)
+                </h3>
+                <table class="multi-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+                    <thead>
+                        <tr style="background:#f1f5f9; text-align:left; font-size:13px; color:#334155;">
+                            <th style="padding:8px;">组别 Group</th>
+                            <th style="padding:8px;">学号 ID</th>
+                            <th style="padding:8px;">姓名 Name</th>
+                            <th style="padding:8px;">最佳纪录 Best</th>
+                            <th style="padding:8px;">比赛年份 Year</th>
+                            <th style="padding:8px;">备注 Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        GROUPS.forEach(grp => {
+            const grpData = filteredData.filter(i => {
+                const g = getVal(i, ["组别 GROUP", "组别", "group"]);
+                return String(g).trim().toLowerCase().includes(grp.split('/')[0].toLowerCase());
+            });
+        
+            grpData.sort((a, b) => {
+                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                return isTrack ? valA - valB : valB - valA;
+            });
+
+            const best = grpData[0];
+            if (best) {
+                const sid = getVal(best, ["学号 ID", "学号", "id"]);
+                const sName = getStudentName(sid);
+                const perf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
+                const yr = getVal(best, ["比赛年份 YEAR", "年份", "year"]);
+                const rmk = getVal(best, ["备注 REMARKS", "备注"]);
+
+                bestRecordHtml += `
+                    <tr style="border-bottom:1px solid #e2e8f0; font-size:13px;">
+                        <td style="padding:8px;"><span style="background:#dbeafe; color:#1e40af; padding:2px 6px; border-radius:4px; font-weight:600;">${grp}</span></td>
+                        <td style="padding:8px;">${sid}</td>
+                        <td style="padding:8px;"><strong>${sName}</strong></td>
+                        <td style="padding:8px; color:#059669; font-weight:bold;">${perf}</td>
+                        <td style="padding:8px;">${yr}</td>
+                        <td style="padding:8px; color:#64748b;">${rmk || "-"}</td>
+                    </tr>
+                `;
+            } else {
+                bestRecordHtml += `
+                    <tr style="border-bottom:1px solid #e2e8f0; font-size:13px; color:#94a3b8;">
+                        <td style="padding:8px;"><span style="background:#f1f5f9; color:#64748b; padding:2px 6px; border-radius:4px;">${grp}</span></td>
+                        <td colspan="5" style="padding:8px; text-align:center;">- 暂无纪录 -</td>
+                    </tr>
+                `;
+            }
+        });
+
+        bestRecordHtml += `</tbody></table></div>`;
+
+        // --- 2. 构建 在校运动员 Top 10 排行榜 ---
+        let activeStudentHtml = `
+            <h3 style="color:#0f172a; font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                🏃 <span>${currentYear}年 在校运动员 Top 10 排行榜</span>
+            </h3>
+        `;
+
+        GROUPS.forEach(grp => {
+            const grpData = filteredData.filter(i => {
+                const g = getVal(i, ["组别 GROUP", "组别", "group"]);
+                return String(g).trim().toLowerCase().includes(grp.split('/')[0].toLowerCase());
+            });
+
+            // 年龄判断与去重
+            const uniqueStudentMap = new Map();
+            grpData.forEach(item => {
+                const sid = getVal(item, ["学号 ID", "学号", "id"]);
+                const birthYear = getStudentBirthYear(sid);
+            
+                // 💡 如果找不到出生年份，暂时不做严格过滤，避免显示为空；如果找到则严格检验 13-18 岁
+                let isEligible = true;
+                if (birthYear) {
+                    const age = currentYear - birthYear;
+                    isEligible = (age >= 13 && age <= 18);
+                }
+
+                if (isEligible) {
+                    const currentPerf = parsePerformance(getVal(item, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+
+                    if (!uniqueStudentMap.has(sid)) {
+                        uniqueStudentMap.set(sid, item);
+                    } else {
+                        const prevItem = uniqueStudentMap.get(sid);
+                        const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                    
+                        if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
+                            uniqueStudentMap.set(sid, item);
+                        }
+                    }
+                }
+            });
+
+            const top10 = Array.from(uniqueStudentMap.values());
+            top10.sort((a, b) => {
+                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                return isTrack ? valA - valB : valB - valA;
+            });
+
+            const final10 = top10.slice(0, 10);
+
+            activeStudentHtml += `
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <h4 style="margin-top:0; color:#2563eb; font-size:15px; border-bottom:2px solid #eff6ff; padding-bottom:6px;">
+                        📌 ${grp} (Top 10)
+                    </h4>
+                    <table class="multi-table" style="width:100%; border-collapse:collapse; margin-top:8px;">
+                        <thead>
+                            <tr style="background:#f8fafc; text-align:left; font-size:12px; color:#475569;">
+                                <th style="padding:6px; width:50px; text-align:center;">序号</th>
+                                <th style="padding:6px;">学号 ID</th>
+                                <th style="padding:6px;">姓名 Name</th>
+                                <th style="padding:6px;">最佳纪录 Best</th>
+                                <th style="padding:6px;">比赛年份</th>
+                                <th style="padding:6px; text-align:center;">运动会记录</th>
+                                <th style="padding:6px;">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            if (final10.length === 0) {
+                activeStudentHtml += `
+                    <tr><td colspan="7" style="padding:12px; text-align:center; color:#94a3b8; font-size:13px;">暂无满足条件的在校运动员记录</td></tr>
+                `;
+            } else {
+                final10.forEach((item, idx) => {
+                    const sid = getVal(item, ["学号 ID", "学号", "id"]);
+                    const sName = getStudentName(sid);
+                    const perf = getVal(item, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
+                    const yr = getVal(item, ["比赛年份 YEAR", "年份", "year"]);
+                    const isSportsDay = item.isSportsDay ? '✔️' : '-';
+                    const rmk = getVal(item, ["备注 REMARKS", "备注"]);
+
+                    activeStudentHtml += `
+                        <tr style="border-bottom:1px solid #f1f5f9; font-size:13px;">
+                            <td style="padding:6px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
+                            <td style="padding:6px;">${sid}</td>
+                            <td style="padding:8px;"><strong>${sName}</strong></td>
+                            <td style="padding:6px; color:#059669; font-weight:bold;">${perf}</td>
+                            <td style="padding:6px;">${yr}</td>
+                            <td style="padding:6px; text-align:center;">${isSportsDay}</td>
+                            <td style="padding:6px; color:#64748b;">${rmk || "-"}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            activeStudentHtml += `</tbody></table></div>`;
+        });
+
+        container.innerHTML = bestRecordHtml + activeStudentHtml;
     }
     
 </script>
