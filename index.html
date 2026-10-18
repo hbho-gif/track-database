@@ -1478,6 +1478,7 @@
 
                 // 1. 读取成绩原始值
                 let rawRes = getVal(copyItem, fieldResultKeys);
+                let formattedValue = formatFieldDistance(rawRes);
 
                 // 2. 只有当 rawRes 是合法数字时才强制转 2 位小数
                 if (rawRes !== "-" && rawRes !== "" && !isNaN(parseFloat(rawRes))) {
@@ -2195,14 +2196,12 @@
         container.innerHTML = bestRecordHtml + activeStudentHtml;
     }
 
-        // 📏 田赛距离统一格式化函数 (保留两位小数)
+        // 📏 田赛成绩格式化（保留 2 位小数）
         function formatFieldDistance(val) {
-            if (!val || val === "-" || String(val).trim() === "") return "-";
-            const str = String(val).trim();
-            if (/[a-zA-Z]/.test(str) && !str.includes("m")) return str; // 排除 DNF/DNS 等特殊标记
-    
-            const num = parseFloat(str);
-            return isNaN(num) ? str : num.toFixed(2);
+            if (val === null || val === undefined || val === "-" || String(val).trim() === "") return "-";
+            const num = parseFloat(val);
+            if (isNaN(num)) return String(val).trim(); // 如果是 DNS/DNF/DQ 等文字标记直接返回
+            return num.toFixed(2);
         }
         
 </script>
