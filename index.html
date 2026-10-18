@@ -1732,10 +1732,6 @@
         const selectedEvent = document.getElementById("teamEventSelect").value;
         const includeSportsDay = document.getElementById("includeSportsDayToggle").checked;
     
-        // 🌟 复用原本的 formatTime 处理径赛时间，田赛用 formatFieldDistance 保留两位小数
-        const rawPerf = getVal(item, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
-        const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
-        
         // 更新 Toggle 状态文字
         const toggleLabel = document.getElementById("sportsDayToggleLabel");
         if(toggleLabel) toggleLabel.innerText = includeSportsDay ? "是 Included" : "否 Excluded";
@@ -1796,7 +1792,9 @@
             if (best) {
                 const sid = getVal(best, ["学号 ID", "学号", "id"]);
                 const sName = getStudentName(sid); // 查学生姓名
-                const perf = getVal(best, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]);
+                // 🌟 径赛复用原本的 formatTime，田赛使用 formatFieldDistance
+                const rawPerf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
+                const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
                 const yr = getVal(best, ["比赛年份 YEAR", "年份", "year"]);
                 const rmk = getVal(best, ["备注 REMARKS", "备注"]);
 
@@ -1900,7 +1898,9 @@
                 final10.forEach((item, idx) => {
                     const sid = getVal(item, ["学号 ID", "学号", "id"]);
                     const sName = getStudentName(sid);
-                    const perf = getVal(item, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]);
+                    // 🌟 径赛复用原本的 formatTime，田赛使用 formatFieldDistance
+                    const rawPerf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
+                    const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
                     const yr = getVal(item, ["比赛年份 YEAR", "年份", "year"]);
                     const isSportsDay = item.isSportsDay ? '✔️' : '-';
                     const rmk = getVal(item, ["备注 REMARKS", "备注"]);
