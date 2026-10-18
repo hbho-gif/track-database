@@ -80,29 +80,81 @@
         .info-item label { font-weight: bold; color: #555; }
         .full-width { grid-column: span 2; }
 
-        /* 页签 (Tabs) 切换控制 */
-        .tabs {
+        /* ==========================================
+           🎯 个人数据子 Tab (5 Tab 强行单行自适应 CSS)
+           ========================================== */
+        .profile-sub-tabs {
             display: flex;
-            gap: 8px;
-            border-bottom: 2px solid #eef2f7;
-            margin-top: 20px;
-            margin-bottom: 15px;
-        }
-        .tab-btn {
-            padding: 10px 16px;
-            border: none;
-            background: none;
-            font-size: 15px;
-            font-weight: bold;
-            color: #666;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        .tab-btn.active {
-            color: #1a73e8;
-            border-bottom-color: #1a73e8;
+            flex-wrap: nowrap; /* 💡 核心：强行单行，绝不折行变成两行 */
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            box-sizing: border-box;
+            /* 在极窄屏幕（如小手机）上允许平滑横向滑动，防止挤压变形 */
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
+        /* 隐藏横向滚动条但保留滑动功能 */
+        .profile-sub-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .profile-sub-tabs .tab-btn {
+            flex: 1 1 0px; /* 💡 核心：5 个 Tab 均分宽度 */
+            min-width: 0;   /* 允许文字在有限空间内按比例收缩 */
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 8px 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column; /* 图标+中文在上，英文在下 */
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap; /* 文本不换行 */
+        }
+
+        /* 英文副标题小字排版 */
+        .profile-sub-tabs .tab-btn small {
+            font-size: 9px;
+            font-weight: 500;
+            opacity: 0.75;
+            margin-top: 2px;
+            letter-spacing: 0.2px;
+        }
+
+        /* Hover 与 Active 状态 */
+        .profile-sub-tabs .tab-btn:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .profile-sub-tabs .tab-btn.active {
+            background-color: #007bff;
+            color: #ffffff;
+            border-color: #007bff;
+        }
+
+        /* 📱 手机端适配：文字微调 */
+        @media (max-width: 768px) {
+            .profile-sub-tabs .tab-btn {
+                padding: 6px 2px;
+                font-size: 11px;
+            }
+            .profile-sub-tabs .tab-btn small {
+                font-size: 8px;
+                transform: scale(0.9); /* 手机端适度微缩英文 */
+            }
+        }
+        
         /* 数据表格组件 */
         section { margin-top: 15px; }
         h3 { color: #1a73e8; border-left: 4px solid #1a73e8; padding-left: 10px; margin-bottom: 12px; margin-top: 0; }
@@ -404,19 +456,19 @@
                 <!-- 屏幕查看时的分类 Tabs 控制栏 -->
                 <div class="tab-buttons no-print">
                     <!-- 1. 身体数据（最左边，默认激活） -->
-                    <button class="tab-btn active" onclick="switchTab(event,'body')">📏 身体数据 (BODY MEASUREMENT)</button>
+                    <button class="tab-btn active" onclick="switchTab(event,'body')">📏 身体数据<small>(BODY MEASUREMENT)</small></button>
     
                     <!-- 2. 径赛成绩 -->
-                    <button class="tab-btn" onclick="switchTab(event,'track')">🏃 比赛成绩 (TRACK)</button>
+                    <button class="tab-btn" onclick="switchTab(event,'track')">🏃 比赛成绩<small>(TRACK)</small></button>
     
                     <!-- 3. 田赛成绩 -->
-                    <button class="tab-btn" onclick="switchTab(event,'field')">🏋️ 比赛成绩 (FIELD)</button>
+                    <button class="tab-btn" onclick="switchTab(event,'field')">🏋️ 比赛成绩<small>(FIELD)</small></button>
     
                     <!-- 4. 越野赛 -->
-                    <button class="tab-btn" onclick="switchTab(event,'cross')">🌲 比赛成绩 (CROSS COUNTRY)</button>
+                    <button class="tab-btn" onclick="switchTab(event,'cross')">🌲 比赛成绩<small>(CROSS COUNTRY)</small></button>
 
                     <!-- 🌟 新增：全能项 Tab -->
-                    <button class="tab-btn" onclick="switchTab(event,'multi')">全能项 (Multi)</button>
+                    <button class="tab-btn" onclick="switchTab(event,'multi')">🏆 全能项<small>(Multi)</small></button>
                 </div>
 
                 <!-- 1. 身体数据 -->
@@ -547,7 +599,7 @@
     
                 <!-- 🌟 全能项 Tab 内容区域 -->
                 <div id="tab-multi" class="tab-content hidden">
-                    <h3>全能项目成绩 Multi-Events Performance</h3>
+                    <h3>🏆 全能项目成绩 Multi-Events Performance</h3>
     
                     <!-- 筛选工具列 -->
                     <div class="filter-group no-print">
