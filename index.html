@@ -347,8 +347,8 @@
         }
         
         /* ==========================================
-        🧭 全局主导航栏 CSS (主 Tab 切换)
-        ========================================== */
+           🧭 全局主导航栏 CSS (5 大 Tab 专属)
+           ========================================== */
         .main-nav {
             background-color: #1e293b;
             padding: 10px 0;
@@ -359,9 +359,8 @@
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            /* 💡 在电脑端自动分为 4 等分，完美填满宽度 */
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
+            flex-wrap: nowrap; /* 强行单行 */
             gap: 8px;
             padding: 0 10px;
             box-sizing: border-box;
@@ -371,8 +370,8 @@
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #94a3b8;
-            padding: 8px 6px;
-            font-size: 14px;
+            padding: 8px 4px;
+            font-size: 13px; /* 微调字体大小，适配 5 列排版 */
             font-weight: 600;
             cursor: pointer;
             border-radius: 6px;
@@ -385,17 +384,18 @@
             justify-content: center;
             width: 100%;
             box-sizing: border-box;
+            white-space: nowrap; /* 避免按钮文字在内部换行 */
         }
 
         /* 英文小字样式 */
         .main-nav .nav-btn small {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: normal;
             opacity: 0.8;
             margin-top: 3px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
-        
+
         .main-nav .nav-btn:hover {
             color: #ffffff;
             background-color: rgba(255, 255, 255, 0.05);
@@ -407,23 +407,25 @@
             border-color: #007bff;
         }
 
-        /* 📱 移动端/小屏幕响应式优化 */
+        /* 📱 手机端移动设备适配 */
         @media (max-width: 768px) {
             .nav-container {
-                /* 在手机端改为 2x2 网格，清晰好按，绝对不会出现横向滚动条 */
-                grid-template-columns: repeat(2, 1fr);
-                gap: 6px;
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto; /* 极窄屏幕允许流畅横向滑动 */
+                -webkit-overflow-scrolling: touch;
             }
-    
+            .nav-container::-webkit-scrollbar {
+                display: none; /* 隐藏滚动条 */
+            }
             .main-nav .nav-btn {
+                flex: 1 0 auto;
+                min-width: 90px;
                 padding: 6px 4px;
-                font-size: 13px;
+                font-size: 11px;
             }
+        }
 
-            .main-nav .nav-btn small {
-                font-size: 9px;
-            }
-            
         /* 占位卡片样式 */
         .placeholder-card {
             max-width: 600px;
@@ -524,7 +526,7 @@
                 📈 体测与成长<br><small>FITNESS ASSESSMENT</small>
             </button>
             <button class="main-tab-btn" onclick="switchMainTab('links')">
-                🔗 外部链接<small>EXTERNAL LINKS</small>
+                🔗 外部链接<br><small>EXTERNAL LINKS</small>
             </button>
         </div>
     </nav>
@@ -772,25 +774,28 @@
 
         <!-- 📊 培训队总汇 (暂留空) -->
                 <section id="mainTab-team" class="main-tab-content" style="display: none;">
-                    <div class="placeholder-card">
-                        <h2>📊 培训队数据总汇</h2>
-                        <p>该模块建设中...</p>
+                    <div class="placeholder-card" style="text-align: center; padding: 60px 20px; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 8px; margin-top: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
+                        <h2 style="color: #1e293b; margin-bottom: 8px; font-size: 20px;">培训队数据总汇 Event Summary</h2>
+                        <p style="color: #64748b; font-size: 14px; margin: 0;">该模块建设中 / Page Under Construction...</p>
                     </div>
                 </section>
 
         <!-- 🏆 运动会履历 (暂留空) -->
         <section id="mainTab-sportsDay" class="main-tab-content" style="display: none;">
-            <div class="placeholder-card">
-                <h2>🏆 校内运动会履历</h2>
-                <p>该模块建设中...</p>
+            <div class="placeholder-card" style="text-align: center; padding: 60px 20px; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 8px; margin-top: 20px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">🏆</div>
+                <h2 style="color: #1e293b; margin-bottom: 8px; font-size: 20px;">校内运动会履历 School Spors Day</h2>
+                <p style="color: #64748b; font-size: 14px; margin: 0;">该模块建设中 / Page Under Construction...</p>
             </div>
         </section>
 
         <!-- 📈 体测与成长 (暂留空) -->
         <section id="mainTab-fitness" class="main-tab-content" style="display: none;">
-            <div class="placeholder-card">
-                <h2>📈 个人数据测试与成长</h2>
-                <p>该模块建设中...</p>
+            <div class="placeholder-card" style="text-align: center; padding: 60px 20px; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 8px; margin-top: 20px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">📈</div>
+                <h2 style="color: #1e293b; margin-bottom: 8px; font-size: 20px;">个人数据测试与成长 Fitness assessment</h2>
+                <p style="color: #64748b; font-size: 14px; margin: 0;">该模块建设中 / Page Under Construction...</p>
             </div>
         </section>
     
