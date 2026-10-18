@@ -599,28 +599,29 @@
     
                 <!-- 🌟 全能项 Tab 内容区域 -->
                 <div id="tab-multi" class="tab-content hidden">
-                    <h3>🏆 全能项目成绩 Multi-Events Performance</h3>
-    
-                    <!-- 筛选工具列 -->
-                    <div class="filter-group no-print">
-                        <div class="filter-box">
-                            <label>📅 年份:</label>
-                            <select id="multiYearFilter" onchange="applyFilterAndSort('multi')">
-                                <option value="ALL">全部 ALL</option>
-                            </select>
-                        </div>
-                        <div class="filter-box">
-                            <label>🏋️ 项目:</label>
-                            <select id="multiEventFilter" onchange="applyFilterAndSort('multi')">
-                                <option value="ALL">全部 ALL</option>
-                            </select>
-                        </div>
-                    </div>
+                    <section>
+                        <h3>🏆 全能项目成绩 Multi-Events Performance</h3>
 
-                    <!-- 全能项专属渲染容器 -->
-                    <div id="multiTableContainer" class="table-wrapper">
-                        <p class="no-data">暂无全能项目比赛记录</p>
-                    </div>
+                        <!-- 筛选工具列 -->
+                        <div class="filter-bar no-print" style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <label>📅 年份: 
+                                <select id="multiYearFilter" onchange="applyFilterAndSort('multi')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="ALL">全部年份 ALL YEAR</option>
+                                </select>
+                            </label>
+
+                            <label>🏋️ 项目: 
+                                <select id="multiEventFilter" onchange="applyFilterAndSort('multi')" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="ALL">全部项目 ALL EVENT</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <!-- 全能项专属渲染容器 -->
+                        <div id="multiTableContainer" class="table-wrapper">
+                            <p class="no-data">暂无全能项目比赛记录</p>
+                        </div>
+                    </section>
                 </div>    
             </div>
             </div>
