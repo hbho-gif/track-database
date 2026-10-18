@@ -81,77 +81,76 @@
         .full-width { grid-column: span 2; }
 
         /* ==========================================
-           🎯 个人数据子 Tab (5 Tab 强行单行自适应 CSS)
+           🎯 个人数据子 Tab (极简下划线风格 + 单行自适应)
            ========================================== */
-        .profile-sub-tabs {
+        .tabs {
             display: flex;
-            flex-wrap: nowrap; /* 💡 核心：强行单行，绝不折行变成两行 */
-            gap: 6px;
+            flex-wrap: nowrap;          /* 💡 强行单行，不换行 */
+            gap: 8px;
             width: 100%;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 8px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eef2f7; /* 底部浅色分割线 */
             box-sizing: border-box;
-            /* 在极窄屏幕（如小手机）上允许平滑横向滑动，防止挤压变形 */
-            overflow-x: auto;
+            overflow-x: auto;           /* 极窄小屏平滑滑动 */
             -webkit-overflow-scrolling: touch;
         }
 
-        /* 隐藏横向滚动条但保留滑动功能 */
-        .profile-sub-tabs::-webkit-scrollbar {
+        /* 隐藏横向滚动条 */
+        .tabs::-webkit-scrollbar {
             display: none;
         }
 
-        .profile-sub-tabs .tab-btn {
-            flex: 1 1 0px; /* 💡 核心：5 个 Tab 均分宽度 */
-            min-width: 0;   /* 允许文字在有限空间内按比例收缩 */
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            color: #475569;
-            padding: 8px 4px;
-            font-size: 13px;
-            font-weight: 600;
+        .tabs .tab-btn {
+            flex: 1 1 0px;              /* 💡 5 个按钮等分整行宽度 */
+            min-width: 0;               /* 防挤压变形 */
+            padding: 10px 4px;          /* 保留内边距 */
+            border: none;               /* 移除方框边框 */
+            background: none;           /* 无背景 */
+            font-size: 15px;            /* 保留原本的 15px 字号 */
+            font-weight: bold;
+            color: #666;                /* 原本的默认灰 */
             cursor: pointer;
-            border-radius: 6px 6px 0 0;
+            border-bottom: 3px solid transparent; /* 底部预留下划线位置 */
             transition: all 0.2s ease;
             text-align: center;
             display: flex;
-            flex-direction: column; /* 图标+中文在上，英文在下 */
+            flex-direction: column;     /* 图标+中文在上，英文在下 */
             align-items: center;
             justify-content: center;
-            white-space: nowrap; /* 文本不换行 */
+            white-space: nowrap;        /* 文本不换行 */
         }
 
-        /* 英文副标题小字排版 */
-        .profile-sub-tabs .tab-btn small {
+        /* 英文副标题小字样式 */
+        .tabs .tab-btn small {
             font-size: 9px;
-            font-weight: 500;
+            font-weight: normal;
             opacity: 0.75;
             margin-top: 2px;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
         }
 
-        /* Hover 与 Active 状态 */
-        .profile-sub-tabs .tab-btn:hover {
-            background-color: #e2e8f0;
-            color: #0f172a;
+        /* Hover 悬停效果 */
+        .tabs .tab-btn:hover {
+            color: #1a73e8;
+            background-color: rgba(26, 115, 232, 0.04); /* 微微浅蓝背景反馈 */
         }
 
-        .profile-sub-tabs .tab-btn.active {
-            background-color: #007bff;
-            color: #ffffff;
-            border-color: #007bff;
+        /* 🌟 Active 激活状态（蓝字 + 蓝下划线） */
+        .tabs .tab-btn.active {
+            color: #1a73e8;
+            border-bottom-color: #1a73e8; /* 经典的底部蓝条 */
+            background: none;
         }
 
-        /* 📱 手机端适配：文字微调 */
+        /* 📱 手机端适配 */
         @media (max-width: 768px) {
-            .profile-sub-tabs .tab-btn {
-                padding: 6px 2px;
-                font-size: 11px;
+            .tabs .tab-btn {
+                padding: 8px 2px;
+                font-size: 12px;
             }
-            .profile-sub-tabs .tab-btn small {
+            .tabs .tab-btn small {
                 font-size: 8px;
-                transform: scale(0.9); /* 手机端适度微缩英文 */
             }
         }
         
