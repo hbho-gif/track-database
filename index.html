@@ -1783,8 +1783,8 @@
         
             // 排序
             grpData.sort((a, b) => {
-                const valA = parsePerformance(getVal(a, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]), isTrack);
-                const valB = parsePerformance(getVal(b, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]), isTrack);
+                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
+                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
                 return isTrack ? valA - valB : valB - valA;
             });
 
@@ -1792,7 +1792,7 @@
             if (best) {
                 const sid = getVal(best, ["学号 ID", "学号", "id"]);
                 const sName = getStudentName(sid); // 查学生姓名
-                const perf = getVal(best, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]);
+                const perf = getVal(best, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]);
                 const yr = getVal(best, ["比赛年份 YEAR", "年份", "year"]);
                 const rmk = getVal(best, ["备注 REMARKS", "备注"]);
 
@@ -1842,13 +1842,13 @@
             const uniqueStudentMap = new Map();
             activeData.forEach(item => {
                 const sid = getVal(item, ["学号 ID", "学号", "id"]);
-                const currentPerf = parsePerformance(getVal(item, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]), isTrack);
+                const currentPerf = parsePerformance(getVal(item, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
 
                 if (!uniqueStudentMap.has(sid)) {
                     uniqueStudentMap.set(sid, item);
                 } else {
                     const prevItem = uniqueStudentMap.get(sid);
-                    const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]), isTrack);
+                    const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
                 
                     // 径赛取小，田赛取大
                     if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
@@ -1860,8 +1860,8 @@
             // D. 排序并取前 10 名
             const top10 = Array.from(uniqueStudentMap.values());
             top10.sort((a, b) => {
-                const valA = parsePerformance(getVal(a, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]), isTrack);
-                const valB = parsePerformance(getVal(b, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]), isTrack);
+                const valA = parsePerformance(getVal(a, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
+                const valB = parsePerformance(getVal(b, ["比赛成绩 RESULTS (hh:mm:ss,ss)", "比赛成绩", "成绩"]), isTrack);
                 return isTrack ? valA - valB : valB - valA;
             });
 
@@ -1896,7 +1896,7 @@
                 final10.forEach((item, idx) => {
                     const sid = getVal(item, ["学号 ID", "学号", "id"]);
                     const sName = getStudentName(sid);
-                    const perf = getVal(item, ["比赛成绩 PERFORMANCE", "比赛成绩", "成绩"]);
+                    const perf = getVal(item, ["比赛成绩 RESULTS", "比赛成绩", "成绩"]);
                     const yr = getVal(item, ["比赛年份 YEAR", "年份", "year"]);
                     const isSportsDay = item.isSportsDay ? '✔️' : '-';
                     const rmk = getVal(item, ["备注 REMARKS", "备注"]);
@@ -1930,7 +1930,7 @@
         // 从 bodyData 中寻找匹配
         if (typeof bodyData !== "undefined") {
             const match = bodyData.find(i => getVal(i, ["学号 ID", "学号"]) === studentId);
-            if (match) return getVal(match, ["姓名 NAME", "姓名"]);
+            if (match) return getVal(match, ["中文姓名 NAME (C)", "姓名"]);
         }
         return studentId; // 找不到时显示学号
     }
@@ -1940,7 +1940,7 @@
         if (typeof bodyData !== "undefined") {
             const match = bodyData.find(i => getVal(i, ["学号 ID", "学号"]) === studentId);
             if (match) {
-                const dob = getVal(match, ["出生日期 DOB", "出生日期", "dob"]);
+                const dob = getVal(match, ["出生日期 D.O.B.", "出生日期", "dob"]);
                 if (dob) {
                     // 假设日期格式包含年份，如 "2010-05-12" 或 "2010/05/12" 或 "2010"
                     const yearMatch = String(dob).match(/\d{4}/);
