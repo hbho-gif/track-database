@@ -1928,22 +1928,24 @@
 
     // 1. 获取学生姓名（多变量名兼容）
     function getStudentName(studentId) {
-        if (!studentId) return "-";
+        if (!studentId || String(studentId).trim() === "") return "-";
         const sid = String(studentId).trim();
 
-        // 尝试在多个可能的数据集中查找队员姓名
-        const allData = [
-            ...(typeof bodyData !== "undefined" ? bodyData : []),
-            ...(typeof bodyMeasurements !== "undefined" ? bodyMeasurements : []),
-            ...(typeof trackRaces !== "undefined" ? trackRaces : [])
-        ];
+        // 假设你的【个人资料】Sheet 存储在 bodyData 中 (或 bodyMeasurements / studentProfile)
+        const profileSource = typeof bodyData !== "undefined" ? bodyData : 
+                          (typeof bodyMeasurements !== "undefined" ? bodyMeasurements : []);
 
-        const match = allData.find(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === sid);
+        // 只去个人资料表中通过学号匹配“中文姓名”
+        const match = profileSource.find(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === sid);
         if (match) {
-            const name = getVal(match, ["中文姓名 NAME (C)", "姓名", "name"]);
-            if (name && name !== "-") return name;
+            const cName = getVal(match, ["中文姓名", "姓名 NAME(C)", "姓名", "Chinese Name"]);
+            if (cName && cName !== "-" && cName.trim() !== "") {
+                return cName.trim();
+            }
         }
-        return sid; // 找不到时默认显示学号
+    
+        // 如果个人资料中一时没找到该学号，回退显示学号本身，绝不显示比赛名称
+        return sid; 
     }
 
     // 2. 获取学生出生年份（增强日期格式解析 + 防错回退）
@@ -1980,9 +1982,9 @@
         if (toggleLabel) toggleLabel.innerText = includeSportsDay ? "是 Included" : "否 Excluded";
 
         const isTrack = category === "TRACK";
-        const currentYear = new Date().getFullYear(); // 2026
+        const currentYear = new Date().getFullYear();
 
-        // 数据源安全获取
+        // 数据源获取
         let rawData = [];
         if (isTrack) {
             rawData = typeof trackRaces !== "undefined" ? [...trackRaces] : [];
@@ -1996,30 +1998,27 @@
             }
         }
 
-        // 💡 诊断提示：如果数据还在加载中，给出明确提示
         if (rawData.length === 0) {
             container.innerHTML = `
                 <div style="text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
                     <p style="font-size:16px; font-weight:bold; margin-bottom:8px;">⏳ 正在加载比赛数据或未找到记录...</p>
-                    <p style="font-size:12px; color:#94a3b8;">请确保数据表已成功拉取，或尝试切换其他项目。</p>
                 </div>
             `;
             return;
-    }
+        }
 
-        // 精准过滤项目与 4 大组别
+        // 精准过滤当前选定项目与 4 大组别
         const filteredData = rawData.filter(item => {
             const itemEvent = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目"]);
             const itemGroup = getVal(item, ["组别 GROUP", "组别", "group"]);
         
-            // 忽略空格与大小写差异进行强力匹配
             const matchEvent = String(itemEvent).trim().toLowerCase() === String(selectedEvent).trim().toLowerCase();
             const matchGroup = GROUPS.some(g => String(itemGroup).trim().toLowerCase().includes(g.split('/')[0].toLowerCase()));
         
             return matchEvent && matchGroup;
         });
 
-        // --- 1. 构建 2022年至今最佳纪录 HTML ---
+        // --- 1. 构建 2022年至今最佳纪录 表格 ---
         let bestRecordHtml = `
             <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:16px; margin-bottom:24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 <h3 style="margin-top:0; color:#1e293b; font-size:16px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
@@ -2030,13 +2029,14 @@
                         <tr style="background:#f1f5f9; text-align:left; font-size:13px; color:#334155;">
                             <th style="padding:8px;">组别 Group</th>
                             <th style="padding:8px;">学号 ID</th>
-                            <th style="padding:8px;">姓名 Name</th>
-                            <th style="padding:8px;">最佳纪录 Best</th>
+                            <!-- 🌟 更新表头名称 -->
+                            <th style="padding:8px;">中文姓名 NAME(C)</th>
+                            <th style="padding:8px;">最佳纪录 Best Performance</th>
                             <th style="padding:8px;">比赛年份 Year</th>
                             <th style="padding:8px;">备注 Remarks</th>
                         </tr>
                     </thead>
-                    <tbody>
+                <tbody>
         `;
 
         GROUPS.forEach(grp => {
@@ -2044,7 +2044,7 @@
                 const g = getVal(i, ["组别 GROUP", "组别", "group"]);
                 return String(g).trim().toLowerCase().includes(grp.split('/')[0].toLowerCase());
             });
-        
+            
             grpData.sort((a, b) => {
                 const valA = parsePerformance(getVal(a, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
                 const valB = parsePerformance(getVal(b, ["比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
@@ -2054,7 +2054,7 @@
             const best = grpData[0];
             if (best) {
                 const sid = getVal(best, ["学号 ID", "学号", "id"]);
-                const sName = getStudentName(sid);
+                const sName = getStudentName(sid); // 抓取个人资料 Sheet 的中文姓名
                 const perf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
                 const yr = getVal(best, ["比赛年份 YEAR", "年份", "year"]);
                 const rmk = getVal(best, ["备注 REMARKS", "备注"]);
@@ -2100,7 +2100,6 @@
                 const sid = getVal(item, ["学号 ID", "学号", "id"]);
                 const birthYear = getStudentBirthYear(sid);
             
-                // 💡 如果找不到出生年份，暂时不做严格过滤，避免显示为空；如果找到则严格检验 13-18 岁
                 let isEligible = true;
                 if (birthYear) {
                     const age = currentYear - birthYear;
@@ -2142,8 +2141,9 @@
                             <tr style="background:#f8fafc; text-align:left; font-size:12px; color:#475569;">
                                 <th style="padding:6px; width:50px; text-align:center;">序号</th>
                                 <th style="padding:6px;">学号 ID</th>
-                                <th style="padding:6px;">姓名 Name</th>
-                                <th style="padding:6px;">最佳纪录 Best</th>
+                                <!-- 🌟 更新表头名称 -->
+                                <th style="padding:6px;">中文姓名 NAME(C)</th>
+                                <th style="padding:6px;">最佳纪录 Best Performance</th>
                                 <th style="padding:6px;">比赛年份</th>
                                 <th style="padding:6px; text-align:center;">运动会记录</th>
                                 <th style="padding:6px;">备注</th>
@@ -2159,7 +2159,7 @@
             } else {
                 final10.forEach((item, idx) => {
                     const sid = getVal(item, ["学号 ID", "学号", "id"]);
-                    const sName = getStudentName(sid);
+                    const sName = getStudentName(sid); // 抓取个人资料 Sheet 的中文姓名
                     const perf = getVal(item, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
                     const yr = getVal(item, ["比赛年份 YEAR", "年份", "year"]);
                     const isSportsDay = item.isSportsDay ? '✔️' : '-';
@@ -2169,7 +2169,7 @@
                         <tr style="border-bottom:1px solid #f1f5f9; font-size:13px;">
                             <td style="padding:6px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
                             <td style="padding:6px;">${sid}</td>
-                            <td style="padding:8px;"><strong>${sName}</strong></td>
+                            <td style="padding:6px;"><strong>${sName}</strong></td>
                             <td style="padding:6px; color:#059669; font-weight:bold;">${perf}</td>
                             <td style="padding:6px;">${yr}</td>
                             <td style="padding:6px; text-align:center;">${isSportsDay}</td>
@@ -2181,7 +2181,7 @@
 
             activeStudentHtml += `</tbody></table></div>`;
         });
-
+    
         container.innerHTML = bestRecordHtml + activeStudentHtml;
     }
     
