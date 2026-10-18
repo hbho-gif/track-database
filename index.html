@@ -268,6 +268,83 @@
             print-color-adjust: exact;
         }
         }
+
+        /* ==========================================
+           🎯 径/田/越野赛 统一列宽与对齐样式 (Fixed Layout)
+           ========================================== */
+
+        /* 1. 强制三大 Tab 的表格使用固定布局，确保列宽绝对对齐 */
+        #tab-track table,
+        #tab-field table,
+        #tab-cross table {
+            width: 100% !important;
+            table-layout: fixed !important; /* 💡 关键：固定列宽算法，防止内容挤压变型 */
+            border-collapse: collapse;
+        }
+
+        /* 2. 单元格通用文本处理（允许自动换行，防止超长文字溢出） */
+        #tab-track th, #tab-track td,
+        #tab-field th, #tab-field td,
+        #tab-cross th, #tab-cross td {
+            padding: 10px 8px;
+            word-wrap: break-word;       /* 💡 允许单词/长串在边界换行 */
+            overflow-wrap: break-word;
+            white-space: normal;         /* 💡 开启自动换行 (wrap) */
+            vertical-align: middle;
+        }
+
+        /* 3. 按需求精确指定 5 列的百分比宽度 */
+        /* 第 1 列：年份 YEAR (10%) */
+        #tab-track th:nth-child(1), #tab-track td:nth-child(1),
+        #tab-field th:nth-child(1), #tab-field td:nth-child(1),
+        #tab-cross th:nth-child(1), #tab-cross td:nth-child(1) {
+            width: 10%;
+            text-align: center;
+        }
+
+        /* 第 2 列：比赛名称 TOURNAMENT (38% - 最长) */
+        #tab-track th:nth-child(2), #tab-track td:nth-child(2),
+        #tab-field th:nth-child(2), #tab-field td:nth-child(2),
+        #tab-cross th:nth-child(2), #tab-cross td:nth-child(2) {
+            width: 38%;
+            text-align: left;
+        }
+
+        /* 第 3 列：比赛项目 EVENT (22% - 中等宽度，支持 wrap) */
+        #tab-track th:nth-child(3), #tab-track td:nth-child(3),
+        #tab-field th:nth-child(3), #tab-field td:nth-child(3),
+        #tab-cross th:nth-child(3), #tab-cross td:nth-child(3) {
+            width: 22%;
+            text-align: center;
+        }
+
+        /* 第 4 列：比赛成绩 PERFORMANCE (15%) */
+        #tab-track th:nth-child(4), #tab-track td:nth-child(4),
+        #tab-field th:nth-child(4), #tab-field td:nth-child(4),
+        #tab-cross th:nth-child(4), #tab-cross td:nth-child(4) {
+            width: 15%;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* 第 5 列：备注 REMARKS (15%) */
+        #tab-track th:nth-child(5), #tab-track td:nth-child(5),
+        #tab-field th:nth-child(5), #tab-field td:nth-child(5),
+        #tab-cross th:nth-child(5), #tab-cross td:nth-child(5) {
+            width: 15%;
+            text-align: center;
+            color: #64748b;
+        }
+
+        /* 📱 手机移动端微调：调整内边距，保持挤压时的可读性 */
+        @media (max-width: 768px) {
+            #tab-track th, #tab-track td,
+            #tab-field th, #tab-field td,
+            #tab-cross th, #tab-cross td {
+                padding: 8px 4px;
+                font-size: 12px;
+            }
+        }
         
         /* ==========================================
         🧭 全局主导航栏 CSS (主 Tab 切换)
