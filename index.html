@@ -1769,8 +1769,8 @@
                         <tr style="background:#f1f5f9; text-align:left; font-size:13px;">
                             <th style="padding:8px;">组别 Group</th>
                             <th style="padding:8px;">学号 ID</th>
-                            <th style="padding:8px;">姓名 Name</th>
-                            <th style="padding:8px;">最佳纪录 Best</th>
+                            <th style="padding:8px;">中文姓名 Name(C)</th>
+                            <th style="padding:8px;">最佳纪录 Best Performance</th>
                             <th style="padding:8px;">比赛年份 Year</th>
                             <th style="padding:8px;">备注 Remarks</th>
                         </tr>
@@ -1878,9 +1878,9 @@
                             <tr style="background:#f8fafc; text-align:left; font-size:12px; color:#475569;">
                                 <th style="padding:6px; width:50px; text-align:center;">序号</th>
                                 <th style="padding:6px;">学号 ID</th>
-                                <th style="padding:6px;">姓名 Name</th>
-                                <th style="padding:6px;">最佳纪录 Best</th>
-                                <th style="padding:6px;">比赛年份</th>
+                                <th style="padding:6px;">中文姓名 Name(C)</th>
+                                <th style="padding:6px;">最佳纪录 Best Performance</th>
+                                <th style="padding:6px;">比赛年份 Year</th>
                                 <th style="padding:6px; text-align:center;">运动会记录</th>
                                 <th style="padding:6px;">备注</th>
                             </tr>
@@ -1940,7 +1940,7 @@
 
         const match = allData.find(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === sid);
         if (match) {
-            const name = getVal(match, ["姓名 NAME", "姓名", "name"]);
+            const name = getVal(match, ["中文姓名 NAME (C)", "姓名", "name"]);
             if (name && name !== "-") return name;
         }
         return sid; // 找不到时默认显示学号
