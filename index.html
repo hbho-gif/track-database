@@ -1931,21 +1931,27 @@
         if (!studentId || String(studentId).trim() === "") return "-";
         const sid = String(studentId).trim();
 
-        // 假设你的【个人资料】Sheet 存储在 bodyData 中 (或 bodyMeasurements / studentProfile)
-        const profileSource = typeof bodyData !== "undefined" ? bodyData : 
-                          (typeof bodyMeasurements !== "undefined" ? bodyMeasurements : []);
+        // 优先读取【个人基本资料】Sheet 数据源（兼容各种可能命名的全局变量）
+        const profileSource = typeof basicStudents !== "undefined" ? basicStudents : 
+                          (typeof profileData !== "undefined" ? profileData : 
+                          (typeof studentBasicData !== "undefined" ? studentBasicData : []));
 
-        // 只去个人资料表中通过学号匹配“中文姓名”
-        const match = profileSource.find(i => String(getVal(i, ["学号 ID", "学号", "id"])).trim() === sid);
+        // 只去“个人基本资料”中匹配学号
+        const match = profileSource.find(i => {
+            const idInSheet = getVal(i, ["学号 ID", "学号", "id", "ID"]);
+            return String(idInSheet).trim() === sid;
+        });
+
         if (match) {
-            const cName = getVal(match, ["中文姓名", "姓名 NAME(C)", "姓名", "Chinese Name"]);
-            if (cName && cName !== "-" && cName.trim() !== "") {
-                return cName.trim();
+            // 从“个人基本资料”Sheet 中提取中文姓名
+            const cName = getVal(match, ["中文姓名", "姓名", "姓名 NAME(C)", "Chinese Name", "NAME"]);
+            if (cName && cName !== "-" && String(cName).trim() !== "") {
+                return String(cName).trim();
             }
         }
     
-        // 如果个人资料中一时没找到该学号，回退显示学号本身，绝不显示比赛名称
-        return sid; 
+            // 如果个人资料中一时没找到该学号，回退显示学号本身，绝不显示比赛名称
+            return sid; 
     }
 
     // 2. 获取学生出生年份（增强日期格式解析 + 防错回退）
