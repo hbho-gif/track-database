@@ -1995,6 +1995,9 @@
         const isTrack = category === "TRACK";
         const currentYear = new Date().getFullYear();
 
+        const rawPerf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
+        const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
+        
         // 数据源获取
         let rawData = [];
         if (isTrack) {
