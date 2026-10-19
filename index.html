@@ -1713,18 +1713,24 @@
 
     // 辅助：成绩解析为可比较数值（径赛换算秒数，田赛转浮点数）
     function parsePerformance(val, isTrack) {
-        if (!val || val === "-" || val === "") return isTrack ? Infinity : -Infinity;
-        const str = String(val).trim();
-        if (isTrack) {
-            // 兼容 "0:00:10.00", "00:10.00", "10.00"
-            const parts = str.split(":").map(Number);
-            if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-            if (parts.length === 2) return parts[0] * 60 + parts[1];
-            return parseFloat(str) || Infinity;
-        } else {
-            return parseFloat(str) || -Infinity;
-        }
+    if (!val || val === "-" || val === "" || val === "DNS" || val === "DNF") {
+        return isTrack ? Infinity : -Infinity;
     }
+    
+    // 强制转换为字符串并去掉可能由格式化函数加上去的多余单位 "m"
+    const str = String(val).replace("m", "").trim();
+
+    if (isTrack) {
+        // 兼容 "0:00:10.00", "00:10.00", "10.00"
+        const parts = str.split(":").map(Number);
+        if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || Infinity;
+        if (parts.length === 2) return (parts[0] * 60 + parts[1]) || Infinity;
+        return parseFloat(str) || Infinity;
+    } else {
+        const num = parseFloat(str);
+        return isNaN(num) ? -Infinity : num;
+    }
+}
 
     // 主渲染函数
     // ==========================================
