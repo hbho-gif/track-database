@@ -84,93 +84,93 @@
            🎯 个人数据子 Tab (极简下划线风格 + 单行自适应)
            ========================================== */
         /* 🌟 升级版 Tab 容器：纯净白色独立胶囊风格 (Pill Style) */
-.tabs {
-    display: flex;
-    flex-wrap: nowrap;          /* 强行单行，不换行 */
-    gap: 10px;                  /* 胶囊之间的独立间距 */
-    width: 100%;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border-bottom: none;        /* 💡 移除旧的下划线分割线 */
-    box-sizing: border-box;
-    overflow-x: auto;           /* 极窄小屏平滑滑动 */
-    -webkit-overflow-scrolling: touch;
-    padding: 4px 2px;           /* 留出微妙外边距，确保阴影不被截断 */
-}
+        .tabs {
+            display: flex;
+            flex-wrap: nowrap;          /* 强行单行，不换行 */
+            gap: 10px;                  /* 胶囊之间的独立间距 */
+            width: 100%;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-bottom: none;        /* 💡 移除旧的下划线分割线 */
+            box-sizing: border-box;
+            overflow-x: auto;           /* 极窄小屏平滑滑动 */
+            -webkit-overflow-scrolling: touch;
+            padding: 4px 2px;           /* 留出微妙外边距，确保阴影不被截断 */
+        }
 
-/* 隐藏横向滚动条 */
-.tabs::-webkit-scrollbar {
-    display: none;
-}
+        /* 隐藏横向滚动条 */
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
 
-/* 🌟 升级版 Tab 按钮：白色圆角卡片，放大字体 */
-.tabs .tab-btn {
-    flex: 1 1 0px;              /* 5 个按钮等分整行宽度 */
-    min-width: 0;               /* 防挤压变形 */
-    padding: 10px 8px;          /* 适度增大内边距 */
-    background-color: #ffffff;  /* 💡 默认纯白背景 */
-    border: 1px solid #cbd5e1;  /* 💡 浅灰色优雅边框 */
-    border-radius: 9999px;      /* 💡 极致圆角 (Round End / Pill) */
-    font-size: 15px;            /* 主字号 15px */
-    font-weight: 600;
-    color: #475569;             /* 高对比度灰文本 */
-    cursor: pointer;
-    border-bottom: 1px solid #cbd5e1; /* 💡 移除原本的 3px 底部线条 */
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    display: flex;
-    flex-direction: column;     /* 图标+中文在上，英文在下 */
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;        /* 文本不换行 */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); /* 微妙浮起阴影 */
-}
+        /* 🌟 升级版 Tab 按钮：白色圆角卡片，放大字体 */
+        .tabs .tab-btn {
+            flex: 1 1 0px;              /* 5 个按钮等分整行宽度 */
+            min-width: 0;               /* 防挤压变形 */
+            padding: 10px 8px;          /* 适度增大内边距 */
+            background-color: #ffffff;  /* 💡 默认纯白背景 */
+            border: 1px solid #cbd5e1;  /* 💡 浅灰色优雅边框 */
+            border-radius: 9999px;      /* 💡 极致圆角 (Round End / Pill) */
+            font-size: 15px;            /* 主字号 15px */
+            font-weight: 600;
+            color: #475569;             /* 高对比度灰文本 */
+            cursor: pointer;
+            border-bottom: 1px solid #cbd5e1; /* 💡 移除原本的 3px 底部线条 */
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;     /* 图标+中文在上，英文在下 */
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;        /* 文本不换行 */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); /* 微妙浮起阴影 */
+        }
 
-/* 🌟 英文副标题小字：加大并保持良好视效 */
-.tabs .tab-btn small {
-    font-size: 11px;            /* 💡 从原本的 9px 微调加大到 11px，更清晰 */
-    font-weight: 500;
-    opacity: 0.8;
-    margin-top: 2px;
-    letter-spacing: 0.2px;
-}
+        /* 🌟 英文副标题小字：加大并保持良好视效 */
+        .tabs .tab-btn small {
+            font-size: 11px;            /* 💡 从原本的 9px 微调加大到 11px，更清晰 */
+            font-weight: 500;
+            opacity: 0.8;
+            margin-top: 2px;
+            letter-spacing: 0.2px;
+        }
 
-/* 🌟 Hover 悬停反馈（悬浮提升感） */
-.tabs .tab-btn:hover {
-    color: #1d4ed8;
-    background-color: #f8fafc;
-    border-color: #93c5fd;
-    transform: translateY(-2px); /* 向上微动 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-}
+        /* 🌟 Hover 悬停反馈（悬浮提升感） */
+        .tabs .tab-btn:hover {
+            color: #1d4ed8;
+            background-color: #f8fafc;
+            border-color: #93c5fd;
+            transform: translateY(-2px); /* 向上微动 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
 
-/* 🌟 Active 激活状态（鲜艳蓝底 + 白字 + 深度阴影） */
-.tabs .tab-btn.active {
-    color: #ffffff !important;           /* 白字 */
-    background-color: #2563eb !important;/* 主色蓝 */
-    border-color: #2563eb !important;    /* 同色边框 */
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important; /* 经典深蓝色发光阴影 */
-}
+        /* 🌟 Active 激活状态（鲜艳蓝底 + 白字 + 深度阴影） */
+        .tabs .tab-btn.active {
+            color: #ffffff !important;           /* 白字 */
+            background-color: #2563eb !important;/* 主色蓝 */
+            border-color: #2563eb !important;    /* 同色边框 */
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important; /* 经典深蓝色发光阴影 */
+        }
 
-.tabs .tab-btn.active small {
-    color: #eff6ff !important;
-    opacity: 0.95;
-}
+        .tabs .tab-btn.active small {
+            color: #eff6ff !important;
+            opacity: 0.95;
+        }
 
-/* 📱 手机端移动设备完美自适应 */
-@media (max-width: 768px) {
-    .tabs {
-        gap: 6px;               /* 窄屏适当减小胶囊间距 */
-    }
-    .tabs .tab-btn {
-        padding: 8px 4px;
-        font-size: 13px;        /* 移动端字号防折行 */
-        border-radius: 20px;
-    }
-    .tabs .tab-btn small {
-        font-size: 9px;
-    }
-}
+        /* 📱 手机端移动设备完美自适应 */
+        @media (max-width: 768px) {
+            .tabs {
+                gap: 6px;               /* 窄屏适当减小胶囊间距 */
+            }
+            .tabs .tab-btn {
+                padding: 8px 4px;
+                font-size: 13px;        /* 移动端字号防折行 */
+                border-radius: 20px;
+            }
+            .tabs .tab-btn small {
+                font-size: 9px;
+            }
+        }
         
         /* 数据表格组件 */
         section { margin-top: 15px; }
@@ -1591,29 +1591,29 @@
 
         // 💡 2. 两行一组配对（i 为第 2 行小项名，i+1 为第 3 行成绩）
         for (let i = 0; i < studentMulti.length; i += 2) {
-            const itemHeader = studentMulti[i];       // 第 2 行 (数组)
-            const itemValue = studentMulti[i + 1] || []; // 第 3 行 (数组)
+            const itemHeader = studentMulti[i];          // 第 2 行 (数组/对象)
+            const itemValue = studentMulti[i + 1] || []; // 第 3 行 (数组/对象)
 
             // 判断是用数组索引读取，还是对象读取
             const isArray = Array.isArray(itemHeader);
 
-            const year = isArray ? itemHeader[2] : getVal(itemHeader, ["比赛年份 YEAR", "年份"]);
-            const tournament = isArray ? itemHeader[1] : getVal(itemHeader, ["比赛名称 TOURNAMENT", "比赛名称"]);
-            const eventName = isArray ? itemHeader[3] : getVal(itemHeader, ["比赛项目 EVENT", "项目"]);
+            const year = isArray ? itemHeader[2] : getVal(itemHeader, ["比赛年份 YEAR", "年份", "year"]);
+            const tournament = isArray ? itemHeader[1] : getVal(itemHeader, ["比赛名称 TOURNAMENT", "比赛名称", "tournament"]);
+            const eventName = isArray ? itemHeader[3] : getVal(itemHeader, ["比赛项目 EVENT", "项目", "event"]);
         
             // P 列 (索引 15) 为总积分，Q 列 (索引 16) 为备注
-            const points = isArray ? (itemValue[15] || itemHeader[15] || "-") : getVal(itemHeader, ["比赛成绩 RESULTS (points)", "比赛成绩"]);
+            const points = isArray ? (itemValue[15] || itemHeader[15] || "-") : getVal(itemHeader, ["比赛成绩 RESULTS (points)", "比赛成绩", "points"]);
             const remarks = isArray ? (itemValue[16] || itemHeader[16] || "") : getVal(itemHeader, ["备注 REMARKS", "备注"]);
 
-            // 💡 3. 精准扫描 E 列到 O 列（索引 4 到 14，共 11 列小项容量）
+            // 💡 精准扫描 E 列到 O 列 (索引 4 到 14) 动态提取子项
             let subEventsHtml = "";
             let subCount = 0;
 
             if (isArray) {
-                // 循环索引 4 到 14 (对应 E列到O列)
+                // 循环索引 4 到 14 (对应 E列到O列，覆盖 11 个潜在子项)
                 for (let col = 4; col <= 14; col++) {
-                    const subName = itemHeader[col]; // 第 2 行的小项名称 (例如 "100m")
-                    const subVal = itemValue[col];   // 第 3 行的成绩数值 (例如 "11.20s")
+                    const subName = itemHeader[col]; // 小项名称 (例如 "100m")
+                    const subVal = itemValue[col];   // 成绩数值 (例如 "11.20s")
 
                     if (subName && subVal && 
                         String(subName).trim() !== "" && 
@@ -1625,13 +1625,27 @@
                     
                         subCount++;
                         subEventsHtml += `
-                            <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center;">
+                            <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center; white-space:nowrap; margin-bottom:2px;">
                                 <span style="color:#64748b; font-weight:500;">${String(subName).trim()}:</span>
                                 <strong style="color:#0f172a;">${String(subVal).trim()}</strong>
                             </div>
                         `;
-                        }
+                    }
                 }
+            } else {
+                // 如果解析成了对象模式
+                const ignoreKeys = ["比赛年份 YEAR", "年份", "比赛名称 TOURNAMENT", "比赛名称", "比赛项目 EVENT", "项目", "比赛成绩 RESULTS (points)", "比赛成绩", "备注 REMARKS", "备注", "学号 ID", "学号"];
+                Object.keys(itemHeader).forEach(key => {
+                    if (!ignoreKeys.some(ik => key.includes(ik)) && itemHeader[key] && itemValue[key]) {
+                        subCount++;
+                        subEventsHtml += `
+                            <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center; white-space:nowrap; margin-bottom:2px;">
+                                <span style="color:#64748b; font-weight:500;">${key.trim()}:</span>
+                                <strong style="color:#0f172a;">${String(itemValue[key]).trim()}</strong>
+                            </div>
+                        `;
+                    }
+                });
             }
 
             if (subCount === 0) {
@@ -1647,7 +1661,8 @@
                             ${eventName}
                         </span>
                     </td>
-                    <td style="padding:10px; text-align:left; max-width: 380px;">
+                    <!-- 🌟 重点解封：移除 max-width: 380px 限制，改为 min-width 自适应网格 -->
+                    <td style="padding:10px; text-align:left; min-width:320px;">
                         <div style="display:flex; flex-wrap:wrap; gap:6px; line-height:1.4;">
                             ${subEventsHtml}
                         </div>
@@ -1655,7 +1670,7 @@
                     <td style="padding:10px; text-align:center;">
                         <strong style="color:#059669; font-size:16px;">${points}</strong> <small style="color:#64748b;">pts</small>
                     </td>
-                    <td style="padding:10px; text-align:center; color:#64748b;">${remarks}</td>
+                    <td style="padding:10px; text-align:center; color:#64748b;">${remarks || "-"}</td>
                 </tr>
             `;
         }
