@@ -1795,7 +1795,7 @@
                 const sName = getStudentName(sid); // 查学生姓名
                 // 🌟 径赛复用原本的 formatTime，田赛使用 formatFieldDistance
                 const rawPerf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
-                const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
+                const perf = isTrack ? formatTime(rawPerf) : formatFieldValue(rawPerf, true);
                 const yr = getVal(best, ["比赛年份 YEAR", "年份", "year"]);
                 const rmk = getVal(best, ["备注 REMARKS", "备注"]);
 
@@ -1901,7 +1901,7 @@
                     const sName = getStudentName(sid);
                     // 🌟 径赛复用原本的 formatTime，田赛使用 formatFieldDistance
                     const rawPerf = getVal(best, ["比赛成绩 RESULT", "比赛成绩", "成绩"]);
-                    const perf = isTrack ? formatTime(rawPerf) : formatFieldDistance(rawPerf);
+                    const perf = isTrack ? formatTime(rawPerf) : formatFieldValue(rawPerf, true);
                     const yr = getVal(item, ["比赛年份 YEAR", "年份", "year"]);
                     const isSportsDay = item.isSportsDay ? '✔️' : '-';
                     const rmk = getVal(item, ["备注 REMARKS", "备注"]);
