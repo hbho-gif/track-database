@@ -875,7 +875,7 @@
 
     function fetchSheetData(sheetName) {
         return new Promise((resolve) => {
-            const isMulti = sheetName.includes("MULTI") || sheetName.includes("全能");
+            const isMulti = sheetName.includes("MULTI") || sheetName.includes("比赛成绩 (Multi)");
             Papa.parse(getSheetUrl(sheetName), {
                 download: true,
                 header: !isMulti, // 全能项不用 header，避免合并单元格重名
