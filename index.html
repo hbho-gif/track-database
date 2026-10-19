@@ -83,76 +83,94 @@
         /* ==========================================
            🎯 个人数据子 Tab (极简下划线风格 + 单行自适应)
            ========================================== */
-        .tabs {
-            display: flex;
-            flex-wrap: nowrap;          /* 💡 强行单行，不换行 */
-            gap: 8px;
-            width: 100%;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #eef2f7; /* 底部浅色分割线 */
-            box-sizing: border-box;
-            overflow-x: auto;           /* 极窄小屏平滑滑动 */
-            -webkit-overflow-scrolling: touch;
-        }
+        /* 🌟 升级版 Tab 容器：纯净白色独立胶囊风格 (Pill Style) */
+.tabs {
+    display: flex;
+    flex-wrap: nowrap;          /* 强行单行，不换行 */
+    gap: 10px;                  /* 胶囊之间的独立间距 */
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-bottom: none;        /* 💡 移除旧的下划线分割线 */
+    box-sizing: border-box;
+    overflow-x: auto;           /* 极窄小屏平滑滑动 */
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 2px;           /* 留出微妙外边距，确保阴影不被截断 */
+}
 
-        /* 隐藏横向滚动条 */
-        .tabs::-webkit-scrollbar {
-            display: none;
-        }
+/* 隐藏横向滚动条 */
+.tabs::-webkit-scrollbar {
+    display: none;
+}
 
-        .tabs .tab-btn {
-            flex: 1 1 0px;              /* 💡 5 个按钮等分整行宽度 */
-            min-width: 0;               /* 防挤压变形 */
-            padding: 10px 4px;          /* 保留内边距 */
-            border: none;               /* 移除方框边框 */
-            background: none;           /* 无背景 */
-            font-size: 15px;            /* 保留原本的 15px 字号 */
-            font-weight: bold;
-            color: #666;                /* 原本的默认灰 */
-            cursor: pointer;
-            border-bottom: 3px solid transparent; /* 底部预留下划线位置 */
-            transition: all 0.2s ease;
-            text-align: center;
-            display: flex;
-            flex-direction: column;     /* 图标+中文在上，英文在下 */
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;        /* 文本不换行 */
-        }
+/* 🌟 升级版 Tab 按钮：白色圆角卡片，放大字体 */
+.tabs .tab-btn {
+    flex: 1 1 0px;              /* 5 个按钮等分整行宽度 */
+    min-width: 0;               /* 防挤压变形 */
+    padding: 10px 8px;          /* 适度增大内边距 */
+    background-color: #ffffff;  /* 💡 默认纯白背景 */
+    border: 1px solid #cbd5e1;  /* 💡 浅灰色优雅边框 */
+    border-radius: 9999px;      /* 💡 极致圆角 (Round End / Pill) */
+    font-size: 15px;            /* 主字号 15px */
+    font-weight: 600;
+    color: #475569;             /* 高对比度灰文本 */
+    cursor: pointer;
+    border-bottom: 1px solid #cbd5e1; /* 💡 移除原本的 3px 底部线条 */
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;     /* 图标+中文在上，英文在下 */
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;        /* 文本不换行 */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); /* 微妙浮起阴影 */
+}
 
-        /* 英文副标题小字样式 */
-        .tabs .tab-btn small {
-            font-size: 9px;
-            font-weight: normal;
-            opacity: 0.75;
-            margin-top: 2px;
-            letter-spacing: 0.3px;
-        }
+/* 🌟 英文副标题小字：加大并保持良好视效 */
+.tabs .tab-btn small {
+    font-size: 11px;            /* 💡 从原本的 9px 微调加大到 11px，更清晰 */
+    font-weight: 500;
+    opacity: 0.8;
+    margin-top: 2px;
+    letter-spacing: 0.2px;
+}
 
-        /* Hover 悬停效果 */
-        .tabs .tab-btn:hover {
-            color: #1a73e8;
-            background-color: rgba(26, 115, 232, 0.04); /* 微微浅蓝背景反馈 */
-        }
+/* 🌟 Hover 悬停反馈（悬浮提升感） */
+.tabs .tab-btn:hover {
+    color: #1d4ed8;
+    background-color: #f8fafc;
+    border-color: #93c5fd;
+    transform: translateY(-2px); /* 向上微动 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
 
-        /* 🌟 Active 激活状态（蓝字 + 蓝下划线） */
-        .tabs .tab-btn.active {
-            color: #1a73e8;
-            border-bottom-color: #1a73e8; /* 经典的底部蓝条 */
-            background: none;
-        }
+/* 🌟 Active 激活状态（鲜艳蓝底 + 白字 + 深度阴影） */
+.tabs .tab-btn.active {
+    color: #ffffff !important;           /* 白字 */
+    background-color: #2563eb !important;/* 主色蓝 */
+    border-color: #2563eb !important;    /* 同色边框 */
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important; /* 经典深蓝色发光阴影 */
+}
 
-        /* 📱 手机端适配 */
-        @media (max-width: 768px) {
-            .tabs .tab-btn {
-                padding: 8px 2px;
-                font-size: 12px;
-            }
-            .tabs .tab-btn small {
-                font-size: 8px;
-            }
-        }
+.tabs .tab-btn.active small {
+    color: #eff6ff !important;
+    opacity: 0.95;
+}
+
+/* 📱 手机端移动设备完美自适应 */
+@media (max-width: 768px) {
+    .tabs {
+        gap: 6px;               /* 窄屏适当减小胶囊间距 */
+    }
+    .tabs .tab-btn {
+        padding: 8px 4px;
+        font-size: 13px;        /* 移动端字号防折行 */
+        border-radius: 20px;
+    }
+    .tabs .tab-btn small {
+        font-size: 9px;
+    }
+}
         
         /* 数据表格组件 */
         section { margin-top: 15px; }
@@ -1552,17 +1570,22 @@
         }
 
         let html = `
-            <table class="multi-table" style="width:100%; border-collapse:collapse;">
-                <thead>
-                    <tr style="background-color:#f8fafc; border-bottom:2px solid #e2e8f0;">
-                        <th style="padding:10px; text-align:center;">年份 Year</th>
-                        <th style="padding:10px; text-align:left;">比赛名称 Tournament</th>
-                        <th style="padding:10px; text-align:center;">全能项目 Event</th>
-                        <th style="padding:10px; text-align:left;">各项成绩明细 Breakdown</th>
-                        <th style="padding:10px; text-align:center;">总积分 Points</th>
-                        <th style="padding:10px; text-align:center;">备注 Remarks</th>
-                    </tr>
-                </thead>
+            <!-- 🌟 解除宽高锁死，允许自适应与横向滚动 -->
+            <div style="width: 100%; overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <h4 style="margin-top:0; color:#1e293b; font-size:16px; margin-bottom:12px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
+                    🏆 全能项目成绩明细 (Multi-Events Breakdown)
+                </h4>
+                <table class="multi-table" style="width: 100%; min-width: 800px; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #f8fafc; color: #475569; text-align: left; border-bottom: 2px solid #e2e8f0;">
+                            <th style="padding: 10px; min-width: 80px;">年份 Year</th>
+                            <th style="padding: 10px; min-width: 120px;">赛事名称 Event</th>
+                            <th style="padding: 10px; min-width: 90px;">组别 Group</th>
+                            <th style="padding: 10px; min-width: 100px; color: #2563eb;">总得分 Total</th>
+                            <!-- 🌟 动态明细表头列 -->
+                            <th style="padding: 10px;">各项成绩明细 Breakdown</th>
+                        </tr>
+                    </thead>
                 <tbody>
         `;
 
