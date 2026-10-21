@@ -1625,7 +1625,7 @@
                     
                         subCount++;
                         subEventsHtml += `
-                            <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center; white-space:nowrap; margin-bottom:2px;">
+                            <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center; white-space: nowrap;">
                                 <span style="color:#64748b; font-weight:500;">${String(subName).trim()}:</span>
                                 <strong style="color:#0f172a;">${String(subVal).trim()}</strong>
                             </div>
@@ -1661,9 +1661,9 @@
                             ${eventName}
                         </span>
                     </td>
-                    <!-- 🌟 重点解封：移除 max-width: 380px 限制，改为 min-width 自适应网格 -->
+                    
                     <td style="padding:10px; text-align:left; min-width:320px;">
-                        <div style="display:flex; flex-wrap:wrap; gap:6px; line-height:1.4;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; line-height: 1.4;">
                             ${subEventsHtml}
                         </div>
                     </td>
