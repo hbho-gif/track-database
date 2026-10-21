@@ -1619,11 +1619,14 @@
                         String(subName).trim() !== "" && 
                         String(subName).trim() !== "-" && 
                         !String(subName).includes("比赛小项") &&
-                        !String(subName).includes("#") &&
-                        String(subVal).trim() !== "" && 
-                        String(subVal).trim() !== "-") {
+                        !String(subName).includes("#")) {
                     
                         subCount++;
+
+                        let displayVal = (subVal !== undefined && subVal !== null && String(subVal).trim() !== "") 
+                            ? String(subVal).trim() 
+                            : "-";
+                        
                         subEventsHtml += `
                             <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center; white-space: nowrap;">
                                 <span style="color:#64748b; font-weight:500;">${String(subName).trim()}:</span>
@@ -1656,7 +1659,7 @@
                 <tr style="border-bottom:1px solid #e2e8f0;">
                     <td style="padding:10px; text-align:center;">${year}</td>
                     <td style="padding:10px; text-align:left;"><strong>${tournament}</strong></td>
-                    <td style="padding:10px; text-align:center;">
+                    <td style="padding:10px; text-align:center; white-space:nowrap;">
                         <span style="background-color:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:600;">
                             ${eventName}
                         </span>
