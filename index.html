@@ -83,94 +83,106 @@
         /* ==========================================
            🎯 个人数据子 Tab (极简下划线风格 + 单行自适应)
            ========================================== */
-        /* 🌟 升级版 Tab 容器：纯净白色独立胶囊风格 (Pill Style) */
-        .tabs {
-            display: flex;
-            flex-wrap: nowrap;          /* 强行单行，不换行 */
-            gap: 10px;                  /* 胶囊之间的独立间距 */
-            width: 100%;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            border-bottom: none;        /* 💡 移除旧的下划线分割线 */
-            box-sizing: border-box;
-            overflow-x: auto;           /* 极窄小屏平滑滑动 */
-            -webkit-overflow-scrolling: touch;
-            padding: 4px 2px;           /* 留出微妙外边距，确保阴影不被截断 */
-        }
+        /* 🌟 极致白色圆角胶囊 Tab（通用类名融合版） */
+.tabs, .tab-buttons, .sub-tab-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;       /* 单行不换行 */
+    gap: 12px !important;              /* 胶囊独立间距 */
+    width: 100% !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    background: transparent !important;/* 彻底清理灰色背景框 */
+    border-bottom: none !important;     /* 移除下划线分割线 */
+    box-sizing: border-box !important;
+    overflow-x: auto !important;        /* 极窄屏平滑滑动 */
+    -webkit-overflow-scrolling: touch;
+    padding: 6px 2px !important;
+}
 
-        /* 隐藏横向滚动条 */
-        .tabs::-webkit-scrollbar {
-            display: none;
-        }
+/* 隐藏横向滚动条 */
+.tabs::-webkit-scrollbar, 
+.tab-buttons::-webkit-scrollbar, 
+.sub-tab-container::-webkit-scrollbar {
+    display: none !important;
+}
 
-        /* 🌟 升级版 Tab 按钮：白色圆角卡片，放大字体 */
-        .tabs .tab-btn {
-            flex: 1 1 0px;              /* 5 个按钮等分整行宽度 */
-            min-width: 0;               /* 防挤压变形 */
-            padding: 10px 8px;          /* 适度增大内边距 */
-            background-color: #ffffff;  /* 💡 默认纯白背景 */
-            border: 1px solid #cbd5e1;  /* 💡 浅灰色优雅边框 */
-            border-radius: 9999px;      /* 💡 极致圆角 (Round End / Pill) */
-            font-size: 15px;            /* 主字号 15px */
-            font-weight: 600;
-            color: #475569;             /* 高对比度灰文本 */
-            cursor: pointer;
-            border-bottom: 1px solid #cbd5e1; /* 💡 移除原本的 3px 底部线条 */
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            display: flex;
-            flex-direction: column;     /* 图标+中文在上，英文在下 */
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;        /* 文本不换行 */
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); /* 微妙浮起阴影 */
-        }
+/* 🌟 Tab 胶囊按钮（放大字号 + 独立白色圆角卡片） */
+.tabs .tab-btn, 
+.tab-buttons button, 
+.sub-tab-btn {
+    flex: 1 1 0px !important;          /* 5 个按钮等分整行宽度 */
+    min-width: 120px !important;        /* 设置保底最小宽度，防止移动端挤压变形 */
+    padding: 12px 10px !important;      /* 增大内边距，提升点击手感 */
+    background-color: #ffffff !important;/* 💡 强制纯白背景 */
+    border: 1px solid #cbd5e1 !important;/* 💡 浅灰色边框 */
+    border-radius: 9999px !important;  /* 💡 极致圆角 (Round End / Pill) */
+    font-size: 16px !important;        /* 💡 主字号加大到 16px */
+    font-weight: 700 !important;       /* 加粗中文 */
+    color: #334155 !important;         /* 深灰高对比度字色 */
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important; /* 图标+中文在上，英文在下 */
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important; /* 柔和悬浮阴影 */
+}
 
-        /* 🌟 英文副标题小字：加大并保持良好视效 */
-        .tabs .tab-btn small {
-            font-size: 11px;            /* 💡 从原本的 9px 微调加大到 11px，更清晰 */
-            font-weight: 500;
-            opacity: 0.8;
-            margin-top: 2px;
-            letter-spacing: 0.2px;
-        }
+/* 🌟 英文副标题小字 <small> 强化 */
+.tabs .tab-btn small, 
+.tab-buttons button small, 
+.sub-tab-btn small {
+    font-size: 11px !important;        /* 💡 英文小字加大到 11px */
+    font-weight: 600 !important;
+    color: #64748b !important;         /* 清晰的次级灰 */
+    margin-top: 3px !important;
+    letter-spacing: 0.3px !important;
+}
 
-        /* 🌟 Hover 悬停反馈（悬浮提升感） */
-        .tabs .tab-btn:hover {
-            color: #1d4ed8;
-            background-color: #f8fafc;
-            border-color: #93c5fd;
-            transform: translateY(-2px); /* 向上微动 */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-        }
+/* 🌟 Hover 悬停效果 */
+.tabs .tab-btn:hover, 
+.tab-buttons button:hover, 
+.sub-tab-btn:hover {
+    color: #1d4ed8 !important;
+    background-color: #f8fafc !important;
+    border-color: #93c5fd !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+}
 
-        /* 🌟 Active 激活状态（鲜艳蓝底 + 白字 + 深度阴影） */
-        .tabs .tab-btn.active {
-            color: #ffffff !important;           /* 白字 */
-            background-color: #2563eb !important;/* 主色蓝 */
-            border-color: #2563eb !important;    /* 同色边框 */
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important; /* 经典深蓝色发光阴影 */
-        }
+/* 🌟 Active 激活状态（鲜艳蓝底 + 纯白文字 + 高亮阴影） */
+.tabs .tab-btn.active, 
+.tab-buttons button.active, 
+.sub-tab-btn.active {
+    color: #ffffff !important;           /* 白字 */
+    background-color: #2563eb !important;/* 活力蓝背景 */
+    border-color: #2563eb !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important; /* 蓝发光阴影 */
+}
 
-        .tabs .tab-btn.active small {
-            color: #eff6ff !important;
-            opacity: 0.95;
-        }
+.tabs .tab-btn.active small, 
+.tab-buttons button.active small, 
+.sub-tab-btn.active small {
+    color: #ffffff !important;           /* 激活时英文小字也变白色 */
+    opacity: 0.9 !important;
+}
 
-        /* 📱 手机端移动设备完美自适应 */
-        @media (max-width: 768px) {
-            .tabs {
-                gap: 6px;               /* 窄屏适当减小胶囊间距 */
-            }
-            .tabs .tab-btn {
-                padding: 8px 4px;
-                font-size: 13px;        /* 移动端字号防折行 */
-                border-radius: 20px;
-            }
-            .tabs .tab-btn small {
-                font-size: 9px;
-            }
-        }
+/* 📱 移动端自适应 */
+@media (max-width: 768px) {
+    .tabs, .tab-buttons, .sub-tab-container {
+        gap: 8px !important;
+    }
+    .tabs .tab-btn, .tab-buttons button, .sub-tab-btn {
+        min-width: 100px !important;
+        padding: 10px 6px !important;
+        font-size: 14px !important;    /* 移动端维持 14px */
+    }
+    .tabs .tab-btn small, .tab-buttons button small, .sub-tab-btn small {
+        font-size: 10px !important;
+    }
+}
         
         /* 数据表格组件 */
         section { margin-top: 15px; }
