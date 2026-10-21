@@ -1639,12 +1639,17 @@
                 // 如果解析成了对象模式
                 const ignoreKeys = ["比赛年份 YEAR", "年份", "比赛名称 TOURNAMENT", "比赛名称", "比赛项目 EVENT", "项目", "比赛成绩 RESULTS (points)", "比赛成绩", "备注 REMARKS", "备注", "学号 ID", "学号"];
                 Object.keys(itemHeader).forEach(key => {
-                    if (!ignoreKeys.some(ik => key.includes(ik)) && itemHeader[key] && itemValue[key]) {
+                    if (!ignoreKeys.some(ik => key.includes(ik)) && itemHeader[key]) {
                         subCount++;
+                        let subVal = itemValue[key];
+                        let displayVal = (subVal !== undefined && subVal !== null && String(subVal).trim() !== "") 
+                            ? String(subVal).trim() 
+                            : "-";
+                        
                         subEventsHtml += `
                             <div style="background-color:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-size:12px; display:inline-flex; gap:4px; align-items:center; white-space:nowrap; margin-bottom:2px;">
                                 <span style="color:#64748b; font-weight:500;">${key.trim()}:</span>
-                                <strong style="color:#0f172a;">${String(itemValue[key]).trim()}</strong>
+                                <strong style="color:#0f172a;">${displayVal}</strong>
                             </div>
                         `;
                     }
