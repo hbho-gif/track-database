@@ -1770,21 +1770,33 @@
         renderTeamRankings();
     }
 
-    // 辅助：成绩解析为可比较数值（径赛换算秒数，田赛转浮点数）
+    // 🌟 遗漏点 1 补丁：增强版成绩解析（模糊正则过滤所有非法/无成绩文本，防排序错乱）
     function parsePerformance(val, isTrack) {
-        if (!val || val === "-" || val === "" || val === "DNS" || val === "DNF" || val === "有比赛没记录") {
+        if (!val || val === "-" || val === "null" || val === "undefined") {
+            return isTrack ? Infinity : -Infinity;
+        }
+
+        const strVal = String(val).trim();
+
+        // 强力过滤 DNS / DNF / DQ / 有比赛没记录 等各种无数值情况
+        if (
+            strVal === "" || 
+            strVal === "-" || 
+            /(DNS|DNF|DQ|NM|没记录|无成绩)/i.test(strVal)
+        ) {
             return isTrack ? Infinity : -Infinity;
         }
         
-        // 强制转换为字符串并去掉可能由格式化函数加上去的多余单位 "m"
-        const str = String(val).replace("m", "").trim();
+        // 强制转换为字符串并去掉单位 "m"
+        const str = strVal.replace("m", "").trim();
 
         if (isTrack) {
             // 兼容 "0:00:10.00", "00:10.00", "10.00"
             const parts = str.split(":").map(Number);
             if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || Infinity;
             if (parts.length === 2) return (parts[0] * 60 + parts[1]) || Infinity;
-            return parseFloat(str) || Infinity;
+            const num = parseFloat(str);
+            return isNaN(num) ? Infinity : num;
         } else {
             const num = parseFloat(str);
             return isNaN(num) ? -Infinity : num;
@@ -1796,7 +1808,6 @@
         if (!studentId || String(studentId).trim() === "") return "-";
         const sid = String(studentId).trim();
 
-        // 优先读取【个人基本资料】Sheet 数据源
         const profileSource = typeof basicStudents !== "undefined" ? basicStudents : 
                               (typeof profileData !== "undefined" ? profileData : 
                               (typeof basicInfoData !== "undefined" ? basicInfoData : []));
@@ -1893,7 +1904,6 @@
                 "results", "m", "Result", "成绩results (m)"
             ]);
 
-            // 🌟 核心修复：如果是 undefined、null、空字符串 或 只有空格，坚决返回 "-"
             if (
                 raw === undefined || 
                 raw === null || 
@@ -1905,10 +1915,8 @@
                 return "-";
             }
 
-            // 🌟 核心修复：防止意外抓取到了“比赛名称/项目”等非数字文本（如果是纯文字且不是 DNS/DNF，说明抓错列了）
             const strRaw = String(raw).trim();
-            if (!isTrack && !/\d/.test(strRaw) && !/(DNS|DNF|DQ|NM|有比赛没记录)/i.test(strRaw)) {
-                // 田赛成绩里如果没有数字且不是 DNS/DNF，说明误抓了比赛名称，强制显示 "-"
+            if (!isTrack && !/\d/.test(strRaw) && !/(DNS|DNF|DQ|NM)/i.test(strRaw)) {
                 return "-";
             }
             
@@ -1951,7 +1959,12 @@
                 return isTrack ? valA - valB : valB - valA;
             });
 
-            const best = grpData[0];
+            // 过滤掉最优解是无效成绩的情况
+            const best = grpData.find(i => {
+                const p = parsePerformance(getVal(i, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "results"]), isTrack);
+                return isTrack ? p !== Infinity : p !== -Infinity;
+            });
+
             if (best) {
                 const sid = getVal(best, ["学号 ID", "学号", "id", "ID"]);
                 const sName = getStudentName(sid);
@@ -2011,14 +2024,19 @@
                 if (isEligible) {
                     const currentPerf = parsePerformance(getVal(item, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
 
-                    if (!uniqueStudentMap.has(sid)) {
-                        uniqueStudentMap.set(sid, item);
-                    } else {
-                        const prevItem = uniqueStudentMap.get(sid);
-                        const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
-                        
-                        if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
+                    // 🌟 遗漏点 2 补丁：只将含有有效数值成绩的项目加入排行榜比对，彻底剔除无记录的占位数据
+                    const isValidPerf = isTrack ? currentPerf !== Infinity : currentPerf !== -Infinity;
+
+                    if (isValidPerf) {
+                        if (!uniqueStudentMap.has(sid)) {
                             uniqueStudentMap.set(sid, item);
+                        } else {
+                            const prevItem = uniqueStudentMap.get(sid);
+                            const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                            
+                            if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
+                                uniqueStudentMap.set(sid, item);
+                            }
                         }
                     }
                 }
@@ -2062,7 +2080,7 @@
                     const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
                     const sName = getStudentName(sid);
                     const perf = getPerformanceValue(item);
-                    const yr = getVal(item, ["比赛年份 YEAR", "年份", "year", "YEAR"]);
+                    const yr = getVal(best || item, ["比赛年份 YEAR", "年份", "year", "YEAR"]);
                     const isSportsDay = item.isSportsDay ? '✔️' : '-';
                     const rmk = getVal(item, ["备注 REMARKS", "备注", "REMARKS"]);
 
