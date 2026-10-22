@@ -1523,31 +1523,42 @@
         // 💡 田赛成绩处理 (Field) - 强力格式化与防空白错位
         // -----------------------------------------------------------
         try {
-            const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id"])).trim() === cleanId);
+            const studentField = (fieldRaces || []).filter(i => String(getVal(i, ["学号", "学号 ID", "id", "ID"])).trim() === cleanId);
 
-            // 遍历并规范化田赛成绩（保留 2 位小数 + 空白防错）
+            // 遍历并规范化田赛成绩（保留 2 位小数 + 空白防错 + 全键名覆盖）
             const formattedFieldData = studentField.map(item => {
                 let copyItem = { ...item };
                 
-                const fieldResultKeys = ["results", "m", "成绩", "Result", "成绩results (m)"];
+                // 🌟 1. 扩充所有可能的田赛成绩表头键名
+                const fieldResultKeys = [
+                    "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", 
+                    "PERFORMANCE", "performance", "results", "m", "Result", "成绩results (m)"
+                ];
 
-                // 1. 读取成绩原始值
+                // 2. 读取成绩原始值
                 let rawRes = getVal(copyItem, fieldResultKeys);
-                let formattedValue = formatFieldDistance(rawRes);
-
-                // 2. 只有当 rawRes 是合法数字时才强制转 2 位小数
-                if (rawRes !== "-" && rawRes !== "" && !isNaN(parseFloat(rawRes))) {
-                    const formattedValue = parseFloat(rawRes).toFixed(2);
+                
+                // 🌟 3. 防错转换：判断是否为合法数字（或者附带了 "m" 的数字）
+                let cleanResStr = (rawRes !== null && rawRes !== undefined) ? String(rawRes).replace("m", "").trim() : "";
+                
+                if (
+                    cleanResStr !== "" && 
+                    cleanResStr !== "-" && 
+                    cleanResStr !== "undefined" &&
+                    !isNaN(parseFloat(cleanResStr)) &&
+                    !/(DNS|DNF|DQ|NM|没记录)/i.test(cleanResStr)
+                ) {
+                    const formattedValue = parseFloat(cleanResStr).toFixed(2);
                     
-                    // 覆盖找到的字段
+                    // 覆盖匹配到的键名与通用 results 键
                     const resultKey = fieldResultKeys.find(k => copyItem[k] !== undefined);
                     if (resultKey) {
                         copyItem[resultKey] = formattedValue;
                     }
                     copyItem["results"] = formattedValue;
                 } else {
-                    // 3. 如果是空白或非法字符，强制设定为 "-"
-                    copyItem["results"] = "-";
+                    // 如果是 DNS / DNF 等标记则保留，否则才设为 "-"
+                    copyItem["results"] = /(DNS|DNF|DQ|NM)/i.test(cleanResStr) ? cleanResStr : "-";
                 }
 
                 return copyItem;
