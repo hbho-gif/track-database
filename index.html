@@ -1900,7 +1900,7 @@
 
             // 🌟 核心修复：防止意外抓取到了“比赛名称/项目”等非数字文本（如果是纯文字且不是 DNS/DNF，说明抓错列了）
             const strRaw = String(raw).trim();
-            if (!isTrack && !/\d/.test(strRaw) && !/(DNS|DNF|DQ|NM)/i.test(strRaw)) {
+            if (!isTrack && !/\d/.test(strRaw) && !/(DNS|DNF|DQ|NM|有比赛没记录)/i.test(strRaw)) {
                 // 田赛成绩里如果没有数字且不是 DNS/DNF，说明误抓了比赛名称，强制显示 "-"
                 return "-";
             }
