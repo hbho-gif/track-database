@@ -1799,7 +1799,7 @@
         // 优先读取【个人基本资料】Sheet 数据源
         const profileSource = typeof basicStudents !== "undefined" ? basicStudents : 
                               (typeof profileData !== "undefined" ? profileData : 
-                              (typeof basicInfoData !== "undefined" ? basicInfoData : [])));
+                              (typeof basicInfoData !== "undefined" ? basicInfoData : []));
 
         const match = profileSource.find(i => {
             const idInSheet = getVal(i, ["学号 ID", "学号", "id", "ID"]);
