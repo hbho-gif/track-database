@@ -1894,7 +1894,14 @@
             ]);
 
             // 🌟 核心修复：如果是 undefined、null、空字符串 或 只有空格，坚决返回 "-"
-            if (raw === undefined || raw === null || raw === "有比赛没记录" || String(raw).trim() === "" || String(raw).trim() === "-") {
+            if (
+                raw === undefined || 
+                raw === null || 
+                String(raw).trim() === "" || 
+                String(raw).trim() === "-" || 
+                String(raw).includes("有比赛没记录") ||
+                String(raw).includes("没记录")
+            ) {
                 return "-";
             }
 
@@ -1959,7 +1966,9 @@
                         <td style="padding:8px;"><strong>${sName}</strong></td>
                         <td style="padding:8px; color:#059669; font-weight:bold; font-family: monospace;">${perf}</td>
                         <td style="padding:8px;">${yr}</td>
-                        <td style="padding:8px; color:#64748b;">${rmk || "-"}</td>
+                        <td style="padding:8px; color:#64748b; white-space: normal !important; word-break: break-word; max-width: 180px; min-width: 100px;">
+                            ${rmk || "-"}
+                        </td>
                     </tr>
                 `;
             } else {
@@ -2065,7 +2074,9 @@
                             <td style="padding:6px; color:#059669; font-weight:bold; font-family: monospace;">${perf}</td>
                             <td style="padding:6px;">${yr}</td>
                             <td style="padding:6px; text-align:center;">${isSportsDay}</td>
-                            <td style="padding:6px; color:#64748b;">${rmk || "-"}</td>
+                            <td style="padding:8px; color:#64748b; white-space: normal !important; word-break: break-word; max-width: 180px; min-width: 100px;">
+                                ${rmk || "-"}
+                            </td>
                         </tr>
                     `;
                 });
