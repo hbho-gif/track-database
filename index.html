@@ -1772,7 +1772,7 @@
 
     // 辅助：成绩解析为可比较数值（径赛换算秒数，田赛转浮点数）
     function parsePerformance(val, isTrack) {
-        if (!val || val === "-" || val === "" || val === "DNS" || val === "DNF") {
+        if (!val || val === "-" || val === "" || val === "DNS" || val === "DNF" || val === "有比赛没记录") {
             return isTrack ? Infinity : -Infinity;
         }
         
