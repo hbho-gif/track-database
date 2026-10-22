@@ -1281,15 +1281,40 @@
     }
 
     // 💡 改进后的单元格格式化逻辑：自动识别田赛并保留两位小数
-    function formatFieldValue(val, isField = false) {
-        if (val === undefined || val === null || val === "" || val === "-") return "-";
-    
-        // 如果是数字且属于田赛项目（如远跳、铅球、高跳等单位为米 m 的成绩）
-        const num = parseFloat(val);
-            if (!isNaN(num) && isField) {
-        return num.toFixed(2) + " m"; // 强制格式化为 2 位小数，如 5.30 m
+    // 📏 全局通用：田赛成绩格式化（兼容 1 个或 2 个参数输入）
+    function formatFieldValue(val, appendUnit = false) {
+        // 1. 严格过滤空值与“有比赛没记录”等占位字符
+        if (
+            val === null || 
+            val === undefined || 
+            val === "" || 
+            val === "-" || 
+            String(val).includes("有比赛没记录") ||
+            String(val).includes("没记录")
+        ) {
+            return "-";
         }
-    return val;
+
+        const strVal = String(val).trim();
+
+        // 2. 如果是 DNS / DNF / DQ / NM / 无成绩 等特殊裁判标记，直接原样返回
+        if (/(DNS|DNF|DQ|NM|无成绩)/i.test(strVal)) {
+            return strVal;
+        }
+
+        // 3. 提取其中的数值（自动去除原本自带的 "m" 或其他单位）
+        const num = parseFloat(strVal.replace("m", "").trim());
+    
+        // 如果无法解析成数字，直接返回原始字符串或 "-"
+        if (isNaN(num)) {
+            return strVal || "-";
+        }
+
+        // 4. 格式化为保留 2 位小数
+        const formatted = num.toFixed(2);
+
+        // 如果传了 appendUnit 为 true（或字段本身需要），附带 " m" 单位，否则只返回数字
+        return appendUnit ? `${formatted} m` : formatted;
     }
 
     
