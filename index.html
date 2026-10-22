@@ -1770,7 +1770,7 @@
         renderTeamRankings();
     }
 
-    // 🌟 遗漏点 1 补丁：增强版成绩解析（模糊正则过滤所有非法/无成绩文本，防排序错乱）
+    // 辅助：成绩解析为可比较数值
     function parsePerformance(val, isTrack) {
         if (!val || val === "-" || val === "null" || val === "undefined") {
             return isTrack ? Infinity : -Infinity;
@@ -1778,7 +1778,6 @@
 
         const strVal = String(val).trim();
 
-        // 强力过滤 DNS / DNF / DQ / 有比赛没记录 等各种无数值情况
         if (
             strVal === "" || 
             strVal === "-" || 
@@ -1787,11 +1786,9 @@
             return isTrack ? Infinity : -Infinity;
         }
         
-        // 强制转换为字符串并去掉单位 "m"
         const str = strVal.replace("m", "").trim();
 
         if (isTrack) {
-            // 兼容 "0:00:10.00", "00:10.00", "10.00"
             const parts = str.split(":").map(Number);
             if (parts.length === 3) return (parts[0] * 3600 + parts[1] * 60 + parts[2]) || Infinity;
             if (parts.length === 2) return (parts[0] * 60 + parts[1]) || Infinity;
@@ -1823,10 +1820,10 @@
                 return String(cName).trim();
             }
         }
-        return sid; // 回退显示学号本身
+        return sid;
     }
 
-    // 2. 获取学生出生年份（增强日期格式解析 + 防错回退）
+    // 2. 获取学生出生年份
     function getStudentBirthYear(studentId) {
         if (!studentId) return null;
         const sid = String(studentId).trim();
@@ -1847,7 +1844,7 @@
     }
 
     // ==========================================
-    // 🏆 主渲染函数：培训队总汇 (唯一且完整定义)
+    // 🏆 主渲染函数：培训队总汇
     // ==========================================
     function renderTeamRankings() {
         const container = document.getElementById("teamRankingContainer");
@@ -1899,6 +1896,7 @@
 
         // 💡 辅助：提取并标准化格式化成绩
         const getPerformanceValue = (item) => {
+            if (!item) return "-";
             const raw = getVal(item, [
                 "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "PERFORMANCE", "performance", 
                 "results", "m", "Result", "成绩results (m)"
@@ -1959,13 +1957,12 @@
                 return isTrack ? valA - valB : valB - valA;
             });
 
-            // 过滤掉最优解是无效成绩的情况
-            const best = grpData.find(i => {
-                const p = parsePerformance(getVal(i, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "results"]), isTrack);
-                return isTrack ? p !== Infinity : p !== -Infinity;
-            });
+            // 提取排序后的第 1 名
+            const best = grpData[0];
+            const bestPerfVal = best ? parsePerformance(getVal(best, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack) : (isTrack ? Infinity : -Infinity);
+            const isValidBest = isTrack ? bestPerfVal !== Infinity : bestPerfVal !== -Infinity;
 
-            if (best) {
+            if (best && isValidBest) {
                 const sid = getVal(best, ["学号 ID", "学号", "id", "ID"]);
                 const sName = getStudentName(sid);
                 const perf = getPerformanceValue(best);
@@ -2013,6 +2010,8 @@
             const uniqueStudentMap = new Map();
             grpData.forEach(item => {
                 const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
+                if (!sid || sid === "-") return;
+
                 const birthYear = getStudentBirthYear(sid);
                 
                 let isEligible = true;
@@ -2024,32 +2023,32 @@
                 if (isEligible) {
                     const currentPerf = parsePerformance(getVal(item, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
 
-                    // 🌟 遗漏点 2 补丁：只将含有有效数值成绩的项目加入排行榜比对，彻底剔除无记录的占位数据
-                    const isValidPerf = isTrack ? currentPerf !== Infinity : currentPerf !== -Infinity;
-
-                    if (isValidPerf) {
-                        if (!uniqueStudentMap.has(sid)) {
+                    if (!uniqueStudentMap.has(sid)) {
+                        uniqueStudentMap.set(sid, item);
+                    } else {
+                        const prevItem = uniqueStudentMap.get(sid);
+                        const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                        
+                        if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
                             uniqueStudentMap.set(sid, item);
-                        } else {
-                            const prevItem = uniqueStudentMap.get(sid);
-                            const prevPerf = parsePerformance(getVal(prevItem, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
-                            
-                            if ((isTrack && currentPerf < prevPerf) || (!isTrack && currentPerf > prevPerf)) {
-                                uniqueStudentMap.set(sid, item);
-                            }
                         }
                     }
                 }
             });
 
-            const top10 = Array.from(uniqueStudentMap.values());
-            top10.sort((a, b) => {
+            // 过滤有效成绩并排序
+            const validStudents = Array.from(uniqueStudentMap.values()).filter(item => {
+                const p = parsePerformance(getVal(item, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
+                return isTrack ? p !== Infinity : p !== -Infinity;
+            });
+
+            validStudents.sort((a, b) => {
                 const valA = parsePerformance(getVal(a, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
                 const valB = parsePerformance(getVal(b, ["比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]), isTrack);
                 return isTrack ? valA - valB : valB - valA;
             });
 
-            const final10 = top10.slice(0, 10);
+            const final10 = validStudents.slice(0, 10);
 
             activeStudentHtml += `
                 <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -2080,7 +2079,8 @@
                     const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
                     const sName = getStudentName(sid);
                     const perf = getPerformanceValue(item);
-                    const yr = getVal(best || item, ["比赛年份 YEAR", "年份", "year", "YEAR"]);
+                    // 🌟 修复关键：修正为正确的当前遍历变量 item
+                    const yr = getVal(item, ["比赛年份 YEAR", "年份", "year", "YEAR"]);
                     const isSportsDay = item.isSportsDay ? '✔️' : '-';
                     const rmk = getVal(item, ["备注 REMARKS", "备注", "REMARKS"]);
 
@@ -2105,7 +2105,8 @@
 
         container.innerHTML = bestRecordHtml + activeStudentHtml;
     }
-</script>
+    
+    </script>
 
 </body>
 </html>
