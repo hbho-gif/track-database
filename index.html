@@ -1895,7 +1895,7 @@
             ]);
 
             // 🌟 核心修复：如果是 undefined、null、空字符串 或 只有空格，坚决返回 "-"
-            if (raw === undefined || raw === null || String(raw).trim() === "" || String(raw).trim() === "-") {
+            if (raw === undefined || raw === null || raw === "有比赛没记录" || String(raw).trim() === "" || String(raw).trim() === "-") {
                 return "-";
             }
 
