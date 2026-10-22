@@ -1799,7 +1799,6 @@
         // 优先读取【个人基本资料】Sheet 数据源
         const profileSource = typeof basicStudents !== "undefined" ? basicStudents : 
                               (typeof profileData !== "undefined" ? profileData : 
-                              (typeof studentBasicData !== "undefined" ? studentBasicData : 
                               (typeof basicInfoData !== "undefined" ? basicInfoData : [])));
 
         const match = profileSource.find(i => {
