@@ -950,7 +950,9 @@
     let crossRaces = [];
     let testData = [];
     let multiRaces = [];
-        
+    let schoolSportsDayTrack = []; // 🌟 新增：校内运动会径赛
+    let schoolSportsDayField = []; // 🌟 新增：校内运动会田赛    
+    
     // 3. 执行数据批量加载
     Promise.all([
         fetchSheetData("个人基本资料"),           // 请确保这里的 Tab 名称与 Google Sheet 底部的完全一致
@@ -958,7 +960,9 @@
         fetchSheetData("比赛成绩 (Field)"),
         fetchSheetData("比赛成绩 (Cross Country)"),
         fetchSheetData("测试成绩"),
-        fetchSheetData("比赛成绩 (Multi)")
+        fetchSheetData("比赛成绩 (Multi)"),
+        fetchSheetData("校内运动会 (School SportsDay TRACK)"), // 🌟 新增请求
+        fetchSheetData("校内运动会 (School SportsDay FIELD)")  // 🌟 新增请求
     ]).then(([basic, track, field, cross, test, multi]) => {
         basicStudents = basic;
         trackRaces = track;
@@ -966,8 +970,18 @@
         crossRaces = cross;
         testData = test;
         multiRaces = multi;
+        schoolSportsDayTrack = sportsTrack; // 🌟 赋值给全局变量
+        schoolSportsDayField = sportsField; // 🌟 赋值给全局变量
+        
+        console.log("所有数据加载完成！");
+        console.log("基本资料笔数:", basicStudents.length);
+        console.log("运动会径赛笔数:", schoolSportsDayTrack.length);
+        console.log("运动会田赛笔数:", schoolSportsDayField.length);
 
-        console.log("所有数据加载完成！基本资料笔数:", basicStudents.length);
+        // 如果页面加载完需要自动渲染，在这里调用一次
+        if (typeof renderTeamRankings === "function") {
+            renderTeamRankings();
+        }
     }).catch(err => {
         console.error("数据读取失败:", err);
     });
