@@ -1897,22 +1897,28 @@
         const isTrack = category === "TRACK";
         const currentYear = new Date().getFullYear();
 
-        // 3. 正确引进数据源 (支持校内运动会 Sheet 数据)
+        // 3. 正确引进数据源 (兼容多种可能的运动会变量名)
         let rawData = [];
         if (isTrack) {
             rawData = typeof trackRaces !== "undefined" ? [...trackRaces] : [];
-            // 引入【校内运动会 (School SportsDay TRACK)】
-            if (includeSportsDay && typeof schoolSportsDayTrack !== "undefined" && Array.isArray(schoolSportsDayTrack)) {
-                rawData = rawData.concat(schoolSportsDayTrack.map(item => ({ ...item, isSportsDay: true })));
+            if (includeSportsDay) {
+                const sportsTrack = typeof schoolSportsDayTrack !== "undefined" ? schoolSportsDayTrack :
+                                   (typeof sportsDayTrack !== "undefined" ? sportsDayTrack : []);
+                if (Array.isArray(sportsTrack) && sportsTrack.length > 0) {
+                    rawData = rawData.concat(sportsTrack.map(item => ({ ...item, isSportsDay: true })));
+                }
             }
         } else {
             rawData = typeof fieldRaces !== "undefined" ? [...fieldRaces] : [];
-            // 引入【校内运动会 (School SportsDay FIELD)】
-            if (includeSportsDay && typeof schoolSportsDayField !== "undefined" && Array.isArray(schoolSportsDayField)) {
-                rawData = rawData.concat(schoolSportsDayField.map(item => ({ ...item, isSportsDay: true })));
+            if (includeSportsDay) {
+                const sportsField = typeof schoolSportsDayField !== "undefined" ? schoolSportsDayField :
+                                   (typeof sportsDayField !== "undefined" ? sportsDayField : []);
+                if (Array.isArray(sportsField) && sportsField.length > 0) {
+                    rawData = rawData.concat(sportsField.map(item => ({ ...item, isSportsDay: true })));
+                }
             }
         }
-
+        
         if (rawData.length === 0) {
             container.innerHTML = `
                 <div style="text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
