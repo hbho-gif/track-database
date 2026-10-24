@@ -1916,42 +1916,31 @@
         let rawData = [];
         
         if (isTrack) {
-            // 读取常态径赛数据
+            // 1. 读取常态径赛数据
             rawData = typeof trackRaces !== "undefined" ? [...trackRaces] : [];
 
-            // 勾选后，检索并合并【校内运动会 (School SportsDay TRACK)】 Sheet 数据
+            // 2. 勾选后，合并【校内运动会 (School SportsDay TRACK)】 Sheet 数据
             if (includeSportsDay) {
-                const sportsTrackData = 
-                    (typeof schoolSportsDayTrack !== "undefined" && Array.isArray(schoolSportsDayTrack)) ? schoolSportsDayTrack :
-                    (typeof sportsDayTrack !== "undefined" && Array.isArray(sportsDayTrack)) ? sportsDayTrack :
-                    (typeof schoolSportsDayTrackData !== "undefined" && Array.isArray(schoolSportsDayTrackData)) ? schoolSportsDayTrackData :
-                    (typeof schoolSportsDayTrackRaces !== "undefined" && Array.isArray(schoolSportsDayTrackRaces)) ? schoolSportsDayTrackRaces : [];
-
-                if (sportsTrackData.length > 0) {
-                    rawData = rawData.concat(sportsTrackData.map(item => ({ ...item, isSportsDay: true })));
+                if (typeof schoolSportsDayTrack !== "undefined" && Array.isArray(schoolSportsDayTrack) && schoolSportsDayTrack.length > 0) {
+                    rawData = rawData.concat(schoolSportsDayTrack.map(item => ({ ...item, isSportsDay: true })));
                 } else {
-                    console.warn("⚠️ 未读取到【校内运动会 (School SportsDay TRACK)】数据，请检查 JS 中的变量名设置。");
+                    console.warn("[提示] 未获取到【校内运动会 (TRACK)】数据或数据为空。");
                 }
             }
         } else {
-            // 读取常态田赛数据
+            // 1. 读取常态田赛数据
             rawData = typeof fieldRaces !== "undefined" ? [...fieldRaces] : [];
 
-            // 勾选后，检索并合并【校内运动会 (School SportsDay FIELD)】 Sheet 数据
+            // 2. 勾选后，合并【校内运动会 (School SportsDay FIELD)】 Sheet 数据
             if (includeSportsDay) {
-                const sportsFieldData = 
-                    (typeof schoolSportsDayField !== "undefined" && Array.isArray(schoolSportsDayField)) ? schoolSportsDayField :
-                    (typeof sportsDayField !== "undefined" && Array.isArray(sportsDayField)) ? sportsDayField :
-                    (typeof schoolSportsDayFieldData !== "undefined" && Array.isArray(schoolSportsDayFieldData)) ? schoolSportsDayFieldData :
-                    (typeof schoolSportsDayFieldRaces !== "undefined" && Array.isArray(schoolSportsDayFieldRaces)) ? schoolSportsDayFieldRaces : [];
-
-                if (sportsFieldData.length > 0) {
-                    rawData = rawData.concat(sportsFieldData.map(item => ({ ...item, isSportsDay: true })));
+                if (typeof schoolSportsDayField !== "undefined" && Array.isArray(schoolSportsDayField) && schoolSportsDayField.length > 0) {
+                    rawData = rawData.concat(schoolSportsDayField.map(item => ({ ...item, isSportsDay: true })));
                 } else {
-                    console.warn("⚠️ 未读取到【校内运动会 (School SportsDay FIELD)】数据，请检查 JS 中的变量名设置。");
+                    console.warn("[提示] 未获取到【校内运动会 (FIELD)】数据或数据为空。");
                 }
             }
-        }        
+        }
+        
         if (rawData.length === 0) {
             container.innerHTML = `
                 <div style="text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
