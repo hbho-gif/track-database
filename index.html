@@ -1902,8 +1902,8 @@
         if (isTrack) {
             rawData = typeof trackRaces !== "undefined" ? [...trackRaces] : [];
             if (includeSportsDay) {
-                const sportsTrack = typeof schoolSportsDayTrack !== "undefined" ? schoolSportsDayTrack :
-                                   (typeof sportsDayTrack !== "undefined" ? sportsDayTrack : []);
+                const sportsTrack = typeof SchoolSportsDayTrack !== "undefined" ? SchoolSportsDayTrack :
+                                   (typeof SportsDayTrack !== "undefined" ? SportsDayTrack : []);
                 if (Array.isArray(sportsTrack) && sportsTrack.length > 0) {
                     rawData = rawData.concat(sportsTrack.map(item => ({ ...item, isSportsDay: true })));
                 }
@@ -1911,8 +1911,8 @@
         } else {
             rawData = typeof fieldRaces !== "undefined" ? [...fieldRaces] : [];
             if (includeSportsDay) {
-                const sportsField = typeof schoolSportsDayField !== "undefined" ? schoolSportsDayField :
-                                   (typeof sportsDayField !== "undefined" ? sportsDayField : []);
+                const sportsField = typeof SchoolSportsDayField !== "undefined" ? SchoolSportsDayField :
+                                   (typeof SportsDayField !== "undefined" ? SportsDayField : []);
                 if (Array.isArray(sportsField) && sportsField.length > 0) {
                     rawData = rawData.concat(sportsField.map(item => ({ ...item, isSportsDay: true })));
                 }
