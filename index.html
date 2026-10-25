@@ -811,40 +811,49 @@
         <!-- 🌟 培训队总汇主 Tab 内容 -->
         <section id="mainTab-team" class="main-tab-content" style="display: none;">
     
-            <!-- 1. 顶部控制栏：运动会开关与项目筛选 -->
-            <div class="filter-group" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
-            <!-- 1. 类别选择 -->
-            <select id="teamCategorySelect" onchange="onCategoryChange()">
-                <option value="TRACK">径赛 Track</option>
-                <option value="FIELD">田赛 Field</option>
-            </select>
+            <!-- 🏆 第一页/模块：《培训队总汇》筛选控制栏 -->
+<div class="filter-card" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+    <!-- 1. 类别选择 -->
+    <div>
+        <label style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">类别 Category</label>
+        <select id="teamCategorySelect" onchange="onCategoryChange()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+            <option value="TRACK" selected>径赛 TRACK</option>
+            <option value="FIELD">田赛 FIELD</option>
+        </select>
+    </div>
 
-            <!-- 2. 项目选择 -->
-            <select id="teamEventSelect" onchange="renderTeamRankings()">
-                <!-- 由 JS 动态填充 -->
-            </select>
+    <!-- 2. 项目选择 -->
+    <div>
+        <label style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">比赛项目 Event</label>
+        <select id="teamEventSelect" onchange="renderTeamRankings()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+            <!-- 由 JS 动态填充 (默认 60 m) -->
+        </select>
+    </div>
 
-            <!-- 3. 新增：年份范围筛选 (默认仅今年) -->
-            <select id="teamYearRangeSelect" onchange="renderTeamRankings()">
-                <option value="CURRENT" selected>仅今年 Current Year</option>
-                <option value="ALL">全部年份 All Years</option>
-            </select>
+    <!-- 3. 年份/范围选择 -->
+    <div>
+        <label style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">年份范围 Year</label>
+        <select id="teamYearSelect" onchange="renderTeamRankings()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+            <option value="CURRENT" selected>仅今年 (13-18岁在校生)</option>
+            <option value="ALL">全部年份 (2022至今)</option>
+        </select>
+    </div>
 
-            <!-- 4. 包含运动会开关 (默认不勾选) -->
-            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
-                <input type="checkbox" id="includeSportsDayToggle" onchange="renderTeamRankings()">
-                <span>包含运动会成绩 Include Sports Day</span>
-                <span id="sportsDayToggleLabel" style="font-size: 12px; color: #64748b;">(否 Excluded)</span>
-            </label>
-        </div>
-
+    <!-- 4. 运动会成绩过滤开关 (Pill 复选框/开关样式) -->
+    <div style="display: flex; align-items: center; margin-top: 18px;">
+        <label style="font-size: 14px; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="includeSportsDayCheck" onchange="renderTeamRankings()" style="width: 16px; height: 16px; cursor: pointer;">
+            包含校内运动会成绩
+        </label>
+    </div>
+</div>
             <!-- 2. 排行榜主展示区 -->
             <div id="teamRankingContainer">
                 <!-- JS 动态渲染：2022至今最佳 + 今年在校生 4 组排行榜 -->
             </div>
         </section>
 
-        <!-- 🏆 运动会履历 (暂留空) -->
+        <!-- 🏆 运动会履历 -->
         <section id="mainTab-sportsDay" class="main-tab-content" style="display: none;">
             <!-- 🏆 第三页：运动会履历 -->
             <div id="sportsDayResumeModule" class="module-section">
