@@ -2349,7 +2349,7 @@ function renderSportsDayResume() {
         const matchYear = (selectedYear === "ALL") || (String(itemYear).trim() === String(selectedYear).trim());
 
         // (3) 匹配组别 (直接读取 Sheet 中的 "运动会分组 SPORTsDAY GRP" 或 "组别 GROUP")
-        const itemGroup = getVal(item, ["运动会分组 SPORTsDAY GRP", "运动会分组", "组别 GROUP", "组别", "GROUP", "group"]);
+        const itemGroup = getVal(item, ["运动会分组 SPORTsDAY GRP", "运动会分组"]);
         const matchGroup = (selectedGroup === "ALL") || (String(itemGroup).trim().toLowerCase().includes(selectedGroup.toLowerCase()));
 
         return matchEvent && matchYear && matchGroup;
