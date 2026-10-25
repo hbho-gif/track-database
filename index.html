@@ -979,7 +979,9 @@
         console.log("运动会田赛笔数:", schoolSportsDayField.length);
 
         // 如果页面加载完需要自动渲染，在这里调用一次
-        if (typeof renderTeamRankings === "function") {
+        if (typeof onCategoryChange === "function") {
+            onCategoryChange();
+        } else if (typeof renderTeamRankings === "function") {
             renderTeamRankings();
         }
     }).catch(err => {
