@@ -1813,7 +1813,11 @@
         if (!eventSelect) return;
         const events = cat === "TRACK" ? TRACK_EVENTS : FIELD_EVENTS;
     
-        eventSelect.innerHTML = events.map(e => `<option value="${e}">${e}</option>`).join("");
+        eventSelect.innerHTML = events.map(e => {
+            const isDefault = (e === "60 m") ? "selected" : "";
+            return `<option value="${e}" ${isDefault}>${e}</option>`;
+        }).join("");
+        
         renderTeamRankings();
     }
 
