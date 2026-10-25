@@ -833,7 +833,7 @@
     <!-- 3. 年份/范围选择 -->
     <div>
         <label style="font-size: 12px; color: #64748b; display: block; margin-bottom: 4px;">年份范围 Year</label>
-        <select id="teamYearSelect" onchange="renderTeamRankings()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        <select id="teamYearRangeSelect" onchange="renderTeamRankings()" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
             <option value="CURRENT" selected>仅今年 (13-18岁在校生)</option>
             <option value="ALL">全部年份 (2022至今)</option>
         </select>
@@ -842,7 +842,7 @@
     <!-- 4. 运动会成绩过滤开关 (Pill 复选框/开关样式) -->
     <div style="display: flex; align-items: center; margin-top: 18px;">
         <label style="font-size: 14px; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-            <input type="checkbox" id="includeSportsDayCheck" onchange="renderTeamRankings()" style="width: 16px; height: 16px; cursor: pointer;">
+            <input type="checkbox" id="includeSportsDayToggle" onchange="renderTeamRankings()" style="width: 16px; height: 16px; cursor: pointer;">
             包含校内运动会成绩
         </label>
     </div>
