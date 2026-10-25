@@ -2320,11 +2320,17 @@ function renderSportsDayResume() {
     const isTrack = category === "TRACK";
 
     // 1. 获取运动会原始数据源
+    // 1. 获取运动会原始数据源
     let rawData = [];
     if (isTrack) {
         rawData = typeof schoolSportsDayTrack !== "undefined" && Array.isArray(schoolSportsDayTrack) ? [...schoolSportsDayTrack] : [];
     } else {
         rawData = typeof schoolSportsDayField !== "undefined" && Array.isArray(schoolSportsDayField) ? [...schoolSportsDayField] : [];
+    }
+
+    // 🌟 打印诊断信息（必须写在 rawData 声明和赋值之后！）
+    if (rawData.length > 0) {
+        console.log("运动会数据中的组别示例:", rawData.slice(0, 5).map(i => getVal(i, ["运动会分组 SPORTsDAY GRP", "运动会分组", "组别 GROUP", "组别"])));
     }
 
     if (rawData.length === 0) {
@@ -2336,7 +2342,7 @@ function renderSportsDayResume() {
         return;
     }
 
-    // 2. 根据筛选条件过滤数据
+    // 2. 根据筛选条件过滤数据 (增强组别匹配)
     const filteredData = rawData.filter(item => {
         // (1) 匹配项目 EVENT (消除空格差异)
         const itemEvent = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目", "EVENT", "event"]);
@@ -2348,9 +2354,19 @@ function renderSportsDayResume() {
         const itemYear = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
         const matchYear = (selectedYear === "ALL") || (String(itemYear).trim() === String(selectedYear).trim());
 
-        // (3) 匹配组别 (直接读取 Sheet 中的 "运动会分组 SPORTsDAY GRP" 或 "组别 GROUP")
+        // (3) 匹配组别 (兼容去空格与提取核心词)
         const itemGroup = getVal(item, ["运动会分组 SPORTsDAY GRP", "运动会分组"]);
-        const matchGroup = (selectedGroup === "ALL") || (String(itemGroup).trim().toLowerCase().includes(selectedGroup.toLowerCase()));
+        
+        let matchGroup = false;
+        if (selectedGroup === "ALL") {
+            matchGroup = true;
+        } else if (itemGroup) {
+            const cleanItemGroup = String(itemGroup).replace(/\s+/g, "").toLowerCase();
+            const cleanSelectedGroup = String(selectedGroup).replace(/\s+/g, "").toLowerCase();
+            const coreKeyword = cleanSelectedGroup.replace("组", ""); // 如 "女子丙"
+            
+            matchGroup = cleanItemGroup.includes(cleanSelectedGroup) || cleanItemGroup.includes(coreKeyword);
+        }
 
         return matchEvent && matchYear && matchGroup;
     });
