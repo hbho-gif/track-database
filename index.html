@@ -2330,7 +2330,7 @@ function renderSportsDayResume() {
 
     // 🌟 打印诊断信息（必须写在 rawData 声明和赋值之后！）
     if (rawData.length > 0) {
-        console.log("运动会数据中的组别示例:", rawData.slice(0, 5).map(i => getVal(i, ["运动会分组 SPORTsDAY GRP", "运动会分组", "组别 GROUP", "组别"])));
+        console.log("运动会数据中的组别示例:", rawData.slice(0, 5).map(i => getVal(i, ["运动会分组 SPORTsDAY GRP", "运动会分组"])));
     }
 
     if (rawData.length === 0) {
