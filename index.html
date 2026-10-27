@@ -642,10 +642,18 @@
                         <div><strong style="color: #1e293b;">年龄 AGE：</strong><span id="infoAge">-</span></div>
                         <div><strong style="color: #1e293b;">训练年龄 TRAINING AGE：</strong><span id="infoTrainingAge">-</span></div>
                         <div><strong style="color: #1e293b;">邮箱 EMAIL：</strong><span id="infoEmail">-</span></div>
+        
+                        <!-- 主项 -->
                         <div><strong style="color: #1e293b;">主项 PRIMARY：</strong><span id="infoPrimaryEvent">-</span></div>
-                        <div><strong style="color: #1e293b;">主项 PRIMARY PB：</strong><span id="infoPrimaryBest">-</span></div>
-                        <div><strong style="color: #1e293b;">副项 SECONDARY：</strong><span id="infoSecondaryEvent">-</span></div>
-                        <div><strong style="color: #1e293b;">副项 SECONDARY PB：</strong><span id="infoSecondaryBest">-</span></div>
+                        <div><strong style="color: #1e293b;">主项 PB / SB：</strong><span id="infoPrimaryBest">-</span></div>
+
+                        <!-- 副项 1 -->
+                        <div><strong style="color: #1e293b;">副项 1 SECONDARY 1：</strong><span id="infoSecondary1Event">-</span></div>
+                        <div><strong style="color: #1e293b;">副项 1 PB / SB：</strong><span id="infoSecondary1Best">-</span></div>
+
+                        <!-- 副项 2 -->
+                        <div><strong style="color: #1e293b;">副项 2 SECONDARY 2：</strong><span id="infoSecondary2Event">-</span></div>
+                        <div><strong style="color: #1e293b;">副项 2 PB / SB：</strong><span id="infoSecondary2Best">-</span></div>
                     </div>
                 </div>
 
@@ -1746,7 +1754,23 @@
         const contact = getVal(student, ["联络电话", "CONTACT", "Contact", "电话"]);
         const email = getVal(student, ["邮箱", "EMAIL", "Email", "电邮"]);
 
-        // 2. 赋值渲染到 HTML DOM
+        // 🌟 2. 动态获取主项、副项 1、副项 2 的名称
+        const primaryEvent = getVal(student, ["主项 PRIMARY", "主项", "PRIMARY"]) || "-";
+        const secondary1Event = getVal(student, ["副项 1 SECONDARY 1", "副项 1", "副项1", "SECONDARY 1", "副项", "SECONDARY"]) || "-";
+        const secondary2Event = getVal(student, ["副项 2 SECONDARY 2", "副项 2", "副项2", "SECONDARY 2"]) || "-";
+
+        // 🌟 3. 实时计算全历史 PB 与今年 SB
+        const primaryRes = getStudentPBSB(cleanId, primaryEvent);
+        const sec1Res = getStudentPBSB(cleanId, secondary1Event);
+        const sec2Res = getStudentPBSB(cleanId, secondary2Event);
+
+        // 🌟 4. 组装双色 HTML 渲染文本
+        const formatBestHtml = (res) => {
+            if (!res || (res.pbText === "-" && res.sbText === "-")) return "-";
+            return `<span style="color:#059669; font-weight:bold;">PB: ${res.pbText}</span> <span style="color:#cbd5e1; margin:0 4px;">|</span> <span style="color:#2563eb; font-weight:bold;">SB: ${res.sbText}</span>`;
+        };
+        
+        // 5. 赋值渲染到 HTML DOM
         safeSetText("infoNameC", nameC);
         safeSetText("nameC", nameC);
         safeSetText("infoNameE", nameE);
@@ -1764,6 +1788,16 @@
         safeSetText("infoSecondaryBest", secondaryBest);
         safeSetText("infoEmail", email);
 
+        // 🌟 6. 渲染主项与副项的名称与 PB/SB
+        safeSetText("infoPrimaryEvent", primaryEvent);
+        safeSetHtml("infoPrimaryBest", formatBestHtml(primaryRes));
+
+        safeSetText("infoSecondary1Event", secondary1Event);
+        safeSetHtml("infoSecondary1Best", formatBestHtml(sec1Res));
+
+        safeSetText("infoSecondary2Event", secondary2Event);
+        safeSetHtml("infoSecondary2Best", formatBestHtml(sec2Res));
+        
         // 照片设置
         const photoUrl = getVal(student, ["photo", "照片", "相片", "avatar", "Image"]);
         const avatarElem = document.getElementById("avatarImg") || document.getElementById("studentPhoto");
@@ -1773,6 +1807,14 @@
                 : 'https://dummyimage.com/150x190/cccccc/666666.png&text=No+Photo';
         }
 
+        // 💡 辅助函数：专门用于安全写入带带颜色标签的 HTML 内容
+        function safeSetHtml(elemId, htmlContent) {
+            const elem = document.getElementById(elemId);
+            if (elem) {
+                elem.innerHTML = htmlContent;
+            }
+        }
+        
         // 全局数据缓存
         raceDataStore.inputId = cleanId;
         raceDataStore.track = trackRaces || [];
@@ -2151,6 +2193,113 @@
         return null;
     }
 
+    /**
+     * 🎽 计算指定学生在特定项目上的 PB (个人最佳) 与 SB (赛季最佳)
+     * @param {string|number} studentId - 学生学号
+     * @param {string} eventName - 项目名称（如 "100 m", "跳高"）
+     * @returns {object} { pbText: "格式化后的PB", sbText: "格式化后的SB" }
+     */
+    function getStudentPBSB(studentId, eventName) {
+        if (!studentId || !eventName || eventName === "-" || eventName.trim() === "") {
+            return { pbText: "-", sbText: "-" };
+        }
+
+        const cleanTargetEvent = String(eventName).replace(/\s+/g, "").toLowerCase();
+        const currentYear = new Date().getFullYear();
+
+        // 1. 判断项目类型（径赛 / 田赛 / 全能）
+        const isTrack = typeof TRACK_EVENTS !== "undefined" && TRACK_EVENTS.some(e => e.replace(/\s+/g, "").toLowerCase() === cleanTargetEvent);
+        const isField = typeof FIELD_EVENTS !== "undefined" && FIELD_EVENTS.some(e => e.replace(/\s+/g, "").toLowerCase() === cleanTargetEvent);
+        const isMulti = cleanTargetEvent.includes("全能") || cleanTargetEvent.includes("multi");
+
+        // 2. 搜集该项目的所有成绩记录
+        let records = [];
+
+        // (1) 搜集径赛数据 (常规 + 运动会)
+        if (isTrack || (!isField && !isMulti)) {
+            const trackData = typeof trackRaces !== "undefined" ? trackRaces : [];
+            const sportsTrackData = typeof schoolSportsDayTrack !== "undefined" ? schoolSportsDayTrack : [];
+            [...trackData, ...sportsTrackData].forEach(item => {
+                const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
+                const ev = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目", "EVENT"]);
+                if (String(sid) === String(studentId) && String(ev || "").replace(/\s+/g, "").toLowerCase() === cleanTargetEvent) {
+                    const yr = parseInt(getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR"]), 10);
+                    const rawPerf = getVal(item, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]);
+                    const val = parsePerformance(rawPerf, true);
+                    if (val !== null && val !== undefined && !isNaN(val)) {
+                        records.push({ value: val, raw: rawPerf, year: yr, type: "TRACK" });
+                    }
+                }
+            });
+        }
+
+        // (2) 搜集田赛数据 (常规 + 运动会)
+        if (isField || (!isTrack && !isMulti)) {
+            const fieldData = typeof fieldRaces !== "undefined" ? fieldRaces : [];
+            const sportsFieldData = typeof schoolSportsDayField !== "undefined" ? schoolSportsDayField : [];
+            [...fieldData, ...sportsFieldData].forEach(item => {
+                const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
+                const ev = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目", "EVENT"]);
+                if (String(sid) === String(studentId) && String(ev || "").replace(/\s+/g, "").toLowerCase() === cleanTargetEvent) {
+                    const yr = parseInt(getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR"]), 10);
+                    const rawPerf = getVal(item, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩"]);
+                    const val = parsePerformance(rawPerf, false);
+                    if (val !== null && val !== undefined && !isNaN(val)) {
+                        records.push({ value: val, raw: rawPerf, year: yr, type: "FIELD" });
+                    }
+                }
+            });
+        }
+
+        // (3) 搜集全能数据
+        if (isMulti) {
+            const multiData = typeof multiRaces !== "undefined" ? multiRaces : [];
+            multiData.forEach(item => {
+                const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
+                const ev = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目", "EVENT"]);
+                if (String(sid) === String(studentId) && String(ev || "").replace(/\s+/g, "").toLowerCase() === cleanTargetEvent) {
+                    const yr = parseInt(getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR"]), 10);
+                    const rawScore = getVal(item, ["总分 TOTAL", "总分", "成绩", "SCORE", "SCORE/PTS"]);
+                    const val = parseFloat(rawScore);
+                    if (!isNaN(val)) {
+                        records.push({ value: val, raw: rawScore + " pts", year: yr, type: "MULTI" });
+                    }
+                }
+            });
+        }
+
+        if (records.length === 0) return { pbText: "-", sbText: "-" };
+
+        // 3. 排序得出 PB 与 SB
+        // 径赛：时间越短越好 (升序)；田赛/全能：数值/分数越高越好 (降序)
+        const sortFn = (a, b) => isTrack ? (a.value - b.value) : (b.value - a.value);
+
+        // 计算 PB (所有历史记录中最好)
+        const pbRecord = [...records].sort(sortFn)[0];
+
+        // 计算 SB (仅限今年 currentYear 的记录)
+        const sbRecords = records.filter(r => r.year === currentYear);
+        const sbRecord = sbRecords.length > 0 ? [...sbRecords].sort(sortFn)[0] : null;
+
+        // 4. 格式化输出文本
+        const formatValue = (rec) => {
+            if (!rec) return "-";
+            if (rec.type === "TRACK") {
+                return typeof formatTime === "function" ? formatTime(rec.raw) : rec.raw;
+            } else if (rec.type === "FIELD") {
+                return typeof formatFieldValue === "function" ? formatFieldValue(rec.raw, true) : rec.raw;
+            } else {
+                return String(rec.raw);
+            }
+        };
+
+        return {
+            pbText: formatValue(pbRecord),
+            sbText: formatValue(sbRecord)
+        };
+    }
+
+        
     // ==========================================
     // 🏆 主渲染函数：培训队总汇 (无 Emoji 兼容版)
     // ==========================================
