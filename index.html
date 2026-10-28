@@ -299,31 +299,35 @@
         }
 
         /* ==========================================
-           🎯 径/田/越野赛 统一列宽与对齐样式 (Fixed Layout)
+           🏆 四大 Tab 表格统一排版与打印优化 CSS
            ========================================== */
 
-        /* 1. 强制三大 Tab 的表格使用固定布局，确保列宽绝对对齐 */
+        /* 1. 强制四大 Tab 的表格使用固定布局，确保列宽绝对对齐 */
         #tab-track table,
         #tab-field table,
-        #tab-cross table {
+        #tab-cross table,
+        #tab-multi table {
             width: 100% !important;
-            table-layout: fixed !important; /* 💡 关键：固定列宽算法，防止内容挤压变型 */
+            table-layout: fixed !important; /* 💡 固定列宽算法，防止溢出变型 */
             border-collapse: collapse;
         }
 
-        /* 2. 单元格通用文本处理（允许自动换行，防止超长文字溢出） */
+        /* 2. 单元格通用文本处理（允许自动换行） */
         #tab-track th, #tab-track td,
         #tab-field th, #tab-field td,
-        #tab-cross th, #tab-cross td {
+        #tab-cross th, #tab-cross td,
+        #tab-multi th, #tab-multi td {
             padding: 10px 8px;
-            word-wrap: break-word;       /* 💡 允许单词/长串在边界换行 */
+            word-wrap: break-word;
             overflow-wrap: break-word;
-            white-space: normal;         /* 💡 开启自动换行 (wrap) */
+            white-space: normal;
             vertical-align: middle;
         }
 
-        /* 3. 按需求精确指定 5 列的百分比宽度 */
-        /* 第 1 列：年份 YEAR (10%) */
+        /* ------------------------------------------
+           3. 前三大 Tab (5 列结构) 宽度分配
+           ------------------------------------------ */
+        /* 第 1 列：年份 (10%) */
         #tab-track th:nth-child(1), #tab-track td:nth-child(1),
         #tab-field th:nth-child(1), #tab-field td:nth-child(1),
         #tab-cross th:nth-child(1), #tab-cross td:nth-child(1) {
@@ -331,7 +335,7 @@
             text-align: center;
         }
 
-        /* 第 2 列：比赛名称 TOURNAMENT (38% - 最长) */
+        /* 第 2 列：赛事名称 (38%) */
         #tab-track th:nth-child(2), #tab-track td:nth-child(2),
         #tab-field th:nth-child(2), #tab-field td:nth-child(2),
         #tab-cross th:nth-child(2), #tab-cross td:nth-child(2) {
@@ -339,7 +343,7 @@
             text-align: left;
         }
 
-        /* 第 3 列：比赛项目 EVENT (22% - 中等宽度，支持 wrap) */
+        /* 第 3 列：比赛项目 (22%) */
         #tab-track th:nth-child(3), #tab-track td:nth-child(3),
         #tab-field th:nth-child(3), #tab-field td:nth-child(3),
         #tab-cross th:nth-child(3), #tab-cross td:nth-child(3) {
@@ -347,7 +351,7 @@
             text-align: center;
         }
 
-        /* 第 4 列：比赛成绩 PERFORMANCE (15%) */
+        /* 第 4 列：比赛成绩 (15%) */
         #tab-track th:nth-child(4), #tab-track td:nth-child(4),
         #tab-field th:nth-child(4), #tab-field td:nth-child(4),
         #tab-cross th:nth-child(4), #tab-cross td:nth-child(4) {
@@ -356,7 +360,7 @@
             font-weight: 600;
         }
 
-        /* 第 5 列：备注 REMARKS (15%) */
+        /* 第 5 列：备注 (15%) */
         #tab-track th:nth-child(5), #tab-track td:nth-child(5),
         #tab-field th:nth-child(5), #tab-field td:nth-child(5),
         #tab-cross th:nth-child(5), #tab-cross td:nth-child(5) {
@@ -365,15 +369,86 @@
             color: #64748b;
         }
 
-        /* 📱 手机移动端微调：调整内边距，保持挤压时的可读性 */
-        @media (max-width: 768px) {
-            #tab-track th, #tab-track td,
-            #tab-field th, #tab-field td,
-            #tab-cross th, #tab-cross td {
-                padding: 8px 4px;
-                font-size: 12px;
-            }
+
+        /* ------------------------------------------
+           4. 第四大 Tab - 全能 Multi (6 列结构) 专属宽度分配
+           ------------------------------------------ */
+        /* 第 1 列：年份 Year (10%) */
+        #tab-multi th:nth-child(1), #tab-multi td:nth-child(1) {
+            width: 10%;
+            text-align: center;
         }
+
+        /* 第 2 列：赛事名称 Event (22%) */
+        #tab-multi th:nth-child(2), #tab-multi td:nth-child(2) {
+            width: 22%;
+            text-align: left;
+        }
+
+        /* 第 3 列：组别 Group (12%) */
+        #tab-multi th:nth-child(3), #tab-multi td:nth-child(3) {
+            width: 12%;
+            text-align: center;
+        }
+
+        /* 第 4 列：各项成绩明细 Breakdown (34% - 最宽，留足空间给明细换行) */
+        #tab-multi th:nth-child(4), #tab-multi td:nth-child(4) {
+            width: 34%;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        /* 第 5 列：总得分 Total (11%) */
+        #tab-multi th:nth-child(5), #tab-multi td:nth-child(5) {
+            width: 11%;
+            text-align: center;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        /* 第 6 列：备注 Remarks (11%) */
+        #tab-multi th:nth-child(6), #tab-multi td:nth-child(6) {
+            width: 11%;
+            text-align: center;
+            color: #64748b;
+        }
+
+
+/* ------------------------------------------
+   📱 移动端与 🖨️ PDF 打印特定优化
+   ------------------------------------------ */
+@media (max-width: 768px) {
+    #tab-track th, #tab-track td,
+    #tab-field th, #tab-field td,
+    #tab-cross th, #tab-cross td,
+    #tab-multi th, #tab-multi td {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+}
+
+/* 🖨️ 关键：导出/打印 PDF 专属适配规则 */
+@media print {
+    /* 移除外层容器的 min-width 限制与横向滚动，确保全平铺在 PDF A4 页面上 */
+    #tab-multi div,
+    .multi-table {
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+
+    #tab-track table,
+    #tab-field table,
+    #tab-cross table,
+    #tab-multi table {
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    #tab-multi th, #tab-multi td {
+        padding: 6px 4px !important;
+        font-size: 11px !important; /* 稍微缩小打印字体，防止跨页截断 */
+    }
+}
         
         /* ==========================================
            🧭 全局主导航栏 CSS (5 大 Tab 专属)
@@ -1921,7 +1996,7 @@
 
         let html = `
             <!-- 🌟 解除宽高锁死，允许自适应与横向滚动 -->
-            <div style="width: 100%; overflow-x: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="width: 100%; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); box-sizing: border-box;">
                 <h4 style="margin-top:0; color:#1e293b; font-size:16px; margin-bottom:12px; border-bottom:2px solid #f1f5f9; padding-bottom:8px;">
                     🏆 全能项目成绩明细 (Multi-Events Breakdown)
                 </h4>
