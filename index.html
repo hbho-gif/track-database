@@ -1578,48 +1578,80 @@
 
     // ⏱️ 时间自动补齐与格式化函数
     function formatTime(val) {
-        if (val === undefined || val === null) return "-";
-        
-        let str = String(val).trim();
-        str = str.replace(/：/g, ":").replace(/[\u200B-\u200D\uFEFF]/g, "");
-        
-        if (str === "" || str === "-") return "-";
+    if (val === undefined || val === null) return "-";
+    
+    let str = String(val).trim();
+    // 替换全角冒号与不可见字符
+    str = str.replace(/：/g, ":").replace(/[\u200B-\u200D\uFEFF]/g, "");
+    
+    if (str === "" || str === "-") return "-";
 
-        if (str.includes(":")) {
-            let parts = str.split(":");
-            if (parts.length === 2) {
-                let mm = parts[0].trim().padStart(2, '0');
-                let ssPart = parts[1].trim();
-                let secNum = parseFloat(ssPart);
-                let ss = isNaN(secNum) ? ssPart : secNum.toFixed(2).padStart(5, '0');
-                return `00:${mm}:${ss}`;
-            }
-
-            if (parts.length === 3) {
-                let hh = parts[0].trim().padStart(2, '0');
-                let mm = parts[1].trim().padStart(2, '0');
-                let ssPart = parts[2].trim();
-                let secNum = parseFloat(ssPart);
-                let ss = isNaN(secNum) ? ssPart : secNum.toFixed(2).padStart(5, '0');
-                return `${hh}:${mm}:${ss}`;
-            }
+    // 1. 处理带冒号的输入 (MM:SS 或 HH:MM:SS)
+    if (str.includes(":")) {
+        let parts = str.split(":");
+        
+        // 格式: MM:SS.ss (例如 75:30.50 或 02:15.00)
+        if (parts.length === 2) {
+            let totalMinutes = parseInt(parts[0].trim(), 10) || 0;
+            let secNum = parseFloat(parts[1].trim()) || 0;
+            
+            // 计算小时与剩余分钟
+            let hh = Math.floor(totalMinutes / 60);
+            let mm = totalMinutes % 60;
+            
+            // 组装格式
+            let hhStr = String(hh).padStart(2, '0');
+            let mmStr = String(mm).padStart(2, '0');
+            let ssStr = secNum.toFixed(2).padStart(5, '0');
+            
+            return `${hhStr}:${mmStr}:${ssStr}`;
         }
 
-        let totalSeconds = parseFloat(str);
-        if (!isNaN(totalSeconds)) {
-            let hours = Math.floor(totalSeconds / 3600);
-            let minutes = Math.floor((totalSeconds % 3600) / 60);
-            let seconds = (totalSeconds % 60).toFixed(2);
+        // 格式: HH:MM:SS.ss
+        if (parts.length === 3) {
+            let hh = parseInt(parts[0].trim(), 10) || 0;
+            let totalMinutes = parseInt(parts[1].trim(), 10) || 0;
+            let secNum = parseFloat(parts[2].trim()) || 0;
+            
+            // 如果 MM 超过 60，自动折算进 HH
+            hh += Math.floor(totalMinutes / 60);
+            let mm = totalMinutes % 60;
 
-            let hh = String(hours).padStart(2, '0');
-            let mm = String(minutes).padStart(2, '0');
-            let ss = String(parseFloat(seconds).toFixed(2)).padStart(5, '0');
+            let hhStr = String(hh).padStart(2, '0');
+            let mmStr = String(mm).padStart(2, '0');
+            let ssStr = secNum.toFixed(2).padStart(5, '0');
 
-            return `${hh}:${mm}:${ss}`;
+            return `${hhStr}:${mmStr}:${ssStr}`;
         }
-
-        return str;
     }
+
+    // 2. 处理纯数字（总秒数）输入
+    let totalSeconds = parseFloat(str);
+    if (!isNaN(totalSeconds)) {
+        let hours = Math.floor(totalSeconds / 3600);
+        let remainingSeconds = totalSeconds % 3600;
+        let minutes = Math.floor(remainingSeconds / 60);
+        let seconds = (remainingSeconds % 60).toFixed(2);
+
+        // 防止 59.999 进位成 60.00 的特殊边界情况
+        if (parseFloat(seconds) >= 60) {
+            seconds = (0).toFixed(2);
+            minutes += 1;
+            if (minutes >= 60) {
+                minutes = 0;
+                hours += 1;
+            }
+        }
+
+        let hh = String(hours).padStart(2, '0');
+        let mm = String(minutes).padStart(2, '0');
+        let ss = String(seconds).padStart(5, '0');
+
+        return `${hh}:${mm}:${ss}`;
+    }
+
+    return str;
+}
 
     // 💡 改进后的单元格格式化逻辑：自动识别田赛并保留两位小数
     // 📏 全局通用：田赛成绩格式化（兼容 1 个或 2 个参数输入）
