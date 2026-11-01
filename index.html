@@ -1516,7 +1516,7 @@ function applyFilterAndSort(type) {
 
     const selectedYear = String(yearSelect.value).trim();
     const selectedEvent = String(eventSelect.value).trim();
-    const sortOrder = sortSelect.value;
+    const sortOrder = String(sortSelect.value).trim();
 
     // 1. 筛选逻辑
     let filtered = rawData.filter(item => {
