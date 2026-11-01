@@ -1069,6 +1069,7 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease-in-out;
             box-sizing: border-box;
+            height: 100%; /* 💡 关键：确保同一行的卡片自动保持完全等高 */
         }
 
         .link-card:hover {
@@ -1084,12 +1085,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0; /* 保证图标不受右侧文字挤压 */
+            flex-shrink: 0; /* 图标固定尺寸，不挤压 */
         }
 
         .link-info {
             flex: 1;
-            min-width: 0; /* 核心：配合 wrap 防止溢出 */
+            min-width: 0; /* 自动 wrap 换行保护 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .link-title {
@@ -1097,7 +1101,7 @@
             font-weight: 600;
             color: #0f172a;
             line-height: 1.4;
-            word-wrap: break-word; /* 核心：自动 wrap 换行 */
+            word-wrap: break-word;
             overflow-wrap: break-word;
         }
 
