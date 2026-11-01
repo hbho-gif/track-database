@@ -675,7 +675,7 @@
                 <input type="text" id="searchInput" placeholder="输入学号、中文姓名或英文姓名..." 
                        oninput="handleSearchInput()" 
                        onfocus="handleSearchInput()"
-                       onkeyup="if(event.==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
+                       onkeyup="if(event.key==='Enter'){ document.getElementById('searchResultsList').style.display='none'; searchStudent(); }"
                        autocomplete="off"
                        style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px;">
                
