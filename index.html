@@ -1542,7 +1542,21 @@ function applyFilterAndSort(type) {
     });
 
     // 2. 🌟 智能排序逻辑（无筛选排序时默认按年份，选择成绩排序时打破年份限制）
-    const perfKeys = ["results", "m", "成绩", "比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "PERFORMANCE", "RESULTS"];
+    // 💡 补全完整的成绩列名别名（加入了 "比赛成绩 RESULT (hh:mm:ss,ss)"）
+    const perfKeys = [
+        "比赛成绩 RESULT (hh:mm:ss,ss)", 
+        "比赛成绩 RESULT", 
+        "比赛成绩 RESULTS", 
+        "比赛成绩 PERFORMANCE", 
+        "results", 
+        "result", 
+        "m", 
+        "成绩", 
+        "比赛成绩", 
+        "PERFORMANCE", 
+        "RESULTS", 
+        "RESULT"
+    ];
 
     filtered.sort((a, b) => {
         let yearA = parseInt(getVal(a, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
