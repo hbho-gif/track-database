@@ -1355,28 +1355,38 @@
 
     // 💡 将各种时间/成绩字符串统一解析为总秒数/数值，用于准确排序
     function parsePerformanceToSeconds(val) {
-        if (!val || val === "-" || val === "") return -1;
-        let str = String(val).trim().replace(/：/g, ":");
+    if (val === undefined || val === null || val === "-" || val === "") return -1;
 
-        // 如果是时间格式 (hh:mm:ss.ss 或 mm:ss.ss)
-        if (str.includes(":")) {
-            let parts = str.split(":");
-            if (parts.length === 2) {
-                let mm = parseFloat(parts[0]) || 0;
-                let ss = parseFloat(parts[1]) || 0;
-                return mm * 60 + ss;
-            } else if (parts.length === 3) {
-                let hh = parseFloat(parts[0]) || 0;
-                let mm = parseFloat(parts[1]) || 0;
-                let ss = parseFloat(parts[2]) || 0;
-                return hh * 3600 + mm * 60 + ss;
-            }
+    let str = String(val).trim();
+    // 过滤掉不可见字符，将全角冒号转为半角
+    str = str.replace(/：/g, ":").replace(/[\u200B-\u200D\uFEFF]/g, "");
+
+    // 过滤常见的非成绩字符串 (DNS, DNF, DQ, 弃权, 无成绩)
+    if (/DNS|DNF|DQ|弃权|无成绩/i.test(str)) return -1;
+
+    // 清洗掉末尾可能附带的单位字符 (如 "s", "秒", "m", "pts")，但保留冒号和数字小数点
+    str = str.replace(/[^\d:.]/g, "").trim();
+    if (!str) return -1;
+
+    // 如果是时间格式 (HH:MM:SS 或 MM:SS)
+    if (str.includes(":")) {
+        let parts = str.split(":");
+        if (parts.length === 2) {
+            let mm = parseFloat(parts[0]) || 0;
+            let ss = parseFloat(parts[1]) || 0;
+            return mm * 60 + ss;
+        } else if (parts.length === 3) {
+            let hh = parseFloat(parts[0]) || 0;
+            let mm = parseFloat(parts[1]) || 0;
+            let ss = parseFloat(parts[2]) || 0;
+            return hh * 3600 + mm * 60 + ss;
         }
-
-        // 如果是纯数值 (如径赛秒数 12.34 或田赛距离 5.45)
-        let num = parseFloat(str);
-        return isNaN(num) ? -1 : num;
     }
+
+    // 纯数值 (如秒数 12.34 或田赛成绩 5.45)
+    let num = parseFloat(str);
+    return isNaN(num) ? -1 : num;
+}
 
     // 全局数据缓存对象
     let raceDataStore = {
@@ -1482,70 +1492,76 @@
     }
 
     // 💡 执行通用筛选与排序（修正越野赛距离筛选）
-    function applyFilterAndSort(type) {
-        const config = moduleConfig[type];
-        if (!config) return;
+    // 💡 执行通用筛选与排序
+function applyFilterAndSort(type) {
+    const config = moduleConfig[type];
+    if (!config) return;
 
-        const rawData = raceDataStore[type];
-        if (!rawData) return;
+    const rawData = raceDataStore[type];
+    if (!rawData) return;
 
-        const yearSelect = document.getElementById(config.yearFilterId);
-        const eventSelect = document.getElementById(config.eventFilterId);
-        const sortSelect = document.getElementById(config.sortOrderId);
+    const yearSelect = document.getElementById(config.yearFilterId);
+    const eventSelect = document.getElementById(config.eventFilterId);
+    const sortSelect = document.getElementById(config.sortOrderId);
 
-        // 防错处理：若无下拉菜单直接渲染默认列表
-        if (!yearSelect || !eventSelect || !sortSelect) {
-            const defaultFiltered = rawData.filter(item => {
-                const id = getVal(item, ["学号", "学号 ID", "id"]);
-                return String(id).trim() === String(raceDataStore.inputId).trim();
-            });
-            renderStandardTableDirect(config.tableSelector, defaultFiltered, config.columnsMap, config.isTimeFormat);
-            return;
-        }
-
-        const selectedYear = String(yearSelect.value).trim();
-        const selectedEvent = String(eventSelect.value).trim();
-        const sortOrder = sortSelect.value;
-
-        // 1. 筛选逻辑（修复：兼容越野赛 distance 字段）
-        let filtered = rawData.filter(item => {
-            const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
-            const matchesId = (id === String(raceDataStore.inputId).trim());
-
-            const year = String(getVal(item, ["year", "年份"])).trim();
-
-            // 🛠️ 关键修正：越野赛优先读取 distance/距离 字段
-            let event = "-";
-            if (type === "cross") {
-                event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"])).trim();
-            } else {
-                event = String(getVal(item, ["event", "比赛项目", "项目"])).trim();
-            }
-
-            const matchesYear = (selectedYear === "ALL" || year === selectedYear);
-            const matchesEvent = (selectedEvent === "ALL" || event === selectedEvent);
-
-            return matchesId && matchesYear && matchesEvent;
+    // 防错处理：若无下拉菜单直接渲染默认列表
+    if (!yearSelect || !eventSelect || !sortSelect) {
+        const defaultFiltered = rawData.filter(item => {
+            const id = getVal(item, ["学号", "学号 ID", "学号ID", "id", "ID"]);
+            return String(id).trim() === String(raceDataStore.inputId).trim();
         });
+        renderStandardTableDirect(config.tableSelector, defaultFiltered, config.columnsMap, config.isTimeFormat);
+        return;
+    }
 
-        // 2. 排序逻辑
-        if (sortOrder === "DESC") {
-            filtered.sort((a, b) => {
-                let valA = parsePerformanceToSeconds(getVal(a, ["results", "m", "成绩"]));
-                let valB = parsePerformanceToSeconds(getVal(b, ["results", "m", "成绩"]));
-                return valB - valA;
-            });
-        } else if (sortOrder === "ASC") {
-            filtered.sort((a, b) => {
-                let valA = parsePerformanceToSeconds(getVal(a, ["results", "m", "成绩"]));
-                let valB = parsePerformanceToSeconds(getVal(b, ["results", "m", "成绩"]));
-                return valA - valB;
-            });
+    const selectedYear = String(yearSelect.value).trim();
+    const selectedEvent = String(eventSelect.value).trim();
+    const sortOrder = sortSelect.value;
+
+    // 1. 筛选逻辑
+    let filtered = rawData.filter(item => {
+        const id = String(getVal(item, ["学号", "学号 ID", "学号ID", "id", "ID"])).trim();
+        const matchesId = (id === String(raceDataStore.inputId).trim());
+
+        const year = String(getVal(item, ["year", "年份", "比赛年份 YEAR", "比赛年份"])).trim();
+
+        let event = "-";
+        if (type === "cross") {
+            event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"])).trim();
+        } else {
+            event = String(getVal(item, ["event", "比赛项目", "项目", "比赛项目 EVENT"])).trim();
         }
 
-        // 3. 渲染
-        renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
-    }
+        const matchesYear = (selectedYear === "ALL" || year === selectedYear);
+        const matchesEvent = (selectedEvent === "ALL" || event === selectedEvent);
+
+        return matchesId && matchesYear && matchesEvent;
+    });
+
+    // 2. 🌟 强化后的排序逻辑
+    // 补全所有可能的成绩列名别名
+    const perfKeys = ["results", "m", "成绩", "比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "PERFORMANCE", "RESULTS"];
+
+    filtered.sort((a, b) => {
+        let valA = parsePerformanceToSeconds(getVal(a, perfKeys));
+        let valB = parsePerformanceToSeconds(getVal(b, perfKeys));
+
+        // 💡 关键：无成绩/无效数据 (-1) 永远置底，不参与比大小
+        if (valA === -1 && valB === -1) return 0;
+        if (valA === -1) return 1;
+        if (valB === -1) return -1;
+
+        if (sortOrder === "DESC") {
+            return valB - valA; // 降序（田赛/全能：大数值在前）
+        } else if (sortOrder === "ASC") {
+            return valA - valB; // 升序（径赛：用时少/短时间在前）
+        }
+        return 0;
+    });
+
+    // 3. 渲染
+    renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
+}
 
     // 💡 统一渲染表格函数
     function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
