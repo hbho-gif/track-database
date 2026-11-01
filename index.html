@@ -1538,23 +1538,32 @@ function applyFilterAndSort(type) {
         return matchesId && matchesYear && matchesEvent;
     });
 
-    // 2. 🌟 强化后的排序逻辑
-    // 补全所有可能的成绩列名别名
+    // 2. 🌟 默认按年份降序（最新年份在前），年份相同时按成绩排序
     const perfKeys = ["results", "m", "成绩", "比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "PERFORMANCE", "RESULTS"];
 
     filtered.sort((a, b) => {
+        // (1) 先解析年份
+        let yearA = parseInt(getVal(a, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
+        let yearB = parseInt(getVal(b, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
+
+        // 主要排序：年份降序（如 2026 排在 2025 前面）
+        if (yearA !== yearB) {
+            return yearB - yearA; 
+        }
+
+        // (2) 年份相同时的次要排序：按成绩排序
         let valA = parsePerformanceToSeconds(getVal(a, perfKeys));
         let valB = parsePerformanceToSeconds(getVal(b, perfKeys));
 
-        // 💡 关键：无成绩/无效数据 (-1) 永远置底，不参与比大小
+        // 无效数据 (-1) 永远靠后
         if (valA === -1 && valB === -1) return 0;
         if (valA === -1) return 1;
         if (valB === -1) return -1;
 
         if (sortOrder === "DESC") {
-            return valB - valA; // 降序（田赛/全能：大数值在前）
+            return valB - valA; // 降序
         } else if (sortOrder === "ASC") {
-            return valA - valB; // 升序（径赛：用时少/短时间在前）
+            return valA - valB; // 升序
         }
         return 0;
     });
