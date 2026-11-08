@@ -755,12 +755,45 @@
 
                 <!-- 1. 身体数据 -->
                 <div id="tab-body" class="tab-content">
+                    <!-- 1. 🏥 最上方：健康 / 伤病历史摘要 -->
+                    <section style="margin-bottom: 24px;">
+                        <h3 style="display: flex; align-items: center; gap: 8px; color: #dc2626;">
+                            🏥 健康/伤病历史摘要 (MEDICAL / INJURY NOTES)
+                        </h3>
+        
+                        <div id="healthStatusContainer" style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px;">
+                            <!-- JS 将动态填充此处内容 -->
+                            <p style="color: #991b1b; margin: 0; font-weight: 500;">🔍 正在加载健康档案...</p>
+                        </div>
+                    </section>
+
+                    <!-- 2. 📏 下方：身体数据测量表格 -->
                     <section>
-                        <h3>📏 身体数据  (BODY MEASUREMENT)</h3>
-                        <table id="bodyTable">
-                            <thead></thead>
-                            <tbody></tbody>
-                        </table>
+                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                            📏 身体数据 (BODY MEASUREMENT)
+                        </h3>
+                        
+                        <div style="overflow-x: auto; width: 100%;">
+                            <table id="bodyTable" style="width: 100%; border-collapse: collapse; text-align: center;">
+                                <thead>
+                                    <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; font-size: 14px; color: #475569;">
+                                        <th style="padding: 10px;">测试日期</th>
+                                        <th style="padding: 10px;">身高 (cm)</th>
+                                        <th style="padding: 10px;">体重 (kg)</th>
+                                        <th style="padding: 10px;">BMI</th>
+                                        <th style="padding: 10px;">全腿长 (cm)</th>
+                                        <th style="padding: 10px;">小腿长 (cm)</th>
+                                        <th style="padding: 10px;">跟腱长 (cm)</th>
+                                        <th style="padding: 10px;">臂展 (cm)</th>
+                                        <th style="padding: 10px;">手长 (cm)</th>
+                                        <th style="padding: 10px;">肩宽 (cm)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyTableBody">
+                                    <!-- JS 将动态填充身体测量记录 -->
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
                 </div>
 
@@ -2924,6 +2957,70 @@ function renderSportsDayResume() {
 
     container.innerHTML = tableHtml;
 }
+
+    // 假设根据学号查出的健康数据为 healthDataList，身体测量数据为 bodyDataList
+
+// 1. 渲染健康/伤病历史摘要
+function renderHealthStatus(healthDataList) {
+    const container = document.getElementById("healthStatusContainer");
+    
+    if (!healthDataList || healthDataList.length === 0) {
+        container.style.backgroundColor = "#f0fdf4";
+        container.style.borderColor = "#bbf7d0";
+        container.innerHTML = `<p style="color: #166534; margin: 0; font-weight: 600;">✅ 暂无伤病记录 / 身体状况良好 (Healthy)</p>`;
+        return;
+    }
+
+    container.style.backgroundColor = "#fef2f2";
+    container.style.borderColor = "#fecaca";
+    
+    let html = `<ul style="margin: 0; padding-left: 20px; color: #991b1b;">`;
+    healthDataList.forEach(item => {
+        html += `
+            <li style="margin-bottom: 6px;">
+                <strong>${item["记录日期"] || item.date || "-"}:</strong> 
+                <span>${item["身体健康状况"] || item.status || "-"}</span>
+            </li>
+        `;
+    });
+    html += `</ul>`;
+    
+    container.innerHTML = html;
+}
+
+    // 2. 渲染身体数据表格
+    function renderBodyTable(bodyDataList) {
+        const tbody = document.getElementById("bodyTableBody");
+        tbody.innerHTML = "";
+
+        if (!bodyDataList || bodyDataList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" style="padding: 16px; color: #94a3b8;">暂无身体测量数据</td></tr>`;
+            return;
+        }
+
+        bodyDataList.forEach(item => {
+            // 自动计算 BMI（如果表格内未直接提供）
+            let heightM = parseFloat(item["身高"]) / 100;
+            let weight = parseFloat(item["体重"]);
+            let bmi = item["BMI"] || (heightM && weight ? (weight / (heightM * heightM)).toFixed(1) : "-");
+
+            let tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid #f1f5f9";
+            tr.innerHTML = `
+                <td style="padding: 10px; font-weight: 600;">${item["测试日期"] || "-"}</td>
+                <td style="padding: 10px;">${item["身高"] || "-"}</td>
+                <td style="padding: 10px;">${item["体重"] || "-"}</td>
+                <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: 600;">${bmi}</span></td>
+                <td style="padding: 10px;">${item["全腿长"] || "-"}</td>
+                <td style="padding: 10px;">${item["小腿长"] || "-"}</td>
+                <td style="padding: 10px;">${item["跟腱长"] || "-"}</td>
+                <td style="padding: 10px;">${item["臂展"] || "-"}</td>
+                <td style="padding: 10px;">${item["手长"] || "-"}</td>
+                <td style="padding: 10px;">${item["肩宽"] || "-"}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
         
     </script>
 
