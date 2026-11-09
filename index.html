@@ -2085,6 +2085,24 @@ function applyFilterAndSort(type) {
         } catch(e) { 
             console.warn("Multi-events render error:", e); 
         }
+
+        // 💡 1. 筛选当前学号的“身体数据”与“健康状况”
+    // 注意：优先匹配 "学号"，兼容 "学号 ID" 或 "id"
+    const currentBodyList = bodyData.filter(item => {
+        const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
+        return id === targetId;
+    });
+
+    const currentHealthList = healthData.filter(item => {
+        const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
+        return id === targetId;
+    });
+
+    // 💡 2. 调用渲染函数，传入当前学生的专属数据
+    renderHealthStatus(currentHealthList);
+    renderBodyTable(currentBodyList);
+    
+    
     }
 
     // ==========================================
@@ -2249,14 +2267,6 @@ function applyFilterAndSort(type) {
         } else {
             showMatchedStudentsList(matchedStudents);
         }
-    
-        // 1. 从全局总池子 (bodyData / healthData) 中筛选出当前学号的列表 (List)
-        const bodyDataList = bodyData.filter(item => String(item["学号"] || item.id).trim() === studentId);
-        const healthDataList = healthData.filter(item => String(item["学号"] || item.id).trim() === studentId);
-
-        // 2. 将当前学生的个人列表传入之前写的渲染函数中
-        renderHealthStatus(healthDataList);
-        renderBodyTable(bodyDataList);
     
     }
 
