@@ -2088,12 +2088,12 @@ function applyFilterAndSort(type) {
 
         // 💡 1. 筛选当前学号的“身体数据”与“健康状况”
     // 注意：优先匹配 "学号"，兼容 "学号 ID" 或 "id"
-    const currentBodyList = bodyData.filter(item => {
+    const currentBodyList = bodyDataList.filter(item => {
         const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
         return id === targetId;
     });
 
-    const currentHealthList = healthData.filter(item => {
+    const currentHealthList = healthDataList.filter(item => {
         const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
         return id === targetId;
     });
