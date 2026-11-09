@@ -3006,7 +3006,7 @@ function renderHealthStatus(healthDataList) {
     // 💡 已修正：改为正确的 healthDataList 变量名
     healthDataList.forEach(item => {
         const date = getVal(item, ["记录日期", "测试日期", "date"]) || "-";
-        const status = getVal(item, ["身体健康状况", "健康状况", "status"]) || "-";
+        const status = getVal(item, ["身体健康状况", "健康状况", "status", "健康/伤病历史摘要"]) || "-";
         html += `
             <li style="margin-bottom: 6px;">
                 <strong>${date}:</strong> <span>${status}</span>
