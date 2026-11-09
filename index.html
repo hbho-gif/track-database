@@ -2087,20 +2087,20 @@ function applyFilterAndSort(type) {
         }
 
         // 💡 1. 筛选当前学号的“身体数据”与“健康状况”
-    // 注意：优先匹配 "学号"，兼容 "学号 ID" 或 "id"
-    const currentBodyList = bodyDataList.filter(item => {
-        const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
-        return id === targetId;
-    });
+// 直接复用你前面定义的 cleanId 和 idKeys，实现多列名兼容匹配
+const currentBodyList = bodyDataList.filter(item => {
+    const val = getVal(item, idKeys);
+    return val !== "-" && String(val).trim() === cleanId;
+});
 
-    const currentHealthList = healthDataList.filter(item => {
-        const id = String(getVal(item, ["学号", "学号 ID", "id"])).trim();
-        return id === targetId;
-    });
+const currentHealthList = healthDataList.filter(item => {
+    const val = getVal(item, idKeys);
+    return val !== "-" && String(val).trim() === cleanId;
+});
 
-    // 💡 2. 调用渲染函数，传入当前学生的专属数据
-    renderHealthStatus(currentHealthList);
-    renderBodyTable(currentBodyList);
+// 💡 2. 调用渲染函数，传入当前学生的专属数据
+renderHealthStatus(currentHealthList);
+renderBodyTable(currentBodyList);
     
     
     }
