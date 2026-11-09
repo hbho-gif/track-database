@@ -1308,7 +1308,9 @@
     let testData = [];
     let multiRaces = [];
     let schoolSportsDayTrack = []; // 🌟 新增：校内运动会径赛
-    let schoolSportsDayField = []; // 🌟 新增：校内运动会田赛    
+    let schoolSportsDayField = []; // 🌟 新增：校内运动会田赛
+    let bodyDataList = [];
+    let healthDataList = [];
     
     // 3. 执行数据批量加载
     Promise.all([
@@ -1319,8 +1321,10 @@
         fetchSheetData("测试成绩"),
         fetchSheetData("比赛成绩 (Multi)"),
         fetchSheetData("校内运动会 (School SportsDay TRACK)"), // 🌟 新增请求
-        fetchSheetData("校内运动会 (School SportsDay FIELD)")  // 🌟 新增请求
-    ]).then(([basic, track, field, cross, test, multi, sportsTrack, sportsField]) => {
+        fetchSheetData("校内运动会 (School SportsDay FIELD)"),  // 🌟 新增请求
+        fetchSheetData("身体数据"),               // 🌟 新增请求：身体数据 Sheet 名称
+        fetchSheetData("健康")                // 🌟 新增请求：健康状况 Sheet 名称
+    ]).then(([basic, track, field, cross, test, multi, sportsTrack, sportsField, body, health]) => {
         basicStudents = basic;
         trackRaces = track;
         fieldRaces = field;
@@ -1329,11 +1333,15 @@
         multiRaces = multi;
         schoolSportsDayTrack = sportsTrack; // 🌟 赋值给全局变量
         schoolSportsDayField = sportsField; // 🌟 赋值给全局变量
+        bodyDataList = body;
+        healthDataList = health;
         
         console.log("所有数据加载完成！");
         console.log("基本资料笔数:", basicStudents.length);
         console.log("运动会径赛笔数:", schoolSportsDayTrack.length);
         console.log("运动会田赛笔数:", schoolSportsDayField.length);
+        console.log("身体数据笔数:", bodyDataList.length);
+        console.log("健康数据笔数:", healthDataList.length);
 
         // 如果页面加载完需要自动渲染，在这里调用一次
         if (typeof onCategoryChange === "function") {
@@ -2241,6 +2249,15 @@ function applyFilterAndSort(type) {
         } else {
             showMatchedStudentsList(matchedStudents);
         }
+    
+        // 1. 从全局总池子 (bodyData / healthData) 中筛选出当前学号的列表 (List)
+        const bodyDataList = bodyData.filter(item => String(item["学号"] || item.id).trim() === studentId);
+        const healthDataList = healthData.filter(item => String(item["学号"] || item.id).trim() === studentId);
+
+        // 2. 将当前学生的个人列表传入之前写的渲染函数中
+        renderHealthStatus(healthDataList);
+        renderBodyTable(bodyDataList);
+    
     }
 
     // 💡 Tab 选项卡切换函数
