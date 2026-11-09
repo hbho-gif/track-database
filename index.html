@@ -2987,11 +2987,12 @@ function renderSportsDayResume() {
 
     // 假设根据学号查出的健康数据为 healthDataList，身体测量数据为 bodyDataList
 
-// 1. 渲染健康/伤病历史摘要
-function renderHealthStatus(healthDataList) {
+// 1. 渲染健康 / 伤病历史摘要 (Medical Notes)
+function renderHealthStatus(healthList) {
     const container = document.getElementById("healthStatusContainer");
+    if (!container) return;
     
-    if (!healthDataList || healthDataList.length === 0) {
+    if (!healthList || healthList.length === 0) {
         container.style.backgroundColor = "#f0fdf4";
         container.style.borderColor = "#bbf7d0";
         container.innerHTML = `<p style="color: #166534; margin: 0; font-weight: 600;">✅ 暂无伤病记录 / 身体状况良好 (Healthy)</p>`;
@@ -3002,11 +3003,12 @@ function renderHealthStatus(healthDataList) {
     container.style.borderColor = "#fecaca";
     
     let html = `<ul style="margin: 0; padding-left: 20px; color: #991b1b;">`;
-    healthDataList.forEach(item => {
+    healthList.forEach(item => {
+        const date = getVal(item, ["记录日期", "测试日期", "date"]) || "-";
+        const status = getVal(item, ["身体健康状况", "健康状况", "status"]) || "-";
         html += `
             <li style="margin-bottom: 6px;">
-                <strong>${item["记录日期"] || item.date || "-"}:</strong> 
-                <span>${item["身体健康状况"] || item.status || "-"}</span>
+                <strong>${date}:</strong> <span>${status}</span>
             </li>
         `;
     });
@@ -3015,39 +3017,55 @@ function renderHealthStatus(healthDataList) {
     container.innerHTML = html;
 }
 
-    // 2. 渲染身体数据表格
-    function renderBodyTable(bodyDataList) {
-        const tbody = document.getElementById("bodyTableBody");
-        tbody.innerHTML = "";
+// 2. 渲染身体数据表格 (Body Measurement)
+function renderBodyTable(bodyList) {
+    const tbody = document.getElementById("bodyTableBody");
+    if (!tbody) return;
 
-        if (!bodyDataList || bodyDataList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" style="padding: 16px; color: #94a3b8;">暂无身体测量数据</td></tr>`;
-            return;
+    tbody.innerHTML = "";
+
+    if (!bodyList || bodyList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="padding: 16px; color: #94a3b8;">暂无身体测量数据</td></tr>`;
+        return;
+    }
+
+    bodyList.forEach(item => {
+        const date = getVal(item, ["测试日期", "date"]) || "-";
+        const height = getVal(item, ["身高", "height"]) || "-";
+        const weight = getVal(item, ["体重", "weight"]) || "-";
+        
+        // 自动计算或读取 BMI
+        let bmi = getVal(item, ["BMI", "bmi"]);
+        if (!bmi || bmi === "-") {
+            const hM = parseFloat(height) / 100;
+            const wKg = parseFloat(weight);
+            bmi = (hM && wKg) ? (wKg / (hM * hM)).toFixed(1) : "-";
         }
 
-        bodyDataList.forEach(item => {
-            // 自动计算 BMI（如果表格内未直接提供）
-            let heightM = parseFloat(item["身高"]) / 100;
-            let weight = parseFloat(item["体重"]);
-            let bmi = item["BMI"] || (heightM && weight ? (weight / (heightM * heightM)).toFixed(1) : "-");
+        const leg = getVal(item, ["全腿长", "腿长"]) || "-";
+        const calf = getVal(item, ["小腿长"]) || "-";
+        const achilles = getVal(item, ["跟腱长"]) || "-";
+        const wingspan = getVal(item, ["臂展"]) || "-";
+        const hand = getVal(item, ["手长"]) || "-";
+        const shoulder = getVal(item, ["肩宽"]) || "-";
 
-            let tr = document.createElement("tr");
-            tr.style.borderBottom = "1px solid #f1f5f9";
-            tr.innerHTML = `
-                <td style="padding: 10px; font-weight: 600;">${item["测试日期"] || "-"}</td>
-                <td style="padding: 10px;">${item["身高"] || "-"}</td>
-                <td style="padding: 10px;">${item["体重"] || "-"}</td>
-                <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: 600;">${bmi}</span></td>
-                <td style="padding: 10px;">${item["全腿长"] || "-"}</td>
-                <td style="padding: 10px;">${item["小腿长"] || "-"}</td>
-                <td style="padding: 10px;">${item["跟腱长"] || "-"}</td>
-                <td style="padding: 10px;">${item["臂展"] || "-"}</td>
-                <td style="padding: 10px;">${item["手长"] || "-"}</td>
-                <td style="padding: 10px;">${item["肩宽"] || "-"}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+        let tr = document.createElement("tr");
+        tr.style.borderBottom = "1px solid #f1f5f9";
+        tr.innerHTML = `
+            <td style="padding: 10px; font-weight: 600;">${date}</td>
+            <td style="padding: 10px;">${height}</td>
+            <td style="padding: 10px;">${weight}</td>
+            <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: 600;">${bmi}</span></td>
+            <td style="padding: 10px;">${leg}</td>
+            <td style="padding: 10px;">${calf}</td>
+            <td style="padding: 10px;">${achilles}</td>
+            <td style="padding: 10px;">${wingspan}</td>
+            <td style="padding: 10px;">${hand}</td>
+            <td style="padding: 10px;">${shoulder}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
         
     </script>
 
