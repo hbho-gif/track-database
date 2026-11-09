@@ -3003,7 +3003,8 @@ function renderHealthStatus(healthDataList) {
     container.style.borderColor = "#fecaca";
     
     let html = `<ul style="margin: 0; padding-left: 20px; color: #991b1b;">`;
-    healthLDataist.forEach(item => {
+    // 💡 已修正：改为正确的 healthDataList 变量名
+    healthDataList.forEach(item => {
         const date = getVal(item, ["记录日期", "测试日期", "date"]) || "-";
         const status = getVal(item, ["身体健康状况", "健康状况", "status"]) || "-";
         html += `
@@ -3024,7 +3025,8 @@ function renderBodyTable(bodyDataList) {
 
     tbody.innerHTML = "";
 
-    if (!bodyList || bodyDataList.length === 0) {
+    // 💡 已修正：将 !bodyList 修改为 !bodyDataList
+    if (!bodyDataList || bodyDataList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="10" style="padding: 16px; color: #94a3b8;">暂无身体测量数据</td></tr>`;
         return;
     }
