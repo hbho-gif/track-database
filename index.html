@@ -87,7 +87,7 @@
         .tabs, .tab-buttons, .sub-tab-container {
             display: flex !important;
             flex-wrap: nowrap !important;       /* 单行不换行 */
-            gap: 12px !important;              /* 胶囊独立间距 */
+            gap: 10px !important;              /* 胶囊独立间距 */
             width: 100% !important;
             margin-top: 20px !important;
             margin-bottom: 20px !important;
@@ -110,9 +110,9 @@
         .tabs .tab-btn, 
         .tab-buttons button, 
         .sub-tab-btn {
-            flex: 1 1 0px !important;          /* 5 个按钮等分整行宽度 */
-            min-width: 120px !important;        /* 设置保底最小宽度，防止移动端挤压变形 */
-            padding: 12px 10px !important;      /* 增大内边距，提升点击手感 */
+            flex: 1 1 0px !important;          /* 6 个按钮等分整行宽度 */
+            min-width: 105px !important;       /* 适配 6 列的保底最小宽度 */ 
+            padding: 12px 8px !important;      /* 增大内边距，提升点击手感 */
             background-color: #ffffff !important;/* 💡 强制纯白背景 */
             border: 1px solid #cbd5e1 !important;/* 💡 浅灰色边框 */
             border-radius: 9999px !important;  /* 💡 极致圆角 (Round End / Pill) */
@@ -749,7 +749,7 @@
                 <button class="tab-btn" onclick="switchTab(event,'multi')">🏆 全能项<small>(MULTI)</small></button>
 
                 <!-- 🌟 6. 新增：服务时数 Tab -->
-                <button class="tab-btn" onclick="switchTab(event,'service')">🤝 服务时数<small>(VOLUNTEER SERVICE HOURS)</small></button>
+                <button class="tab-btn" onclick="switchTab(event,'service')">🤝 服务时数<small>(SERVICE HOURS)</small></button>
                 </div>
 
                 <!-- 1. 身体数据 -->
