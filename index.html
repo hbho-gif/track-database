@@ -1271,22 +1271,22 @@
     <script>
 
     // 💡 把主 Tab 切换逻辑放在这里：
-        function switchMainTab(tabId) {
-            const contents = document.querySelectorAll('.main-tab-content');
-            contents.forEach(content => content.style.display = 'none');
+    function switchMainTab(tabId) {
+        const contents = document.querySelectorAll('.main-tab-content');
+        contents.forEach(content => content.style.display = 'none');
 
-            const buttons = document.querySelectorAll('.main-nav .nav-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
+        const buttons = document.querySelectorAll('.main-nav .nav-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
 
-            const targetContent = document.getElementById(`mainTab-${tabId}`);
-            if (targetContent) {
-                targetContent.style.display = 'block';
-            }
+        const targetContent = document.getElementById(`mainTab-${tabId}`);
+        if (targetContent) {
+            targetContent.style.display = 'block';
+        }
 
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-            }
-        }        
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+    }        
             
     // 1. 基础配置与通用工具函数（放在 script 最上方）
     const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
@@ -1433,42 +1433,42 @@
     }
 
     // 💡 将各种时间/成绩字符串统一解析为总秒数/数值，用于准确排序
-function parsePerformanceToSeconds(val) {
-    if (val === undefined || val === null || val === "-" || val === "") return -1;
+    function parsePerformanceToSeconds(val) {
+        if (val === undefined || val === null || val === "-" || val === "") return -1;
 
-    let str = String(val).trim();
-    // 1. 过滤不可见字符，将全角冒号/句号转为半角
-    str = str.replace(/：/g, ":").replace(/。/g, ".").replace(/[\u200B-\u200D\uFEFF]/g, "");
+        let str = String(val).trim();
+        // 1. 过滤不可见字符，将全角冒号/句号转为半角
+        str = str.replace(/：/g, ":").replace(/。/g, ".").replace(/[\u200B-\u200D\uFEFF]/g, "");
 
-    // 2. 过滤常见的非成绩/弃权/未完成字符串 (DNS, DNF, DQ, NM, 弃权, 无成绩)
-    if (/DNS|DNF|DQ|NM|弃权|无成绩/i.test(str)) return -1;
+        // 2. 过滤常见的非成绩/弃权/未完成字符串 (DNS, DNF, DQ, NM, 弃权, 无成绩)
+        if (/DNS|DNF|DQ|NM|弃权|无成绩/i.test(str)) return -1;
 
-    // 3. 剥离风速等括号附带信息，如 "11.50 (+1.2m/s)" ➔ "11.50"
-    str = str.replace(/\(.*\)/g, "").replace(/（.*）/g, "").trim();
+        // 3. 剥离风速等括号附带信息，如 "11.50 (+1.2m/s)" ➔ "11.50"
+        str = str.replace(/\(.*\)/g, "").replace(/（.*）/g, "").trim();
 
-    // 4. 清洗单位字符（保留数字、冒号、小数点），并处理多余小数点
-    str = str.replace(/[^\d:.]/g, "").trim();
-    if (!str) return -1;
+        // 4. 清洗单位字符（保留数字、冒号、小数点），并处理多余小数点
+        str = str.replace(/[^\d:.]/g, "").trim();
+        if (!str) return -1;
 
-    // 5. 时间格式解析 (HH:MM:SS 或 MM:SS)
-    if (str.includes(":")) {
-        let parts = str.split(":");
-        if (parts.length === 2) {
-            let mm = parseFloat(parts[0]) || 0;
-            let ss = parseFloat(parts[1]) || 0;
-            return mm * 60 + ss;
-        } else if (parts.length === 3) {
-            let hh = parseFloat(parts[0]) || 0;
-            let mm = parseFloat(parts[1]) || 0;
-            let ss = parseFloat(parts[2]) || 0;
-            return hh * 3600 + mm * 60 + ss;
+        // 5. 时间格式解析 (HH:MM:SS 或 MM:SS)
+        if (str.includes(":")) {
+            let parts = str.split(":");
+            if (parts.length === 2) {
+                let mm = parseFloat(parts[0]) || 0;
+                let ss = parseFloat(parts[1]) || 0;
+                return mm * 60 + ss;
+            } else if (parts.length === 3) {
+                let hh = parseFloat(parts[0]) || 0;
+                let mm = parseFloat(parts[1]) || 0;
+                let ss = parseFloat(parts[2]) || 0;
+                return hh * 3600 + mm * 60 + ss;
+            }
         }
-    }
 
-    // 6. 纯数值解析 (秒数或距离)
-    let num = parseFloat(str);
-    return isNaN(num) ? -1 : num;
-}
+        // 6. 纯数值解析 (秒数或距离)
+        let num = parseFloat(str);
+        return isNaN(num) ? -1 : num;
+    }
 
     // 全局数据缓存对象
     let raceDataStore = {
@@ -1575,105 +1575,105 @@ function parsePerformanceToSeconds(val) {
 
     // 💡 执行通用筛选与排序（修正越野赛距离筛选）
     // 💡 执行通用筛选与排序
-function applyFilterAndSort(type) {
-    const config = moduleConfig[type];
-    if (!config) return;
+    function applyFilterAndSort(type) {
+        const config = moduleConfig[type];
+        if (!config) return;
 
-    const rawData = raceDataStore[type];
-    if (!rawData) return;
+        const rawData = raceDataStore[type];
+        if (!rawData) return;
 
-    const yearSelect = document.getElementById(config.yearFilterId);
-    const eventSelect = document.getElementById(config.eventFilterId);
-    const sortSelect = document.getElementById(config.sortOrderId);
+        const yearSelect = document.getElementById(config.yearFilterId);
+        const eventSelect = document.getElementById(config.eventFilterId);
+        const sortSelect = document.getElementById(config.sortOrderId);
 
-    // 防错处理：若无下拉菜单直接渲染默认列表
-    if (!yearSelect || !eventSelect || !sortSelect) {
-        const defaultFiltered = rawData.filter(item => {
-            const id = getVal(item, ["学号", "学号 ID", "学号ID", "id", "ID"]);
-            return String(id).trim() === String(raceDataStore.inputId).trim();
-        });
-        renderStandardTableDirect(config.tableSelector, defaultFiltered, config.columnsMap, config.isTimeFormat);
-        return;
-    }
-
-    const selectedYear = String(yearSelect.value).trim();
-    const selectedEvent = String(eventSelect.value).trim();
-    const sortOrder = String(sortSelect.value).trim();
-
-    // 1. 筛选逻辑
-    let filtered = rawData.filter(item => {
-        const id = String(getVal(item, ["学号", "学号 ID", "学号ID", "id", "ID"])).trim();
-        const matchesId = (id === String(raceDataStore.inputId).trim());
-
-        const year = String(getVal(item, ["year", "年份", "比赛年份 YEAR", "比赛年份"])).trim();
-
-        let event = "-";
-        if (type === "cross") {
-            event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"])).trim();
-        } else {
-            event = String(getVal(item, ["event", "比赛项目", "项目", "比赛项目 EVENT"])).trim();
+        // 防错处理：若无下拉菜单直接渲染默认列表
+        if (!yearSelect || !eventSelect || !sortSelect) {
+            const defaultFiltered = rawData.filter(item => {
+                const id = getVal(item, ["学号", "学号 ID", "学号ID", "id", "ID"]);
+                return String(id).trim() === String(raceDataStore.inputId).trim();
+            });
+            renderStandardTableDirect(config.tableSelector, defaultFiltered, config.columnsMap, config.isTimeFormat);
+            return;
         }
 
-        const matchesYear = (selectedYear === "ALL" || year === selectedYear);
-        const matchesEvent = (selectedEvent === "ALL" || event === selectedEvent);
+        const selectedYear = String(yearSelect.value).trim();
+        const selectedEvent = String(eventSelect.value).trim();
+        const sortOrder = String(sortSelect.value).trim();
 
-        return matchesId && matchesYear && matchesEvent;
-    });
+        // 1. 筛选逻辑
+        let filtered = rawData.filter(item => {
+            const id = String(getVal(item, ["学号", "学号 ID", "学号ID", "id", "ID"])).trim();
+            const matchesId = (id === String(raceDataStore.inputId).trim());
 
-    // 2. 🌟 智能排序逻辑（无筛选排序时默认按年份，选择成绩排序时打破年份限制）
-    // 💡 补全完整的成绩列名别名（加入了 "比赛成绩 RESULT (hh:mm:ss,ss)"）
-    const perfKeys = [
-        "比赛成绩 RESULT (hh:mm:ss,ss)", 
-        "比赛成绩 RESULT", 
-        "比赛成绩 RESULTS", 
-        "比赛成绩 PERFORMANCE", 
-        "results", 
-        "result", 
-        "m", 
-        "成绩", 
-        "比赛成绩", 
-        "PERFORMANCE", 
-        "RESULTS", 
-        "RESULT"
-    ];
+            const year = String(getVal(item, ["year", "年份", "比赛年份 YEAR", "比赛年份"])).trim();
 
-    filtered.sort((a, b) => {
-        let yearA = parseInt(getVal(a, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
-        let yearB = parseInt(getVal(b, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
+            let event = "-";
+            if (type === "cross") {
+                event = String(getVal(item, ["distance", "distance/km", "距离", "event", "比赛项目"])).trim();
+            } else {
+                event = String(getVal(item, ["event", "比赛项目", "项目", "比赛项目 EVENT"])).trim();
+            }
 
-        let valA = parsePerformanceToSeconds(getVal(a, perfKeys));
-        let valB = parsePerformanceToSeconds(getVal(b, perfKeys));
+            const matchesYear = (selectedYear === "ALL" || year === selectedYear);
+            const matchesEvent = (selectedEvent === "ALL" || event === selectedEvent);
 
-        // 💡 1. 如果用户主动选择了按成绩排序（ASC 秒数升序 / DESC 成绩降序）
-        if (sortOrder === "ASC" || sortOrder === "DESC") {
-            // 无效成绩/未完成 (-1) 永远置底
+            return matchesId && matchesYear && matchesEvent;
+        });
+
+        // 2. 🌟 智能排序逻辑（无筛选排序时默认按年份，选择成绩排序时打破年份限制）
+        // 💡 补全完整的成绩列名别名（加入了 "比赛成绩 RESULT (hh:mm:ss,ss)"）
+        const perfKeys = [
+            "比赛成绩 RESULT (hh:mm:ss,ss)", 
+            "比赛成绩 RESULT", 
+            "比赛成绩 RESULTS", 
+            "比赛成绩 PERFORMANCE", 
+            "results", 
+            "result", 
+            "m", 
+            "成绩", 
+            "比赛成绩", 
+            "PERFORMANCE", 
+            "RESULTS", 
+            "RESULT"
+        ];
+
+        filtered.sort((a, b) => {
+            let yearA = parseInt(getVal(a, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
+            let yearB = parseInt(getVal(b, ["year", "年份", "比赛年份 YEAR", "比赛年份"]), 10) || 0;
+
+            let valA = parsePerformanceToSeconds(getVal(a, perfKeys));
+            let valB = parsePerformanceToSeconds(getVal(b, perfKeys));
+
+            // 💡 1. 如果用户主动选择了按成绩排序（ASC 秒数升序 / DESC 成绩降序）
+            if (sortOrder === "ASC" || sortOrder === "DESC") {
+                // 无效成绩/未完成 (-1) 永远置底
+                if (valA === -1 && valB === -1) return 0;
+                if (valA === -1) return 1;
+                if (valB === -1) return -1;
+
+                if (sortOrder === "ASC") {
+                    return valA - valB; // 绝对升序（如径赛：全历史最短用时在前）
+                } else {
+                    return valB - valA; // 绝对降序（如田赛/全能：全历史最高成绩在前）
+                }
+            }
+
+            // 💡 2. 默认模式（或 sortOrder 为 DEFAULT/YEAR 时）：优先按年份降序 (2026 -> 2025 -> 2024)
+            if (yearA !== yearB) {
+                return yearB - yearA; 
+            }
+
+            // 同一年份内，有效成绩排在前面
             if (valA === -1 && valB === -1) return 0;
             if (valA === -1) return 1;
             if (valB === -1) return -1;
 
-            if (sortOrder === "ASC") {
-                return valA - valB; // 绝对升序（如径赛：全历史最短用时在前）
-            } else {
-                return valB - valA; // 绝对降序（如田赛/全能：全历史最高成绩在前）
-            }
-        }
+            return valA - valB; // 同一年内默认按时间较短/成绩较优排序
+        });
 
-        // 💡 2. 默认模式（或 sortOrder 为 DEFAULT/YEAR 时）：优先按年份降序 (2026 -> 2025 -> 2024)
-        if (yearA !== yearB) {
-            return yearB - yearA; 
-        }
-
-        // 同一年份内，有效成绩排在前面
-        if (valA === -1 && valB === -1) return 0;
-        if (valA === -1) return 1;
-        if (valB === -1) return -1;
-
-        return valA - valB; // 同一年内默认按时间较短/成绩较优排序
-    });
-
-    // 3. 渲染
-    renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
-}
+        // 3. 渲染
+        renderStandardTableDirect(config.tableSelector, filtered, config.columnsMap, config.isTimeFormat);
+    }
 
     // 💡 统一渲染表格函数
     function renderStandardTableDirect(tbodySelector, filteredData, columnsMap, isTimeFormat = false) {
@@ -1706,80 +1706,80 @@ function applyFilterAndSort(type) {
 
     // ⏱️ 时间自动补齐与格式化函数
     function formatTime(val) {
-    if (val === undefined || val === null) return "-";
+        if (val === undefined || val === null) return "-";
     
-    let str = String(val).trim();
-    // 替换全角冒号与不可见字符
-    str = str.replace(/：/g, ":").replace(/[\u200B-\u200D\uFEFF]/g, "");
+        let str = String(val).trim();
+        // 替换全角冒号与不可见字符
+        str = str.replace(/：/g, ":").replace(/[\u200B-\u200D\uFEFF]/g, "");
     
-    if (str === "" || str === "-") return "-";
+        if (str === "" || str === "-") return "-";
 
-    // 1. 处理带冒号的输入 (MM:SS 或 HH:MM:SS)
-    if (str.includes(":")) {
-        let parts = str.split(":");
+        // 1. 处理带冒号的输入 (MM:SS 或 HH:MM:SS)
+        if (str.includes(":")) {
+            let parts = str.split(":");
         
-        // 格式: MM:SS.ss (例如 75:30.50 或 02:15.00)
-        if (parts.length === 2) {
-            let totalMinutes = parseInt(parts[0].trim(), 10) || 0;
-            let secNum = parseFloat(parts[1].trim()) || 0;
+            // 格式: MM:SS.ss (例如 75:30.50 或 02:15.00)
+            if (parts.length === 2) {
+                let totalMinutes = parseInt(parts[0].trim(), 10) || 0;
+                let secNum = parseFloat(parts[1].trim()) || 0;
             
-            // 计算小时与剩余分钟
-            let hh = Math.floor(totalMinutes / 60);
-            let mm = totalMinutes % 60;
+                // 计算小时与剩余分钟
+                let hh = Math.floor(totalMinutes / 60);
+                let mm = totalMinutes % 60;
             
-            // 组装格式
-            let hhStr = String(hh).padStart(2, '0');
-            let mmStr = String(mm).padStart(2, '0');
-            let ssStr = secNum.toFixed(2).padStart(5, '0');
+                // 组装格式
+                let hhStr = String(hh).padStart(2, '0');
+                let mmStr = String(mm).padStart(2, '0');
+                let ssStr = secNum.toFixed(2).padStart(5, '0');
             
-            return `${hhStr}:${mmStr}:${ssStr}`;
-        }
+                return `${hhStr}:${mmStr}:${ssStr}`;
+            }
 
-        // 格式: HH:MM:SS.ss
-        if (parts.length === 3) {
-            let hh = parseInt(parts[0].trim(), 10) || 0;
-            let totalMinutes = parseInt(parts[1].trim(), 10) || 0;
-            let secNum = parseFloat(parts[2].trim()) || 0;
+            // 格式: HH:MM:SS.ss
+            if (parts.length === 3) {
+                let hh = parseInt(parts[0].trim(), 10) || 0;
+                let totalMinutes = parseInt(parts[1].trim(), 10) || 0;
+                let secNum = parseFloat(parts[2].trim()) || 0;
             
-            // 如果 MM 超过 60，自动折算进 HH
-            hh += Math.floor(totalMinutes / 60);
-            let mm = totalMinutes % 60;
+                // 如果 MM 超过 60，自动折算进 HH
+                hh += Math.floor(totalMinutes / 60);
+                let mm = totalMinutes % 60;
 
-            let hhStr = String(hh).padStart(2, '0');
-            let mmStr = String(mm).padStart(2, '0');
-            let ssStr = secNum.toFixed(2).padStart(5, '0');
+                let hhStr = String(hh).padStart(2, '0');
+                let mmStr = String(mm).padStart(2, '0');
+                let ssStr = secNum.toFixed(2).padStart(5, '0');
 
-            return `${hhStr}:${mmStr}:${ssStr}`;
-        }
-    }
-
-    // 2. 处理纯数字（总秒数）输入
-    let totalSeconds = parseFloat(str);
-    if (!isNaN(totalSeconds)) {
-        let hours = Math.floor(totalSeconds / 3600);
-        let remainingSeconds = totalSeconds % 3600;
-        let minutes = Math.floor(remainingSeconds / 60);
-        let seconds = (remainingSeconds % 60).toFixed(2);
-
-        // 防止 59.999 进位成 60.00 的特殊边界情况
-        if (parseFloat(seconds) >= 60) {
-            seconds = (0).toFixed(2);
-            minutes += 1;
-            if (minutes >= 60) {
-                minutes = 0;
-                hours += 1;
+                return `${hhStr}:${mmStr}:${ssStr}`;
             }
         }
 
-        let hh = String(hours).padStart(2, '0');
-        let mm = String(minutes).padStart(2, '0');
-        let ss = String(seconds).padStart(5, '0');
+        // 2. 处理纯数字（总秒数）输入
+        let totalSeconds = parseFloat(str);
+        if (!isNaN(totalSeconds)) {
+            let hours = Math.floor(totalSeconds / 3600);
+            let remainingSeconds = totalSeconds % 3600;
+            let minutes = Math.floor(remainingSeconds / 60);
+            let seconds = (remainingSeconds % 60).toFixed(2);
 
-        return `${hh}:${mm}:${ss}`;
+            // 防止 59.999 进位成 60.00 的特殊边界情况
+            if (parseFloat(seconds) >= 60) {
+                seconds = (0).toFixed(2);
+                minutes += 1;
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours += 1;
+                }
+            }
+
+            let hh = String(hours).padStart(2, '0');
+            let mm = String(minutes).padStart(2, '0');
+            let ss = String(seconds).padStart(5, '0');
+
+            return `${hh}:${mm}:${ss}`;
+        }
+
+        return str;
     }
-
-    return str;
-}
 
     // 💡 改进后的单元格格式化逻辑：自动识别田赛并保留两位小数
     // 📏 全局通用：田赛成绩格式化（兼容 1 个或 2 个参数输入）
@@ -2125,22 +2125,20 @@ function applyFilterAndSort(type) {
         }
 
         // 💡 1. 筛选当前学号的“身体数据”与“健康状况”
-// 直接复用你前面定义的 cleanId 和 idKeys，实现多列名兼容匹配
-const currentBodyList = bodyDataList.filter(item => {
-    const val = getVal(item, idKeys);
-    return val !== "-" && String(val).trim() === cleanId;
-});
+        // 直接复用你前面定义的 cleanId 和 idKeys，实现多列名兼容匹配
+        const currentBodyList = bodyDataList.filter(item => {
+            const val = getVal(item, idKeys);
+            return val !== "-" && String(val).trim() === cleanId;
+        });
 
-const currentHealthList = healthDataList.filter(item => {
-    const val = getVal(item, idKeys);
-    return val !== "-" && String(val).trim() === cleanId;
-});
+        const currentHealthList = healthDataList.filter(item => {
+            const val = getVal(item, idKeys);
+            return val !== "-" && String(val).trim() === cleanId;
+        });
 
-// 💡 2. 调用渲染函数，传入当前学生的专属数据
-renderHealthStatus(currentHealthList);
-renderBodyTable(currentBodyList);
-    
-    
+        // 💡 2. 调用渲染函数，传入当前学生的专属数据
+        renderHealthStatus(currentHealthList);
+        renderBodyTable(currentBodyList);
     }
 
     // ==========================================
