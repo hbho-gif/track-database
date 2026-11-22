@@ -3239,24 +3239,38 @@
         return /^\d+$/.test(str) ? str.padStart(5, "0") : str;
     }
         
-    // 🛠️ 将日期统一规整为 yyyy-mm-dd 格式
-    function normalizeServiceDate(raw) {
+    // 🛠️ 将日期统一规整为完整的 yyyy-mm-dd 格式（若原单元格缺少年份，自动用当前 sheet 的 year 补全）
+    function normalizeServiceDate(raw, defaultYear) {
         const str = String(raw || "").trim();
         if (!str) return "";
 
-        // 1. 匹配 yyyy-m-d 或 yyyy/m/d（例如 2026-3-5 或 2026/03/05）
+        // 1. 已有完整年份：yyyy-m-d 或 yyyy/m/d（例如 2026-3-5 -> 2026-03-05）
         let m = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
         if (m) {
             return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
         }
 
-        // 2. 兼容马来西亚常见的 d/m/yyyy 格式（例如 15/03/2026）
+        // 2. 已有完整年份（日/月/年）：d/m/yyyy 或 d-m-yyyy（例如 15/03/2026 -> 2026-03-15）
         m = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
         if (m) {
             return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
         }
 
-        // 其他特殊文本原样返回
+        // 3. 缺少四位年份（如 3/15、03-15 或 15-Mar），结合当前 Sheet 的年份用原生 Date 兜底解析
+        const parsed = new Date(`${str} ${defaultYear}`);
+        if (!isNaN(parsed.getTime())) {
+            const y = parsed.getFullYear();
+            const mo = String(parsed.getMonth() + 1).padStart(2, "0");
+            const d = String(parsed.getDate()).padStart(2, "0");
+            return `${y}-${mo}-${d}`;
+        }
+
+        // 4. 兜底匹配中文日期格式（如 3月15日 -> 2026-03-15）
+        m = str.match(/(\d{1,2})月(\d{1,2})日?/);
+        if (m && defaultYear) {
+            return `${defaultYear}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+        }
+
         return str;
     }
 
@@ -3285,12 +3299,12 @@
     
                 // 从 Column E (索引 4) 开始横向扫描每一次活动
                 for (let c = 4; c < dateRow.length; c++) {
-                    // 💡 条件 2：先检查 Row 1 日期是否为空，为空则直接跳过整列，不记录任何数据
+                    // Row 1 日期为空则跳过整列
                     const rawDate = (dateRow[c] || "").trim();
                     if (!rawDate) continue;
 
                     const cellVal = (rowData[c] || "").trim();
-                    if (!cellVal) continue; // 该生此项无时数记录则跳过
+                    if (!cellVal) continue;
 
                     const descStr = (descRow[c] || "").trim();
 
@@ -3300,8 +3314,8 @@
                         continue;
                     }
 
-                    // 💡 条件 1：统一格式化为 yyyy-mm-dd
-                    const formattedDate = normalizeServiceDate(rawDate);
+                    // 💡 传入当前标签页的 year，确保输出必定带有完整的 yyyy-mm-dd
+                    const formattedDate = normalizeServiceDate(rawDate, year);
 
                     records.push({
                         studentId: studentId,
