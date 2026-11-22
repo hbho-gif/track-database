@@ -3239,6 +3239,27 @@
         return /^\d+$/.test(str) ? str.padStart(5, "0") : str;
     }
         
+    // 🛠️ 将日期统一规整为 yyyy-mm-dd 格式
+    function normalizeServiceDate(raw) {
+        const str = String(raw || "").trim();
+        if (!str) return "";
+
+        // 1. 匹配 yyyy-m-d 或 yyyy/m/d（例如 2026-3-5 或 2026/03/05）
+        let m = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+        if (m) {
+            return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+        }
+
+        // 2. 兼容马来西亚常见的 d/m/yyyy 格式（例如 15/03/2026）
+        m = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
+        if (m) {
+            return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+        }
+
+        // 其他特殊文本原样返回
+        return str;
+    }
+
     // 抓取单个年份 Tab 并把横向矩阵展开为明细列表
     async function fetchServiceYearSheet(year) {
         const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(year)}`;
@@ -3260,27 +3281,32 @@
                 if (!rawId) continue;
 
                 const studentId = formatStudentId(rawId); // 5 位补零
-                // 过滤掉非学号的空行或表尾统计行
                 if (!/^\d{5}$/.test(studentId)) continue;
-
+    
                 // 从 Column E (索引 4) 开始横向扫描每一次活动
-                for (let c = 4; c < Math.max(dateRow.length, descRow.length); c++) {
-                    const cellVal = (rowData[c] || "").trim();
-                    if (!cellVal) continue; // 空白单元格跳过
+                for (let c = 4; c < dateRow.length; c++) {
+                    // 💡 条件 2：先检查 Row 1 日期是否为空，为空则直接跳过整列，不记录任何数据
+                    const rawDate = (dateRow[c] || "").trim();
+                    if (!rawDate) continue;
 
-                    const dateStr = (dateRow[c] || "").trim();
+                    const cellVal = (rowData[c] || "").trim();
+                    if (!cellVal) continue; // 该生此项无时数记录则跳过
+
                     const descStr = (descRow[c] || "").trim();
 
-                    // 🛡️ 防踩坑：如果表格最右侧有“总计 / Total”汇总列，自动跳过，避免重复累加
-                    const headerCheck = (dateStr + " " + descStr).toLowerCase();
+                    // 过滤右侧可能存在的“总计 / Total”列
+                    const headerCheck = (rawDate + " " + descStr).toLowerCase();
                     if (headerCheck.includes("total") || headerCheck.includes("总计") || headerCheck.includes("总时数")) {
                         continue;
                     }
 
+                    // 💡 条件 1：统一格式化为 yyyy-mm-dd
+                    const formattedDate = normalizeServiceDate(rawDate);
+
                     records.push({
                         studentId: studentId,
                         year: year,
-                        date: dateStr || `${year} (日期未填)`,
+                        date: formattedDate,
                         description: descStr || "未命名服务事项",
                         rawHours: cellVal
                     });
