@@ -961,11 +961,48 @@
                     </section>
                 </div>
 
-                <!-- 🌟 新增：服务时数内容占位区 -->
+                <!-- 🌟 6. 服务时数内容区 -->
                 <div id="tab-service" class="tab-content hidden">
                     <section>
-                        <h3>🤝 服务时数 (VOLUNTEER SERVICE HOURS)</h3>
-                        <p style="color: #94a3b8; padding: 16px;">功能开发中，敬请期待...</p>
+                        <!-- 顶部标题 + 总服务时数汇总卡片 -->
+                        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                🤝 服务时数 (VOLUNTEER SERVICE HOURS)
+                            </h3>
+                            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 16px; border-radius: 9999px; color: #1e40af; font-weight: 700; font-size: 14px;">
+                                总服务时数 TOTAL SERVICED HOURS: 
+                                <span id="totalServiceHours" style="font-size: 18px; color: #2563eb; margin-left: 4px;">0</span> 小时 (hrs)
+                            </div>
+                        </div>
+
+                        <!-- 服务时数明细表格 -->
+                        <div style="overflow-x: auto; width: 100%;">
+                            <table id="serviceTable" style="width: 100%; border-collapse: collapse; text-align: center; white-space: nowrap;">
+                                <thead>
+                                    <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; font-size: 13px; color: #475569;">
+                                        <th style="padding: 8px 10px; width: 70px;">
+                                            <div>序</div>
+                                            <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">No.</span>
+                                        </th>
+                                        <th style="padding: 8px 10px; width: 150px;">
+                                            <div>服务日期</div>
+                                            <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">SERVICED DATE</span>
+                                        </th>
+                                        <th style="padding: 8px 10px; text-align: left;">
+                                            <div>服务事项</div>
+                                            <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">SERVICED DESCRIPTION</span>
+                                        </th>
+                                        <th style="padding: 8px 10px; width: 160px;">
+                                            <div>服务时数</div>
+                                            <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">SERVICED HOURS</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="serviceTableBody">
+                                    <!-- JS 动态填充 -->
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
                 </div>
             </div>
@@ -2830,280 +2867,278 @@
     }
 
     // ==========================================
-// 🏃 第三页：《运动会履历》核心逻辑
-// ==========================================
+    // 🏃 第三页：《运动会履历》核心逻辑
+    // ==========================================
 
-// 1. 当《运动会履历》类别切换时，动态更新项目下拉框与年份选项
-function onSdCategoryChange() {
-    const cat = document.getElementById("sdCategorySelect") ? document.getElementById("sdCategorySelect").value : "TRACK";
-    const eventSelect = document.getElementById("sdEventSelect");
-    if (!eventSelect) return;
+    // 1. 当《运动会履历》类别切换时，动态更新项目下拉框与年份选项
+    function onSdCategoryChange() {
+        const cat = document.getElementById("sdCategorySelect") ? document.getElementById("sdCategorySelect").value : "TRACK";
+        const eventSelect = document.getElementById("sdEventSelect");
+        if (!eventSelect) return;
 
-    // 确定当前类别下的所有项目列表
-    const events = cat === "TRACK" ? TRACK_EVENTS : FIELD_EVENTS;
+        // 确定当前类别下的所有项目列表
+        const events = cat === "TRACK" ? TRACK_EVENTS : FIELD_EVENTS;
 
-    // 生成项目选项（默认选中第一项，径赛默认 60 m）
-    eventSelect.innerHTML = events.map(e => {
-        const isDefault = (cat === "TRACK" && e === "60 m") ? "selected" : "";
-        return `<option value="${e}" ${isDefault}>${e}</option>`;
-    }).join("");
+        // 生成项目选项（默认选中第一项，径赛默认 60 m）
+        eventSelect.innerHTML = events.map(e => {
+            const isDefault = (cat === "TRACK" && e === "60 m") ? "selected" : "";
+            return `<option value="${e}" ${isDefault}>${e}</option>`;
+        }).join("");
 
-    // 初始化年份下拉框数据
-    populateSdYearOptions();
+        // 初始化年份下拉框数据
+        populateSdYearOptions();
 
-    // 触发表格渲染
-    renderSportsDayResume();
-}
+        // 触发表格渲染
+        renderSportsDayResume();
+    }
 
-// 2. 动态提取运动会 Sheet 中出现的年份并填充下拉框
-function populateSdYearOptions() {
-    const yearSelect = document.getElementById("sdYearSelect");
-    if (!yearSelect) return;
+    // 2. 动态提取运动会 Sheet 中出现的年份并填充下拉框
+    function populateSdYearOptions() {
+        const yearSelect = document.getElementById("sdYearSelect");
+        if (!yearSelect) return;
 
-    // 合并径赛与田赛数据，提炼所有出现的年份
-    const trackData = typeof schoolSportsDayTrack !== "undefined" ? schoolSportsDayTrack : [];
-    const fieldData = typeof schoolSportsDayField !== "undefined" ? schoolSportsDayField : [];
-    const combined = [...trackData, ...fieldData];
+        // 合并径赛与田赛数据，提炼所有出现的年份
+        const trackData = typeof schoolSportsDayTrack !== "undefined" ? schoolSportsDayTrack : [];
+        const fieldData = typeof schoolSportsDayField !== "undefined" ? schoolSportsDayField : [];
+        const combined = [...trackData, ...fieldData];
 
-    const yearSet = new Set();
-    combined.forEach(item => {
-        const yr = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
-        if (yr && String(yr).trim() !== "" && String(yr).trim() !== "-") {
-            yearSet.add(String(yr).trim());
+        const yearSet = new Set();
+        combined.forEach(item => {
+            const yr = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
+            if (yr && String(yr).trim() !== "" && String(yr).trim() !== "-") {
+                yearSet.add(String(yr).trim());
+            }
+        });
+
+        // 降序排列年份（如：2025, 2024, 2023...）
+        const sortedYears = Array.from(yearSet).sort((a, b) => b - a);
+
+        let html = `<option value="ALL">全部年份 All Years</option>`;
+        sortedYears.forEach(y => {
+            html += `<option value="${y}">${y}</option>`;
+        });
+
+        yearSelect.innerHTML = html;
+    }
+
+    // 3. 主渲染函数：生成履历表格
+    function renderSportsDayResume() {
+        const container = document.getElementById("sportsDayResumeContainer");
+        if (!container) return;
+
+        const category = document.getElementById("sdCategorySelect") ? document.getElementById("sdCategorySelect").value : "TRACK";
+        const selectedEvent = document.getElementById("sdEventSelect") ? document.getElementById("sdEventSelect").value : "";
+        const selectedYear = document.getElementById("sdYearSelect") ? document.getElementById("sdYearSelect").value : "ALL";
+        const selectedGroup = document.getElementById("sdGroupSelect") ? document.getElementById("sdGroupSelect").value : "ALL";
+
+        const isTrack = category === "TRACK";
+
+        // 1. 获取运动会原始数据源
+        let rawData = [];
+        if (isTrack) {
+            rawData = typeof schoolSportsDayTrack !== "undefined" && Array.isArray(schoolSportsDayTrack) ? [...schoolSportsDayTrack] : [];
+        } else {
+            rawData = typeof schoolSportsDayField !== "undefined" && Array.isArray(schoolSportsDayField) ? [...schoolSportsDayField] : [];
         }
-    });
 
-    // 降序排列年份（如：2025, 2024, 2023...）
-    const sortedYears = Array.from(yearSet).sort((a, b) => b - a);
+        // 🌟 打印诊断信息（必须写在 rawData 声明和赋值之后！）
+        if (rawData.length > 0) {
+            console.log("运动会数据中的组别示例:", rawData.slice(0, 5).map(i => getVal(i, ["运动会分组 SPORTsDAY GRP", "运动会分组"])));
+        }
 
-    let html = `<option value="ALL">全部年份 All Years</option>`;
-    sortedYears.forEach(y => {
-        html += `<option value="${y}">${y}</option>`;
-    });
+        if (rawData.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
+                    <p style="font-size:15px; font-weight:bold; margin:0;">- 暂无校内运动会数据 -</p>
+                </div>
+            `;
+            return;
+        }
 
-    yearSelect.innerHTML = html;
-}
+        // 2. 根据筛选条件过滤数据 (增强组别匹配)
+        const filteredData = rawData.filter(item => {
+            // (1) 匹配项目 EVENT (消除空格差异)
+            const itemEvent = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目", "EVENT", "event"]);
+            const cleanItemEvent = String(itemEvent || "").replace(/\s+/g, "").toLowerCase();
+            const cleanSelectedEvent = String(selectedEvent || "").replace(/\s+/g, "").toLowerCase();
+            const matchEvent = selectedEvent ? (cleanItemEvent === cleanSelectedEvent) : true;
 
-// 3. 主渲染函数：生成履历表格
-function renderSportsDayResume() {
-    const container = document.getElementById("sportsDayResumeContainer");
-    if (!container) return;
+            // (2) 匹配年份 YEAR
+            const itemYear = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
+            const matchYear = (selectedYear === "ALL") || (String(itemYear).trim() === String(selectedYear).trim());
 
-    const category = document.getElementById("sdCategorySelect") ? document.getElementById("sdCategorySelect").value : "TRACK";
-    const selectedEvent = document.getElementById("sdEventSelect") ? document.getElementById("sdEventSelect").value : "";
-    const selectedYear = document.getElementById("sdYearSelect") ? document.getElementById("sdYearSelect").value : "ALL";
-    const selectedGroup = document.getElementById("sdGroupSelect") ? document.getElementById("sdGroupSelect").value : "ALL";
-
-    const isTrack = category === "TRACK";
-
-    // 1. 获取运动会原始数据源
-    // 1. 获取运动会原始数据源
-    let rawData = [];
-    if (isTrack) {
-        rawData = typeof schoolSportsDayTrack !== "undefined" && Array.isArray(schoolSportsDayTrack) ? [...schoolSportsDayTrack] : [];
-    } else {
-        rawData = typeof schoolSportsDayField !== "undefined" && Array.isArray(schoolSportsDayField) ? [...schoolSportsDayField] : [];
-    }
-
-    // 🌟 打印诊断信息（必须写在 rawData 声明和赋值之后！）
-    if (rawData.length > 0) {
-        console.log("运动会数据中的组别示例:", rawData.slice(0, 5).map(i => getVal(i, ["运动会分组 SPORTsDAY GRP", "运动会分组"])));
-    }
-
-    if (rawData.length === 0) {
-        container.innerHTML = `
-            <div style="text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
-                <p style="font-size:15px; font-weight:bold; margin:0;">- 暂无校内运动会数据 -</p>
-            </div>
-        `;
-        return;
-    }
-
-    // 2. 根据筛选条件过滤数据 (增强组别匹配)
-    const filteredData = rawData.filter(item => {
-        // (1) 匹配项目 EVENT (消除空格差异)
-        const itemEvent = getVal(item, ["比赛项目 EVENT", "比赛项目", "项目", "EVENT", "event"]);
-        const cleanItemEvent = String(itemEvent || "").replace(/\s+/g, "").toLowerCase();
-        const cleanSelectedEvent = String(selectedEvent || "").replace(/\s+/g, "").toLowerCase();
-        const matchEvent = selectedEvent ? (cleanItemEvent === cleanSelectedEvent) : true;
-
-        // (2) 匹配年份 YEAR
-        const itemYear = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
-        const matchYear = (selectedYear === "ALL") || (String(itemYear).trim() === String(selectedYear).trim());
-
-        // (3) 匹配组别 (兼容去空格与提取核心词)
-        const itemGroup = getVal(item, ["运动会分组 SPORTsDAY GRP", "运动会分组"]);
+            // (3) 匹配组别 (兼容去空格与提取核心词)
+            const itemGroup = getVal(item, ["运动会分组 SPORTsDAY GRP", "运动会分组"]);
         
-        let matchGroup = false;
-        if (selectedGroup === "ALL") {
-            matchGroup = true;
-        } else if (itemGroup) {
-            const cleanItemGroup = String(itemGroup).replace(/\s+/g, "").toLowerCase();
-            const cleanSelectedGroup = String(selectedGroup).replace(/\s+/g, "").toLowerCase();
-            const coreKeyword = cleanSelectedGroup.replace("组", ""); // 如 "女子丙"
+            let matchGroup = false;
+            if (selectedGroup === "ALL") {
+                matchGroup = true;
+            } else if (itemGroup) {
+                const cleanItemGroup = String(itemGroup).replace(/\s+/g, "").toLowerCase();
+                const cleanSelectedGroup = String(selectedGroup).replace(/\s+/g, "").toLowerCase();
+                const coreKeyword = cleanSelectedGroup.replace("组", ""); // 如 "女子丙"
             
-            matchGroup = cleanItemGroup.includes(cleanSelectedGroup) || cleanItemGroup.includes(coreKeyword);
+                matchGroup = cleanItemGroup.includes(cleanSelectedGroup) || cleanItemGroup.includes(coreKeyword);
+            }
+
+            return matchEvent && matchYear && matchGroup;
+        });
+
+        // 3. 数据排序 (径赛：从小到大 / 田赛：从大到小)
+        filteredData.sort((a, b) => {
+            const rawA = getVal(a, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "RESULTS", "results"]);
+            const rawB = getVal(b, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "RESULTS", "results"]);
+
+            const valA = parsePerformance(rawA, isTrack);
+            const valB = parsePerformance(rawB, isTrack);
+
+            return isTrack ? valA - valB : valB - valA;
+        });
+
+        // 4. 构建 HTML 表格输出
+        if (filteredData.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:30px; color:#94a3b8; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
+                    - 未查找到符合条件的运动会记录 -
+                </div>
+            `;
+            return;
         }
 
-        return matchEvent && matchYear && matchGroup;
-    });
+        let tableHtml = `
+            <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow-x: auto;">
+                <table class="multi-table" style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
+                    <thead>
+                        <tr style="background:#f1f5f9; color:#334155; border-bottom:2px solid #cbd5e1;">
+                            <th style="padding:10px 8px; width:50px; text-align:center;">序</th>
+                            <th style="padding:10px 8px; width:90px;">比赛年份</th>
+                            <th style="padding:10px 8px; width:140px;">中文姓名 NAME(C)</th>
+                            <th style="padding:10px 8px; width:160px;">比赛成绩 PERFORMANCE</th>
+                            <th style="padding:10px 8px;">备注 REMARKS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
 
-    // 3. 数据排序 (径赛：从小到大 / 田赛：从大到小)
-    filteredData.sort((a, b) => {
-        const rawA = getVal(a, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "RESULTS", "results"]);
-        const rawB = getVal(b, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "RESULTS", "results"]);
+        filteredData.forEach((item, idx) => {
+            const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
+            const sName = getStudentName(sid); // 通过全局方法获取姓名
+            const year = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
+            const rawPerf = getVal(item, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "RESULTS", "results"]);
+            const remarks = getVal(item, ["备注 REMARKS", "备注", "REMARKS"]);
 
-        const valA = parsePerformance(rawA, isTrack);
-        const valB = parsePerformance(rawB, isTrack);
+            // 格式化成绩
+            let formattedPerf = "-";
+            if (rawPerf !== undefined && rawPerf !== null && String(rawPerf).trim() !== "") {
+                formattedPerf = isTrack 
+                    ? (typeof formatTime === "function" ? formatTime(rawPerf) : rawPerf)
+                    : (typeof formatFieldValue === "function" ? formatFieldValue(rawPerf, true) : rawPerf);
+            }
 
-        return isTrack ? valA - valB : valB - valA;
-    });
+            tableHtml += `
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
+                    <td style="padding:8px; color:#334155;">${year || "-"}</td>
+                    <td style="padding:8px; font-weight:bold; color:#0f172a;">${sName || "-"}</td>
+                    <td style="padding:8px; color:#059669; font-weight:bold; font-family: monospace;">${formattedPerf}</td>
+                    <td style="padding:8px; color:#64748b; white-space: normal !important; word-break: break-word; max-width: 250px; min-width: 120px;">
+                        ${remarks || "-"}
+                    </td>
+                </tr>
+            `;
+        });
 
-    // 4. 构建 HTML 表格输出
-    if (filteredData.length === 0) {
-        container.innerHTML = `
-            <div style="text-align:center; padding:30px; color:#94a3b8; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
-                - 未查找到符合条件的运动会记录 -
+            tableHtml += `
+                    </tbody>
+                </table>
             </div>
         `;
-        return;
+
+        container.innerHTML = tableHtml;
     }
-
-    let tableHtml = `
-        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow-x: auto;">
-            <table class="multi-table" style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
-                <thead>
-                    <tr style="background:#f1f5f9; color:#334155; border-bottom:2px solid #cbd5e1;">
-                        <th style="padding:10px 8px; width:50px; text-align:center;">序</th>
-                        <th style="padding:10px 8px; width:90px;">比赛年份</th>
-                        <th style="padding:10px 8px; width:140px;">中文姓名 NAME(C)</th>
-                        <th style="padding:10px 8px; width:160px;">比赛成绩 PERFORMANCE</th>
-                        <th style="padding:10px 8px;">备注 REMARKS</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    filteredData.forEach((item, idx) => {
-        const sid = getVal(item, ["学号 ID", "学号", "id", "ID"]);
-        const sName = getStudentName(sid); // 通过全局方法获取姓名
-        const year = getVal(item, ["比赛年份 YEAR", "比赛年份", "年份", "YEAR", "year"]);
-        const rawPerf = getVal(item, ["比赛成绩 RESULTS", "比赛成绩 PERFORMANCE", "比赛成绩 RESULT", "比赛成绩", "成绩", "RESULTS", "results"]);
-        const remarks = getVal(item, ["备注 REMARKS", "备注", "REMARKS"]);
-
-        // 格式化成绩
-        let formattedPerf = "-";
-        if (rawPerf !== undefined && rawPerf !== null && String(rawPerf).trim() !== "") {
-            formattedPerf = isTrack 
-                ? (typeof formatTime === "function" ? formatTime(rawPerf) : rawPerf)
-                : (typeof formatFieldValue === "function" ? formatFieldValue(rawPerf, true) : rawPerf);
-        }
-
-        tableHtml += `
-            <tr style="border-bottom:1px solid #e2e8f0;">
-                <td style="padding:8px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
-                <td style="padding:8px; color:#334155;">${year || "-"}</td>
-                <td style="padding:8px; font-weight:bold; color:#0f172a;">${sName || "-"}</td>
-                <td style="padding:8px; color:#059669; font-weight:bold; font-family: monospace;">${formattedPerf}</td>
-                <td style="padding:8px; color:#64748b; white-space: normal !important; word-break: break-word; max-width: 250px; min-width: 120px;">
-                    ${remarks || "-"}
-                </td>
-            </tr>
-        `;
-    });
-
-    tableHtml += `
-                </tbody>
-            </table>
-        </div>
-    `;
-
-    container.innerHTML = tableHtml;
-}
 
     // 假设根据学号查出的健康数据为 healthDataList，身体测量数据为 bodyDataList
-
-// 1. 渲染健康 / 伤病历史摘要 (Medical Notes)
-function renderHealthStatus(healthDataList) {
-    const container = document.getElementById("healthStatusContainer");
-    if (!container) return;
+    // 1. 渲染健康 / 伤病历史摘要 (Medical Notes)
+    function renderHealthStatus(healthDataList) {
+        const container = document.getElementById("healthStatusContainer");
+        if (!container) return;
     
-    if (!healthDataList || healthDataList.length === 0) {
-        container.style.backgroundColor = "#f0fdf4";
-        container.style.borderColor = "#bbf7d0";
-        container.innerHTML = `<p style="color: #166534; margin: 0; font-weight: 600;">✅ 暂无伤病记录 / 身体状况良好 (Healthy)</p>`;
-        return;
-    }
-
-    container.style.backgroundColor = "#fef2f2";
-    container.style.borderColor = "#fecaca";
-    
-    let html = `<ul style="margin: 0; padding-left: 20px; color: #991b1b;">`;
-    // 💡 已修正：改为正确的 healthDataList 变量名
-    healthDataList.forEach(item => {
-        const date = getVal(item, ["记录日期", "测试日期", "date"]) || "-";
-        const status = getVal(item, ["身体健康状况", "健康状况", "status", "健康/伤病历史摘要"]) || "-";
-        html += `
-            <li style="margin-bottom: 6px;">
-                <strong>${date}:</strong> <span>${status}</span>
-            </li>
-        `;
-    });
-    html += `</ul>`;
-    
-    container.innerHTML = html;
-}
-
-// 2. 渲染身体数据表格 (Body Measurement)
-function renderBodyTable(bodyDataList) {
-    const tbody = document.getElementById("bodyTableBody");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    // 💡 已修正：将 !bodyList 修改为 !bodyDataList
-    if (!bodyDataList || bodyDataList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="padding: 16px; color: #94a3b8;">暂无身体测量数据</td></tr>`;
-        return;
-    }
-
-    bodyDataList.forEach(item => {
-        const date = getVal(item, ["测试日期", "date"]) || "-";
-        const height = getVal(item, ["身高", "height"]) || "-";
-        const weight = getVal(item, ["体重", "weight"]) || "-";
-        
-        // 自动计算或读取 BMI
-        let bmi = getVal(item, ["BMI", "bmi"]);
-        if (!bmi || bmi === "-") {
-            const hM = parseFloat(height) / 100;
-            const wKg = parseFloat(weight);
-            bmi = (hM && wKg) ? (wKg / (hM * hM)).toFixed(1) : "-";
+        if (!healthDataList || healthDataList.length === 0) {
+            container.style.backgroundColor = "#f0fdf4";
+            container.style.borderColor = "#bbf7d0";
+            container.innerHTML = `<p style="color: #166534; margin: 0; font-weight: 600;">✅ 暂无伤病记录 / 身体状况良好 (Healthy)</p>`;
+            return;
         }
 
-        const leg = getVal(item, ["全腿长", "腿长"]) || "-";
-        const calf = getVal(item, ["小腿长"]) || "-";
-        const achilles = getVal(item, ["跟腱长"]) || "-";
-        const wingspan = getVal(item, ["臂展"]) || "-";
-        const hand = getVal(item, ["手长"]) || "-";
-        const shoulder = getVal(item, ["肩宽"]) || "-";
+        container.style.backgroundColor = "#fef2f2";
+        container.style.borderColor = "#fecaca";
+    
+        let html = `<ul style="margin: 0; padding-left: 20px; color: #991b1b;">`;
+        // 💡 已修正：改为正确的 healthDataList 变量名
+        healthDataList.forEach(item => {
+            const date = getVal(item, ["记录日期", "测试日期", "date"]) || "-";
+            const status = getVal(item, ["身体健康状况", "健康状况", "status", "健康/伤病历史摘要"]) || "-";
+            html += `
+                <li style="margin-bottom: 6px;">
+                    <strong>${date}:</strong> <span>${status}</span>
+                </li>
+            `;
+        });
+        html += `</ul>`;
+    
+        container.innerHTML = html;
+    }
 
-        let tr = document.createElement("tr");
-        tr.style.borderBottom = "1px solid #f1f5f9";
-        tr.innerHTML = `
-            <td style="padding: 10px; font-weight: 600;">${date}</td>
-            <td style="padding: 10px;">${height}</td>
-            <td style="padding: 10px;">${weight}</td>
-            <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: 600;">${bmi}</span></td>
-            <td style="padding: 10px;">${leg}</td>
-            <td style="padding: 10px;">${calf}</td>
-            <td style="padding: 10px;">${achilles}</td>
-            <td style="padding: 10px;">${wingspan}</td>
-            <td style="padding: 10px;">${hand}</td>
-            <td style="padding: 10px;">${shoulder}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
+    // 2. 渲染身体数据表格 (Body Measurement)
+    function renderBodyTable(bodyDataList) {
+        const tbody = document.getElementById("bodyTableBody");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        // 💡 已修正：将 !bodyList 修改为 !bodyDataList
+        if (!bodyDataList || bodyDataList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" style="padding: 16px; color: #94a3b8;">暂无身体测量数据</td></tr>`;
+            return;
+        }
+
+        bodyDataList.forEach(item => {
+            const date = getVal(item, ["测试日期", "date"]) || "-";
+            const height = getVal(item, ["身高", "height"]) || "-";
+            const weight = getVal(item, ["体重", "weight"]) || "-";
+        
+            // 自动计算或读取 BMI
+            let bmi = getVal(item, ["BMI", "bmi"]);
+            if (!bmi || bmi === "-") {
+                const hM = parseFloat(height) / 100;
+                const wKg = parseFloat(weight);
+                bmi = (hM && wKg) ? (wKg / (hM * hM)).toFixed(1) : "-";
+            }
+
+            const leg = getVal(item, ["全腿长", "腿长"]) || "-";
+            const calf = getVal(item, ["小腿长"]) || "-";
+            const achilles = getVal(item, ["跟腱长"]) || "-";
+            const wingspan = getVal(item, ["臂展"]) || "-";
+            const hand = getVal(item, ["手长"]) || "-";
+            const shoulder = getVal(item, ["肩宽"]) || "-";
+
+            let tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid #f1f5f9";
+            tr.innerHTML = `
+                <td style="padding: 10px; font-weight: 600;">${date}</td>
+                <td style="padding: 10px;">${height}</td>
+                <td style="padding: 10px;">${weight}</td>
+                <td style="padding: 10px;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: 600;">${bmi}</span></td>
+                <td style="padding: 10px;">${leg}</td>
+                <td style="padding: 10px;">${calf}</td>
+                <td style="padding: 10px;">${achilles}</td>
+                <td style="padding: 10px;">${wingspan}</td>
+                <td style="padding: 10px;">${hand}</td>
+                <td style="padding: 10px;">${shoulder}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
         
     </script>
 
