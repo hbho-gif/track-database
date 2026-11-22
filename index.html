@@ -1990,6 +1990,10 @@
             return val !== "-" && String(val).trim() === cleanId;
         });
 
+        // 筛选当前学号的服务时数记录并渲染
+        const currentServiceList = allServiceRecords.filter(item => item.studentId === cleanId);
+        renderServiceHours(currentServiceList);
+        
         if (!student) {
             alert("未找到学号为 " + cleanId + " 的学生资料，请检查数据表！");
             return;
@@ -2176,6 +2180,55 @@
         // 💡 2. 调用渲染函数，传入当前学生的专属数据
         renderHealthStatus(currentHealthList);
         renderBodyTable(currentBodyList);
+
+        // 渲染某个学生的服务时数明细与总计
+        function renderServiceHours(serviceList) {
+            const tbody = document.getElementById("serviceTableBody");
+            const totalEl = document.getElementById("totalServiceHours");
+            if (!tbody || !totalEl) return;
+
+            tbody.innerHTML = "";
+            let totalHours = 0;
+
+            if (!serviceList || serviceList.length === 0) {
+                totalEl.textContent = "0";
+                tbody.innerHTML = `<tr><td colspan="4" style="padding: 16px; color: #94a3b8;">暂无服务时数记录 (No Service Records)</td></tr>`;
+                return;
+            }
+
+            serviceList.forEach((item, index) => {
+                const valLower = item.rawHours.toLowerCase();
+                let displayHoursHtml = "";
+
+                if (valLower === "v" || valLower === "✓" || valLower === "√") {
+                    // "v" 表示被委任，不计入小时累加，显示醒目徽章
+                    displayHoursHtml = `<span style="background: #fef3c7; color: #b45309; padding: 2px 10px; border-radius: 12px; font-weight: 600; font-size: 13px;">被委任 (Appointed)</span>`;
+                } else {
+                    const num = parseFloat(item.rawHours);
+                    if (!isNaN(num)) {
+                        totalHours += num;
+                        displayHoursHtml = `<span style="font-weight: 700; color: #1e293b;">${num}</span> <span style="font-size: 12px; color: #64748b;">小时</span>`;
+                    } else {
+                        // 兼容其他特殊文字备注
+                        displayHoursHtml = `<span>${item.rawHours}</span>`;
+                    }
+                }
+
+                const tr = document.createElement("tr");
+                tr.style.borderBottom = "1px solid #f1f5f9";
+                tr.innerHTML = `
+                    <td style="padding: 10px; color: #64748b;">${index + 1}</td>
+                    <td style="padding: 10px; font-weight: 600;">${item.date}</td>
+                    <td style="padding: 10px; text-align: left; white-space: normal;">${item.description}</td>
+                    <td style="padding: 10px;">${displayHoursHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 保留最多 1 位小数（避免 JS 浮点数如 1.1 + 2.2 = 3.3000000000000003 的精度误差）
+            totalEl.textContent = Number.isInteger(totalHours) ? totalHours : totalHours.toFixed(1);
+        }
+    
     }
 
     // ==========================================
