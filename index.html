@@ -2000,10 +2000,6 @@
             return val !== "-" && String(val).trim() === cleanId;
         });
 
-        // 筛选当前学号的服务时数记录并渲染
-        const currentServiceList = allServiceRecords.filter(item => item.studentId === cleanId);
-        renderServiceHours(currentServiceList);
-        
         if (!student) {
             alert("未找到学号为 " + cleanId + " 的学生资料，请检查数据表！");
             return;
@@ -2238,7 +2234,11 @@
             // 保留最多 1 位小数（避免 JS 浮点数如 1.1 + 2.2 = 3.3000000000000003 的精度误差）
             totalEl.textContent = Number.isInteger(totalHours) ? totalHours : totalHours.toFixed(1);
         }
-    
+
+    // 筛选当前学号的服务时数记录并渲染
+    const currentServiceList = allServiceRecords.filter(item => item.studentId === cleanId);
+    renderServiceHours(currentServiceList);
+            
     }
 
     // ==========================================
