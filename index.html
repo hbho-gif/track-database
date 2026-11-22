@@ -3230,6 +3230,15 @@
         return rows;
     }
 
+    // 🛠️ 统一学号格式：纯数字不足 5 位时自动在前面补 0（例如 12 -> "00012"）
+    function formatStudentId(rawId) {
+        if (rawId === null || rawId === undefined || rawId === "-") return "-";
+        const str = String(rawId).trim();
+        if (!str) return "-";
+        // 如果是纯数字，统一补齐到 5 位
+        return /^\d+$/.test(str) ? str.padStart(5, "0") : str;
+    }
+        
     // 抓取单个年份 Tab 并把横向矩阵展开为明细列表
     async function fetchServiceYearSheet(year) {
         const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(year)}`;
