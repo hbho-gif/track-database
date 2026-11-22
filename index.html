@@ -1330,7 +1330,13 @@
 
     // 🌟 服务时数专用配置（请替换为该独立 Sheet 的真实 ID）
     const SERVICE_SHEET_ID = "1RRCReUL2v7LPCBOB8QLpgq7gWUvzGCor6Rt8DZKVCMU";
-    const SERVICE_YEARS = ["2023", "2024", "2025", "2026", "2027"];
+    const SERVICE_TABS = [
+        { year: "2023", gid: "33838573" },           // 替换为 2023 标签页真实的 gid
+        { year: "2024", gid: "601255189" },
+        { year: "2025", gid: "926053352" },
+        { year: "2026", gid: "163497616" },
+        { year: "2027", gid: "2002631039" }
+    ];
         
     function getSheetUrl(sheetName) {
         return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
@@ -1438,7 +1444,7 @@
     });
 
     // 🌟 2. 新增：紧跟在后面并行加载“服务时数”独立 Sheet 的 2023-2027 五个年份表
-    Promise.all(SERVICE_YEARS.map(yr => fetchServiceYearSheet(yr)))
+    Promise.all(SERVICE_TABS.map(tab => fetchServiceYearSheet(tab)))
         .then(results => {
             allServiceRecords = results.flat();
             console.log("服务时数加载完成，总明细笔数:", allServiceRecords.length);
@@ -3283,7 +3289,8 @@
 
     // 抓取单个年份 Tab 并把横向矩阵展开为明细列表
     async function fetchServiceYearSheet(year) {
-        const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/gviz/tq?tqx=out:csv&headers=0&sheet=${encodeURIComponent(year)}`;
+        const { year, gid } = tab;
+        const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/export?format=csv&gid=${encodeURIComponent(gid)}`;
         try {
             const res = await fetch(url);
             if (!res.ok) return [];
