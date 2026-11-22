@@ -3287,8 +3287,8 @@
         return str;
     }
 
-    // 抓取单个年份 Tab 并把横向矩阵展开为明细列表
-    async function fetchServiceYearSheet(year) {
+    // 🌟 2. 使用 export?format=csv 原样导出，彻底解决“数字列抹除 Row 2 文本”的问题
+    async function fetchServiceYearSheet(tab) {
         const { year, gid } = tab;
         const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/export?format=csv&gid=${encodeURIComponent(gid)}`;
         try {
@@ -3308,28 +3308,27 @@
                 const rawId = rowData[3]; // Column D (索引 3): 学号
                 if (!rawId) continue;
 
-                const studentId = formatStudentId(rawId); // 5 位补零
+                const studentId = formatStudentId(rawId);
                 if (!/^\d{5}$/.test(studentId)) continue;
-    
+
                 // 从 Column E (索引 4) 开始横向扫描每一次活动
                 for (let c = 4; c < dateRow.length; c++) {
-                    // Row 1 日期为空则跳过整列
-                    const rawDate = (dateRow[c] || "").trim();
-                    if (!rawDate) continue;
+                    const rawDateCell = (dateRow[c] || "").trim();
+                    if (!rawDateCell) continue; // Row 1 日期为空则跳过整列
 
                     const cellVal = (rowData[c] || "").trim();
                     if (!cellVal) continue;
 
+                    // 清理垂直/手动换行，完整保留数字列上方的服务事项
                     const descStr = (descRow[c] || "").replace(/[\r\n]+/g, " ").trim();
 
                     // 过滤右侧可能存在的“总计 / Total”列
-                    const headerCheck = (rawDate + " " + descStr).toLowerCase();
+                    const headerCheck = (rawDateCell + " " + descStr).toLowerCase();
                     if (headerCheck.includes("total") || headerCheck.includes("总计") || headerCheck.includes("总时数")) {
                         continue;
                     }
 
-                    // 💡 传入当前标签页的 year，确保输出必定带有完整的 yyyy-mm-dd
-                    const formattedDate = normalizeServiceDate(rawDate, year);
+                    const formattedDate = normalizeServiceDate(rawDateCell, year);
 
                     records.push({
                         studentId: studentId,
@@ -3347,8 +3346,7 @@
         }
     }
 
-
-        
+      
     </script>
 
 </body>
