@@ -3139,6 +3139,87 @@
             tbody.appendChild(tr);
         });
     }
+
+    // 🌟 服务时数专用配置（请替换为该独立 Sheet 的真实 ID）
+    const SERVICE_SHEET_ID = "请替换成你的服务时数_SHEET_ID";
+    const SERVICE_YEARS = ["2023", "2024", "2025", "2026", "2027"];
+    let allServiceRecords = []; // 存储展开后的所有服务记录
+
+    // 简易 CSV 文本解析器（安全处理带引号、换行符的单元格）
+    function parseRawCSV(csvText) {
+        const rows = [];
+        let row = [], cell = "", inQuotes = false;
+        for (let i = 0; i < csvText.length; i++) {
+            const ch = csvText[i], next = csvText[i + 1];
+            if (inQuotes) {
+                if (ch === '"' && next === '"') { cell += '"'; i++; }
+                else if (ch === '"') { inQuotes = false; }
+                else { cell += ch; }
+            } else {
+                if (ch === '"') { inQuotes = true; }
+                else if (ch === ',') { row.push(cell.trim()); cell = ""; }
+                else if (ch === '\r' && next === '\n') { row.push(cell.trim()); rows.push(row); row = []; cell = ""; i++; }
+                else if (ch === '\n' || ch === '\r') { row.push(cell.trim()); rows.push(row); row = []; cell = ""; }
+                else { cell += ch; }
+            }
+        }
+        if (cell || row.length > 0) { row.push(cell.trim()); rows.push(row); }
+        return rows;
+    }
+
+    // 抓取单个年份 Tab 并把横向矩阵展开为明细列表
+    async function fetchServiceYearSheet(year) {
+        const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(year)}`;
+        try {
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const text = await res.text();
+            const matrix = parseRawCSV(text);
+            if (matrix.length < 3) return [];
+
+            const dateRow = matrix[0]; // Row 1: 日期
+            const descRow = matrix[1]; // Row 2: 服务事项
+            const records = [];
+
+            // 从 Row 3 (索引 2) 开始遍历每个学生
+            for (let r = 2; r < matrix.length; r++) {
+                const rowData = matrix[r];
+                const rawId = rowData[3]; // Column D (索引 3): 学号
+                if (!rawId) continue;
+
+                const studentId = formatStudentId(rawId); // 5 位补零
+                // 过滤掉非学号的空行或表尾统计行
+                if (!/^\d{5}$/.test(studentId)) continue;
+
+                // 从 Column E (索引 4) 开始横向扫描每一次活动
+                for (let c = 4; c < Math.max(dateRow.length, descRow.length); c++) {
+                    const cellVal = (rowData[c] || "").trim();
+                    if (!cellVal) continue; // 空白单元格跳过
+
+                    const dateStr = (dateRow[c] || "").trim();
+                    const descStr = (descRow[c] || "").trim();
+
+                    // 🛡️ 防踩坑：如果表格最右侧有“总计 / Total”汇总列，自动跳过，避免重复累加
+                    const headerCheck = (dateStr + " " + descStr).toLowerCase();
+                    if (headerCheck.includes("total") || headerCheck.includes("总计") || headerCheck.includes("总时数")) {
+                        continue;
+                    }
+
+                    records.push({
+                        studentId: studentId,
+                        year: year,
+                        date: dateStr || `${year} (日期未填)`,
+                        description: descStr || "未命名服务事项",
+                        rawHours: cellVal
+                    });
+                }
+            }
+            return records;
+        } catch (e) {
+            console.warn(`读取 ${year} 服务时数失败:`, e);
+            return [];
+        }
+    }
         
     </script>
 
