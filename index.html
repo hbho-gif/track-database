@@ -3283,7 +3283,7 @@
 
     // 抓取单个年份 Tab 并把横向矩阵展开为明细列表
     async function fetchServiceYearSheet(year) {
-        const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(year)}`;
+        const url = `https://docs.google.com/spreadsheets/d/${SERVICE_SHEET_ID}/gviz/tq?tqx=out:csv&headers=0&sheet=${encodeURIComponent(year)}`;
         try {
             const res = await fetch(url);
             if (!res.ok) return [];
@@ -3313,7 +3313,7 @@
                     const cellVal = (rowData[c] || "").trim();
                     if (!cellVal) continue;
 
-                    const descStr = (descRow[c] || "").trim();
+                    const descStr = (descRow[c] || "").replace(/[\r\n]+/g, " ").trim();
 
                     // 过滤右侧可能存在的“总计 / Total”列
                     const headerCheck = (rawDate + " " + descStr).toLowerCase();
