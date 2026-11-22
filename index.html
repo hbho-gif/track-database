@@ -3239,36 +3239,43 @@
         return /^\d+$/.test(str) ? str.padStart(5, "0") : str;
     }
         
-    // 🛠️ 将日期统一规整为完整的 yyyy-mm-dd 格式（若原单元格缺少年份，自动用当前 sheet 的 year 补全）
-    function normalizeServiceDate(raw, defaultYear) {
+    // 🛠️ 强制输出标准 10 位 yyyy-mm-dd（例如 2026-03-05）
+    function normalizeServiceDate(raw, sheetYear) {
         const str = String(raw || "").trim();
         if (!str) return "";
 
-        // 1. 已有完整年份：yyyy-m-d 或 yyyy/m/d（例如 2026-3-5 -> 2026-03-05）
+        // 1. 已经是 yyyy-m-d 或 yyyy/m/d（如 2026-3-5 或 2026/03/05）
         let m = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
         if (m) {
             return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
         }
 
-        // 2. 已有完整年份（日/月/年）：d/m/yyyy 或 d-m-yyyy（例如 15/03/2026 -> 2026-03-15）
+        // 2. 带年份的 日/月/年（如 15/3/2026 或 5-3-2026）
         m = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
         if (m) {
             return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
         }
 
-        // 3. 缺少四位年份（如 3/15、03-15 或 15-Mar），结合当前 Sheet 的年份用原生 Date 兜底解析
-        const parsed = new Date(`${str} ${defaultYear}`);
+        // 3. 只有 日/月 没有年份（如 15/3 或 05-03），用当前 sheetYear 补全为 yyyy-mm-dd
+        m = str.match(/^(\d{1,2})[-/.](\d{1,2})$/);
+        if (m && sheetYear) {
+            return `${sheetYear}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+        }
+
+        // 4. 中文格式（如 3月15日 或 2026年3月15日）
+        m = str.match(/(?:(\d{4})年)?(\d{1,2})月(\d{1,2})日?/);
+        if (m) {
+            const y = m[1] || sheetYear;
+            return `${y}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+        }
+
+        // 5. 英文缩写格式（如 15-Mar 或 Mar 15）
+        const parsed = new Date(`${str} ${sheetYear}`);
         if (!isNaN(parsed.getTime())) {
             const y = parsed.getFullYear();
             const mo = String(parsed.getMonth() + 1).padStart(2, "0");
             const d = String(parsed.getDate()).padStart(2, "0");
             return `${y}-${mo}-${d}`;
-        }
-
-        // 4. 兜底匹配中文日期格式（如 3月15日 -> 2026-03-15）
-        m = str.match(/(\d{1,2})月(\d{1,2})日?/);
-        if (m && defaultYear) {
-            return `${defaultYear}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
         }
 
         return str;
