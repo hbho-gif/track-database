@@ -1432,6 +1432,16 @@
         console.error("数据读取失败:", err);
     });
 
+    // 🌟 2. 新增：紧跟在后面并行加载“服务时数”独立 Sheet 的 2023-2027 五个年份表
+    Promise.all(SERVICE_YEARS.map(yr => fetchServiceYearSheet(yr)))
+        .then(results => {
+            allServiceRecords = results.flat();
+            console.log("服务时数加载完成，总明细笔数:", allServiceRecords.length);
+        })
+        .catch(err => {
+            console.error("服务时数读取失败:", err);
+        });
+        
     // 💡 全局防空 getVal 函数：遇到空白、undefined 或 null 统一返回 "-"
     function getVal(row, keys) {
         if (!row) return "-";
