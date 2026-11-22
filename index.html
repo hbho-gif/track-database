@@ -1328,6 +1328,10 @@
     // 1. 基础配置与通用工具函数（放在 script 最上方）
     const SHEET_ID = "15iHPj4lwny0eiHs0EXndDeKA3oJgdvnO10aVkWPxukk";
 
+    // 🌟 服务时数专用配置（请替换为该独立 Sheet 的真实 ID）
+    const SERVICE_SHEET_ID = "1RRCReUL2v7LPCBOB8QLpgq7gWUvzGCor6Rt8DZKVCMU";
+    const SERVICE_YEARS = ["2023", "2024", "2025", "2026", "2027"];
+        
     function getSheetUrl(sheetName) {
         return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
     }
@@ -1386,7 +1390,8 @@
     let schoolSportsDayField = []; // 🌟 新增：校内运动会田赛
     let bodyDataList = [];
     let healthDataList = [];
-    
+    let allServiceRecords = []; // 存储展开后的所有服务记录
+        
     // 3. 执行数据批量加载
     Promise.all([
         fetchSheetData("个人基本资料"),           // 请确保这里的 Tab 名称与 Google Sheet 底部的完全一致
@@ -3202,11 +3207,6 @@
             tbody.appendChild(tr);
         });
     }
-
-    // 🌟 服务时数专用配置（请替换为该独立 Sheet 的真实 ID）
-    const SERVICE_SHEET_ID = "1RRCReUL2v7LPCBOB8QLpgq7gWUvzGCor6Rt8DZKVCMU";
-    const SERVICE_YEARS = ["2023", "2024", "2025", "2026", "2027"];
-    let allServiceRecords = []; // 存储展开后的所有服务记录
 
     // 简易 CSV 文本解析器（安全处理带引号、换行符的单元格）
     function parseRawCSV(csvText) {
